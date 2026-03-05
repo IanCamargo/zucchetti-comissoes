@@ -175,6 +175,87 @@ function calcMesConsultor(consultorId, mes, vendas, produtos, metas, users) {
 }
 
 // ══════════════════════════════════════════════════════════════════
+//  LÓGICA TRIMESTRAL
+// ══════════════════════════════════════════════════════════════════
+
+// Retorna o trimestre ao qual o mês pertence
+// Ex: "2025-01" → { label:"Q1/2025", meses:["2025-01","2025-02","2025-03"], mesAcerto:"2025-04", parc1:"2025-05", parc2:"2025-06" }
+function getTrimestre(mes) {
+  const [y, m] = mes.split("-").map(Number);
+  const q = Math.ceil(m / 3); // 1,2,3 ou 4
+  const m1 = (q - 1) * 3 + 1;
+  const pad = n => String(n).padStart(2, "0");
+  const meses = [
+    `${y}-${pad(m1)}`,
+    `${y}-${pad(m1+1)}`,
+    `${y}-${pad(m1+2)}`,
+  ];
+  const mesAcerto = `${y}-${pad(m1+3 > 12 ? m1+3-12 : m1+3)}`.replace(/(\d{4})-(\d{2})/, (_, yr, mo) => {
+    const mo2 = m1 + 3;
+    return mo2 > 12 ? `${+y+1}-${pad(mo2-12)}` : `${y}-${pad(mo2)}`;
+  });
+  const parc1Num = m1 + 4;
+  const parc2Num = m1 + 5;
+  const parc1 = parc1Num > 12 ? `${+y+1}-${pad(parc1Num-12)}` : `${y}-${pad(parc1Num)}`;
+  const parc2 = parc2Num > 12 ? `${+y+1}-${pad(parc2Num-12)}` : `${y}-${pad(parc2Num)}`;
+  return { q, label:`Q${q}/${y}`, meses, mesAcerto, parc1, parc2 };
+}
+
+// Calcula o trimestre completo de um consultor
+function calcTrimestreConsultor(consultorId, mes, vendas, produtos, metas, users) {
+  const trim = getTrimestre(mes);
+  const user = users.find(u => u.id === consultorId);
+  const cargo = user?.cargo || "junior";
+
+  // Meta trimestral = soma das metas mensais dos 3 meses
+  const metaTrimMRR = trim.meses.reduce((s, m) => s + (metas[m]?.[cargo]?.mrr || 0), 0);
+  const metaTrimNR  = trim.meses.reduce((s, m) => s + (metas[m]?.[cargo]?.nr  || 0), 0);
+
+  // MRR e NR vendidos no trimestre
+  const vendasTrim = vendas.filter(v => (v.consultorId||v.consultor_id) === consultorId && trim.meses.includes(v.mes));
+  const totalMRRTrim = vendasTrim.reduce((s, v) => s + (v.mrr || 0), 0);
+  const atingMRRTrim = metaTrimMRR > 0 ? (totalMRRTrim / metaTrimMRR) * 100 : 0;
+  const pctMRRTrim   = getPctMRR(atingMRRTrim);
+  const overInfoTrim = getOverInfo(atingMRRTrim);
+
+  // NR total no trimestre
+  const totalNRTrim = vendasTrim.reduce((s, v) => {
+    const c = calcVenda(v, produtos, pctMRRTrim);
+    return s + (c?.nr || 0);
+  }, 0);
+  const atingNRTrim = metaTrimNR > 0 ? (totalNRTrim / metaTrimNR) * 100 : 0;
+
+  // Acerto: diferença entre o que deveria ter recebido (pctMRRTrim) e o que JÁ foi pago (70%)
+  // Só existe acerto se houve overperformance (pctMRRTrim > 70)
+  const pctJaPago   = 70; // base sempre pago mensalmente
+  const pctAcerto   = Math.max(0, pctMRRTrim - pctJaPago);
+  const valorAcerto = totalMRRTrim * (pctAcerto / 100);
+  const parcelaAcerto = valorAcerto / 2;
+
+  // Progresso mensal dentro do trimestre (para o gráfico de evolução)
+  const evolucao = trim.meses.map(m => {
+    const v = vendas.filter(vv => (vv.consultorId||vv.consultor_id) === consultorId && vv.mes === m)
+      .reduce((s, vv) => s + (vv.mrr || 0), 0);
+    return { mes: m, mrr: v, metaMRR: metas[m]?.[cargo]?.mrr || 0 };
+  });
+
+  // Quanto falta para o próximo nível
+  const faltaP1 = metaTrimMRR > 0 ? Math.max(0, metaTrimMRR * 1.5 - totalMRRTrim) : 0;
+  const faltaP2 = metaTrimMRR > 0 ? Math.max(0, metaTrimMRR * 2.0 - totalMRRTrim) : 0;
+
+  return {
+    trim, cargo,
+    metaTrimMRR, metaTrimNR,
+    totalMRRTrim, totalNRTrim,
+    atingMRRTrim, atingNRTrim,
+    pctMRRTrim, overInfoTrim,
+    pctAcerto, valorAcerto, parcelaAcerto,
+    evolucao, faltaP1, faltaP2,
+    vendasTrim,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
 //  MICRO UI
 // ══════════════════════════════════════════════════════════════════
 const inp  = { width:"100%", background:"#0c1a2e", border:"1px solid #0f2040", borderRadius:8, padding:"9px 12px", color:"#e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" };
@@ -605,87 +686,209 @@ function Login({notify, toast}) {
 // ══════════════════════════════════════════════════════════════════
 //  DASHBOARD
 // ══════════════════════════════════════════════════════════════════
+
+// Barra de overperformance reutilizável
+function OverBar({ating, height=8}) {
+  const pct   = Math.min(ating, 220);
+  const color = ating>=200?"#f59e0b":ating>=150?"#34d399":"#38bdf8";
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:"#1e4060",marginBottom:3}}>
+        <span>0%</span><span style={{color:"#38bdf8"}}>150%</span><span style={{color:"#34d399"}}>200%</span>
+      </div>
+      <div style={{position:"relative",height,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}>
+        <div style={{position:"absolute",left:"68.2%",top:0,bottom:0,width:1,background:"#38bdf855"}}/>
+        <div style={{position:"absolute",left:"90.9%",top:0,bottom:0,width:1,background:"#34d39955"}}/>
+        <div style={{width:`${pct/220*100}%`,height:"100%",background:color,borderRadius:99,transition:"width .6s"}}/>
+      </div>
+      <div style={{fontSize:11,color,fontWeight:700,marginTop:3}}>{ating.toFixed(1)}% da meta</div>
+    </div>
+  );
+}
+
+// Gráfico de barras simples (evolução mensal do MRR no trimestre)
+function GraficoEvolucao({evolucao, overInfo}) {
+  const maxVal = Math.max(...evolucao.map(e => Math.max(e.mrr, e.metaMRR)), 1);
+  return (
+    <div style={{display:"flex",gap:8,alignItems:"flex-end",height:80,marginTop:8}}>
+      {evolucao.map((e, i) => {
+        const hMRR  = (e.mrr     / maxVal) * 72;
+        const hMeta = (e.metaMRR / maxVal) * 72;
+        const ating = e.metaMRR > 0 ? (e.mrr / e.metaMRR) * 100 : 0;
+        const cor   = ating >= 200 ? "#f59e0b" : ating >= 150 ? "#34d399" : ating >= 100 ? "#38bdf8" : "#1e4060";
+        return (
+          <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+            <div style={{fontSize:9,color:cor,fontWeight:700}}>{R$(e.mrr).replace("R$","").trim()}</div>
+            <div style={{width:"100%",display:"flex",alignItems:"flex-end",gap:2,height:60,justifyContent:"center"}}>
+              {/* barra meta */}
+              <div style={{width:"40%",height:hMeta,background:"#0c2a42",borderRadius:"3px 3px 0 0",border:"1px solid #1e4060"}}/>
+              {/* barra realizado */}
+              <div style={{width:"40%",height:hMRR,background:cor,borderRadius:"3px 3px 0 0",opacity:.9}}/>
+            </div>
+            <div style={{fontSize:9,color:"#1e4060",fontWeight:600}}>{ML(e.mes).split("/")[0]}</div>
+          </div>
+        );
+      })}
+      <div style={{display:"flex",flexDirection:"column",gap:4,justifyContent:"flex-end",paddingBottom:16,marginLeft:4}}>
+        <div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,background:"#0c2a42",border:"1px solid #1e4060",borderRadius:2}}/><span style={{fontSize:9,color:"#1e4060"}}>Meta</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,background:overInfo.color,borderRadius:2}}/><span style={{fontSize:9,color:"#1e4060"}}>Realizado</span></div>
+      </div>
+    </div>
+  );
+}
+
 function DashPage({me,users,vendas,produtos,mes,metas}) {
   const role=me.role;
+  const [viewMode, setViewMode] = useState("mensal"); // "mensal" | "trimestral"
   const consultores = role==="consultor" ? [me] : users.filter(u=>u.role==="consultor"&&u.active);
 
   const porConsultor = consultores.map(u => {
-    const r = calcMesConsultor(u.id, mes, vendas, produtos, metas, users);
-    return { ...u, ...r };
+    const r  = calcMesConsultor(u.id, mes, vendas, produtos, metas, users);
+    const rt = calcTrimestreConsultor(u.id, mes, vendas, produtos, metas, users);
+    return { ...u, ...r, trim: rt };
   }).sort((a,b)=>b.totalCom-a.totalCom);
 
-  const totGeral = porConsultor.reduce((s,c)=>s+c.totalCom,0);
-
-  const OverBar = ({ating}) => {
-    const pct = Math.min(ating, 220);
-    const color = ating>=200?"#f59e0b":ating>=150?"#34d399":"#38bdf8";
-    return (
-      <div style={{marginTop:8}}>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#1e4060",marginBottom:4}}>
-          <span>0%</span><span style={{color:"#38bdf8"}}>150%</span><span style={{color:"#34d399"}}>200%</span>
-        </div>
-        <div style={{position:"relative",height:8,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}>
-          <div style={{position:"absolute",left:"68.2%",top:0,bottom:0,width:1,background:"#38bdf855"}}/>
-          <div style={{position:"absolute",left:"90.9%",top:0,bottom:0,width:1,background:"#34d39955"}}/>
-          <div style={{width:`${pct/220*100}%`,height:"100%",background:color,borderRadius:99,transition:"width .4s"}}/>
-        </div>
-        <div style={{fontSize:11,color:color,fontWeight:700,marginTop:4}}>{ating.toFixed(1)}% da meta</div>
-      </div>
-    );
-  };
+  const totGeral     = porConsultor.reduce((s,c)=>s+c.totalCom,0);
+  const totMRRTrim   = porConsultor.reduce((s,c)=>s+c.trim.totalMRRTrim,0);
+  const totAcerto    = porConsultor.reduce((s,c)=>s+c.trim.valorAcerto,0);
 
   return (
     <div>
-      <STitle>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
-      <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"12px 18px",marginBottom:20,display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
-        <span style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Overperformance MRR:</span>
-        <span style={{background:"#38bdf822",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>70% · até 149% da meta</span>
-        <span style={{background:"#34d39922",color:"#34d399",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>⚡ 100% · 150–199%</span>
-        <span style={{background:"#f59e0b22",color:"#f59e0b",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>🚀 200% · ≥200% da meta</span>
-        <span style={{fontSize:10,color:"#1e4060",marginLeft:"auto"}}>Pagamento: +2 e +3 meses</span>
+      {/* HEADER */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <STitle style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
+        {/* Toggle mensal / trimestral */}
+        <div style={{display:"flex",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
+          {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"]].map(([v,l])=>(
+            <button key={v} onClick={()=>setViewMode(v)} style={{padding:"6px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:viewMode===v?"#0c2a42":"transparent",color:viewMode===v?"#38bdf8":"#1e4060",transition:"all .15s"}}>{l}</button>
+          ))}
+        </div>
       </div>
 
+      {/* LEGENDA OVER */}
+      <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"10px 16px",marginBottom:18,display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
+        <span style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Over MRR {viewMode==="trimestral"?"trimestral":"mensal"}:</span>
+        <span style={{background:"#38bdf822",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>70% · até 149%</span>
+        <span style={{background:"#34d39922",color:"#34d399",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>⚡ 100% · 150–199%</span>
+        <span style={{background:"#f59e0b22",color:"#f59e0b",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>🚀 200% · ≥200%</span>
+        {viewMode==="trimestral"&&<span style={{fontSize:10,color:"#1e4060",marginLeft:"auto"}}>Acerto pago em {porConsultor[0]?`${ML(porConsultor[0].trim.trim.parc1)} e ${ML(porConsultor[0].trim.trim.parc2)}`:"+5 e +6 meses"}</span>}
+        {viewMode==="mensal"&&<span style={{fontSize:10,color:"#1e4060",marginLeft:"auto"}}>Pagamento: +2 e +3 meses</span>}
+      </div>
+
+      {/* STAT CARDS — gestor/params */}
       {role!=="consultor"&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:22}}>
-          <StatCard l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
-          <StatCard l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
-          <StatCard l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
-          <StatCard l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
+          {viewMode==="mensal"&&<>
+            <StatCard l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
+            <StatCard l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
+            <StatCard l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
+            <StatCard l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
+          </>}
+          {viewMode==="trimestral"&&<>
+            <StatCard l={`MRR Total ${porConsultor[0]?.trim.trim.label||""}`} v={R$(totMRRTrim)} c="#34d399"/>
+            <StatCard l="Consultores c/ Over Trim." v={porConsultor.filter(c=>c.trim.atingMRRTrim>=150).length} c="#f59e0b"/>
+            <StatCard l="Total Acerto Over"  v={R$(totAcerto)} c="#a78bfa"/>
+            <StatCard l="🚀 200%+ Trim."     v={porConsultor.filter(c=>c.trim.atingMRRTrim>=200).length} c="#f59e0b"/>
+          </>}
         </div>
       )}
 
+      {/* CARDS POR CONSULTOR */}
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
         {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty msg="Sem vendas neste mês."/></div>}
-        {porConsultor.map(c=>(
-          <div key={c.id} style={{background:"#060d18",border:`1px solid ${c.atingMRR>=200?"#f59e0b44":c.atingMRR>=150?"#34d39944":"#0c1f35"}`,borderRadius:12,overflow:"hidden"}}>
-            <div style={{padding:"16px 20px",borderBottom:"1px solid #080f1a",display:"flex",gap:20,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:"#040b14"}}>
-              <div style={{flex:1,minWidth:240}}>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                  <div style={{width:8,height:8,borderRadius:"50%",background:CARGO_COLOR[c.cargo]||"#38bdf8"}}/>
-                  <span style={{fontWeight:700,color:"#e2e8f0",fontSize:15}}>{c.name}</span>
-                  <span style={{background:CARGO_COLOR[c.cargo]+"22",color:CARGO_COLOR[c.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[c.cargo]}</span>
-                  <span style={{background:c.overInfo.bg,color:c.overInfo.color,padding:"2px 10px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${c.overInfo.border}`}}>{c.overInfo.label} sobre MRR</span>
-                </div>
-                <div style={{marginBottom:6}}>
-                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
+        {porConsultor.map(c=>{
+          const t = c.trim;
+          const borderColor = viewMode==="mensal"
+            ? (c.atingMRR>=200?"#f59e0b44":c.atingMRR>=150?"#34d39944":"#0c1f35")
+            : (t.atingMRRTrim>=200?"#f59e0b44":t.atingMRRTrim>=150?"#34d39944":"#0c1f35");
+          return (
+          <div key={c.id} style={{background:"#060d18",border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden"}}>
+
+            {/* ── HEADER CARD ── */}
+            <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a",display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:"#040b14"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:CARGO_COLOR[c.cargo]||"#38bdf8"}}/>
+                <span style={{fontWeight:700,color:"#e2e8f0",fontSize:15}}>{c.name}</span>
+                <span style={{background:CARGO_COLOR[c.cargo]+"22",color:CARGO_COLOR[c.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[c.cargo]}</span>
+                {viewMode==="mensal"&&<span style={{background:c.overInfo.bg,color:c.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${c.overInfo.border}`}}>{c.overInfo.label} mensal</span>}
+                {viewMode==="trimestral"&&<span style={{background:t.overInfoTrim.bg,color:t.overInfoTrim.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${t.overInfoTrim.border}`}}>{t.overInfoTrim.label} trim. · {t.trim.label}</span>}
+              </div>
+              {/* Valor destaque */}
+              <div style={{textAlign:"right"}}>
+                {viewMode==="mensal"&&<>
+                  <div style={{fontSize:10,color:"#1e4060",marginBottom:2}}>Comissão do mês</div>
+                  <div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(c.totalCom)}</div>
+                  <div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>MRR {R$(c.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} · NR {R$(c.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))}</div>
+                  <div style={{fontSize:10,color:"#1e4060",marginTop:3}}>Parc: {ML(addMonths(mes,2))} · {ML(addMonths(mes,3))}</div>
+                </>}
+                {viewMode==="trimestral"&&<>
+                  <div style={{fontSize:10,color:"#1e4060",marginBottom:2}}>Acerto over trimestral</div>
+                  <div style={{fontSize:22,fontWeight:800,color:t.valorAcerto>0?"#f59e0b":"#1e4060",fontFamily:"'Syne',sans-serif"}}>{R$(t.valorAcerto)}</div>
+                  {t.valorAcerto>0&&<div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>+{t.pctAcerto}% sobre {R$(t.totalMRRTrim)}</div>}
+                  {t.valorAcerto>0&&<div style={{fontSize:10,color:"#1e4060",marginTop:3}}>Parc: {ML(t.trim.parc1)} · {ML(t.trim.parc2)}</div>}
+                  {t.valorAcerto===0&&<div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>Sem acerto (abaixo de 150%)</div>}
+                </>}
+              </div>
+            </div>
+
+            {/* ── CORPO MENSAL ── */}
+            {viewMode==="mensal"&&(
+              <div style={{padding:"14px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                <div>
+                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
                   <OverBar ating={c.atingMRR}/>
                 </div>
                 <div>
-                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
-                  <div style={{height:6,background:"#0c1f35",borderRadius:99,overflow:"hidden",marginBottom:3}}>
+                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
+                  <div style={{height:8,background:"#0c1f35",borderRadius:99,overflow:"hidden",marginBottom:3,marginTop:16}}>
                     <div style={{width:`${Math.min(c.atingNR,100)}%`,height:"100%",background:c.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99,transition:"width .4s"}}/>
                   </div>
-                  <div style={{fontSize:11,color:c.atingNR>=100?"#a78bfa":"#64748b",fontWeight:700}}>{c.atingNR.toFixed(1)}% da meta</div>
+                  <div style={{fontSize:11,color:c.atingNR>=100?"#a78bfa":"#64748b",fontWeight:700,marginTop:3}}>{c.atingNR.toFixed(1)}% da meta NR</div>
                 </div>
               </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontSize:11,color:"#1e4060",marginBottom:3}}>Comissão do mês</div>
-                <div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(c.totalCom)}</div>
-                <div style={{fontSize:11,color:"#1a3a54",marginTop:2}}>MRR {R$(c.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} · NR {R$(c.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))}</div>
-                <div style={{fontSize:11,color:"#1e4060",marginTop:4}}>1ª parc. {ML(addMonths(mes,2))} · 2ª parc. {ML(addMonths(mes,3))}</div>
+            )}
+
+            {/* ── CORPO TRIMESTRAL ── */}
+            {viewMode==="trimestral"&&(
+              <div style={{padding:"14px 20px"}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
+                  {/* Barra trimestral MRR */}
+                  <div>
+                    <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
+                      Meta MRR Trimestral — {R$(t.metaTrimMRR)} · Vendido: {R$(t.totalMRRTrim)}
+                    </div>
+                    <OverBar ating={t.atingMRRTrim}/>
+                  </div>
+                  {/* Quanto falta para o próximo nível */}
+                  <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c2a42"}}>
+                    <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Falta para o próximo nível</div>
+                    {t.atingMRRTrim>=200
+                      ? <div style={{fontSize:13,color:"#f59e0b",fontWeight:700}}>🚀 Nível máximo atingido!</div>
+                      : <>
+                          {t.faltaP1>0&&<div style={{fontSize:12,color:"#34d399",marginBottom:4}}>⚡ Para 100%: faltam <b>{R$(t.faltaP1)}</b></div>}
+                          {t.faltaP1<=0&&t.faltaP2>0&&<div style={{fontSize:12,color:"#f59e0b",marginBottom:4}}>🚀 Para 200%: faltam <b>{R$(t.faltaP2)}</b></div>}
+                        </>
+                    }
+                    {t.pctAcerto>0&&(
+                      <div style={{marginTop:6,padding:"6px 10px",background:"#0c2a42",borderRadius:8,fontSize:11}}>
+                        <span style={{color:"#1e4060"}}>Acerto atual: </span>
+                        <span style={{color:t.overInfoTrim.color,fontWeight:800}}>+{t.pctAcerto}% = {R$(t.valorAcerto)}</span>
+                        <div style={{color:"#1e4060",fontSize:10,marginTop:2}}>÷2: {R$(t.parcelaAcerto)} em {ML(t.trim.parc1)} e {ML(t.trim.parc2)}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Gráfico de evolução */}
+                <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c1f35"}}>
+                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>Evolução MRR no trimestre — {t.trim.label}</div>
+                  <GraficoEvolucao evolucao={t.evolucao} overInfo={t.overInfoTrim}/>
+                </div>
               </div>
-            </div>
-            {c.vendasCalc.length>0&&(
+            )}
+
+            {/* ── TABELA DE CONTRATOS (só mensal) ── */}
+            {viewMode==="mensal"&&c.vendasCalc.length>0&&(
               <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",minWidth:860}}>
                 <thead><tr style={{background:"#030810"}}>
@@ -719,9 +922,10 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
               </table>
               </div>
             )}
-            {c.vendasCalc.length===0&&<div style={{padding:"16px 20px",fontSize:12,color:"#1a3a54"}}>Sem contratos lançados neste mês.</div>}
+            {viewMode==="mensal"&&c.vendasCalc.length===0&&<div style={{padding:"16px 20px",fontSize:12,color:"#1a3a54"}}>Sem contratos lançados neste mês.</div>}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
