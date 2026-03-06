@@ -9,8 +9,34 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const FontLink = () => (
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 );
+
+// ══════════════════════════════════════════════════════════════════
+//  THEME TOKENS
+// ══════════════════════════════════════════════════════════════════
+const THEMES = {
+  dark: {
+    name:"dark", bg:"#07090f", bgCard:"#0d1117", bgPanel:"#111827", bgInput:"#161d2b",
+    bgHover:"#1a2235", border:"#1e2d42", borderAccent:"#2a4060",
+    text:"#e2e8f0", textSub:"#64748b", textMuted:"#2a3f58",
+    accent:"#3b82f6", accentHover:"#60a5fa", accentGlow:"#3b82f620",
+    green:"#10b981", greenGlow:"#10b98120", amber:"#f59e0b", amberGlow:"#f59e0b20",
+    purple:"#8b5cf6", purpleGlow:"#8b5cf620", red:"#ef4444", cyan:"#06b6d4",
+    sidebarBg:"#09111e", sidebarBorder:"#121e30", topbarBg:"#09111e",
+    tableHead:"#0a0f1a", tableRow:"#0d1117", tableRowAlt:"#0f1520",
+  },
+  light: {
+    name:"light", bg:"#f0f4f8", bgCard:"#ffffff", bgPanel:"#f8fafc", bgInput:"#f1f5f9",
+    bgHover:"#e8f0fe", border:"#e2e8f0", borderAccent:"#bfdbfe",
+    text:"#0f172a", textSub:"#475569", textMuted:"#94a3b8",
+    accent:"#2563eb", accentHover:"#1d4ed8", accentGlow:"#2563eb15",
+    green:"#059669", greenGlow:"#05966915", amber:"#d97706", amberGlow:"#d9770615",
+    purple:"#7c3aed", purpleGlow:"#7c3aed15", red:"#dc2626", cyan:"#0891b2",
+    sidebarBg:"#ffffff", sidebarBorder:"#e2e8f0", topbarBg:"#ffffff",
+    tableHead:"#f8fafc", tableRow:"#ffffff", tableRowAlt:"#f8fafc",
+  }
+};
 
 // ══════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -264,37 +290,175 @@ function calcTrimestreConsultor(consultorId, mes, vendas, produtos, metas, users
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  MICRO UI
+//  GLOBAL CSS
 // ══════════════════════════════════════════════════════════════════
-const inp  = { width:"100%", background:"#0c1a2e", border:"1px solid #0f2040", borderRadius:8, padding:"9px 12px", color:"#e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" };
-const selS = { ...inp, cursor:"pointer" };
-const Label  = ({children}) => <label style={{fontSize:10,color:"#1e4060",fontWeight:700,display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>{children}</label>;
-const TH     = ({children,right}) => <th style={{padding:"10px 14px",textAlign:right?"right":"left",fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,whiteSpace:"nowrap"}}>{children}</th>;
-const TD     = ({children,right,bold,color,sub}) => <td style={{padding:"11px 14px",fontSize:13,color:color||"#94a3b8",fontWeight:bold?700:400,textAlign:right?"right":"left",verticalAlign:"top"}}>{children}{sub&&<div style={{fontSize:10,color:"#1e4060",marginTop:2}}>{sub}</div>}</td>;
-const Empty  = ({msg}) => <div style={{padding:40,textAlign:"center",color:"#1a3a54",fontSize:14}}>{msg||"Nenhum registro."}</div>;
-const STitle = ({children}) => <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#e2e8f0",margin:"0 0 20px",letterSpacing:"-0.5px"}}>{children}</h1>;
-const StatCard=({l,v,c})=><div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:"18px 20px"}}><div style={{fontSize:10,color:"#1a3a54",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c,fontFamily:"'Syne',sans-serif"}}>{v}</div></div>;
-const MiniCard=({l,v,c})=><div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>{l}</div><div style={{fontSize:14,fontWeight:700,color:c}}>{v}</div></div>;
+const GlobalCSS = ({t}) => (
+  <style>{`
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+    @keyframes shimmer { from { background-position:-200% 0; } to { background-position:200% 0; } }
+    @keyframes glow { 0%,100% { box-shadow:0 0 8px ${t.accent}44; } 50% { box-shadow:0 0 20px ${t.accent}88; } }
+    * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:${t.border} ${t.bgCard}; }
+    body { margin:0; background:${t.bg}; font-family:'Outfit',sans-serif; color:${t.text}; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:${t.bgCard}; }
+    ::-webkit-scrollbar-thumb { background:${t.border}; border-radius:99px; }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+    input::placeholder { color:${t.textMuted}; }
+    .nav-item { transition: all .18s cubic-bezier(.4,0,.2,1) !important; }
+    .nav-item:hover { background:${t.bgHover} !important; color:${t.accentHover} !important; transform:translateX(2px); }
+    .nav-item.active { background:${t.accentGlow} !important; color:${t.accent} !important; }
+    .card-hover { transition: all .2s cubic-bezier(.4,0,.2,1); }
+    .card-hover:hover { transform:translateY(-2px); box-shadow:0 12px 40px ${t.accent}18; }
+    .btn-primary { transition: all .15s cubic-bezier(.4,0,.2,1); }
+    .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 24px ${t.accent}44; }
+    .btn-primary:active:not(:disabled) { transform:translateY(0); }
+    .fade-in { animation: fadeIn .3s ease forwards; }
+    .slide-in { animation: slideIn .25s ease forwards; }
+    table tr { transition: background .12s; }
+    table tbody tr:hover { background: ${t.bgHover} !important; }
+  `}</style>
+);
 
-const Btn = ({children,onClick,secondary,sm,disabled}) => (
-  <button onClick={onClick} disabled={disabled} style={{display:"flex",alignItems:"center",gap:6,padding:sm?"6px 12px":"9px 16px",background:secondary?"#0c1a2e":disabled?"#0c1a2e":"#0369a1",color:secondary?"#4a7a90":disabled?"#1e4060":"#fff",border:secondary?"1px solid #0f2040":"none",borderRadius:8,fontSize:sm?12:13,fontWeight:700,cursor:disabled?"not-allowed":"pointer",whiteSpace:"nowrap",fontFamily:"'IBM Plex Sans',sans-serif",opacity:disabled?.6:1}}>
+// ══════════════════════════════════════════════════════════════════
+//  MICRO UI — themed
+// ══════════════════════════════════════════════════════════════════
+const inp = t => ({
+  width:"100%", background:t.bgInput, border:`1px solid ${t.border}`,
+  borderRadius:10, padding:"10px 14px", color:t.text, fontSize:14,
+  outline:"none", fontFamily:"'Outfit',sans-serif", transition:"border .15s",
+});
+const selS = t => ({ ...inp(t), cursor:"pointer" });
+
+const Label = ({children,t}) => (
+  <label style={{fontSize:10,color:t.textMuted,fontWeight:700,display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.8}}>
     {children}
-  </button>
+  </label>
 );
-const IBtn = ({children,onClick,color}) => (
-  <button onClick={onClick} style={{background:color+"18",color,border:`1px solid ${color}33`,borderRadius:6,padding:"5px 8px",cursor:"pointer",display:"flex",alignItems:"center"}}>
+
+const TH = ({children,right,t}) => (
+  <th style={{padding:"11px 16px",textAlign:right?"right":"left",fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap",background:t.tableHead,borderBottom:`1px solid ${t.border}`}}>
     {children}
-  </button>
+  </th>
 );
-const FaixaBadge = ({faixa}) => {
-  if (!faixa) return null;
-  const ok = faixa.id==="r1";
-  return <span style={{background:ok?"#fef08a22":"#1e293b",color:ok?"#ca8a04":"#475569",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700,border:ok?"1px solid #ca8a0433":"1px solid #334155",whiteSpace:"nowrap"}}>{ok?"⭐":""} {faixa.label}</span>;
+
+const TD = ({children,right,bold,color,sub,t}) => (
+  <td style={{padding:"12px 16px",fontSize:13,color:color||t.textSub,fontWeight:bold?700:400,textAlign:right?"right":"left",verticalAlign:"top",borderBottom:`1px solid ${t.border}22`}}>
+    {children}
+    {sub&&<div style={{fontSize:10,color:t.textMuted,marginTop:2}}>{sub}</div>}
+  </td>
+);
+
+const Empty = ({msg,t}) => (
+  <div style={{padding:48,textAlign:"center",color:t.textMuted,fontSize:14}}>
+    <div style={{fontSize:32,marginBottom:12}}>📭</div>
+    {msg||"Nenhum registro encontrado."}
+  </div>
+);
+
+const STitle = ({children,t}) => (
+  <h1 style={{fontFamily:"'Outfit',sans-serif",fontSize:24,fontWeight:800,color:t.text,margin:"0 0 20px",letterSpacing:"-0.5px",lineHeight:1.2}}>
+    {children}
+  </h1>
+);
+
+const StatCard = ({l,v,c,icon,sub,t}) => (
+  <div className="card-hover" style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:16,padding:"20px 22px",position:"relative",overflow:"hidden"}}>
+    <div style={{position:"absolute",top:0,right:0,width:80,height:80,background:`radial-gradient(circle at top right,${c}18,transparent 70%)`,borderRadius:"0 16px 0 0"}}/>
+    <div style={{fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.8,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+      {icon&&<span style={{fontSize:14}}>{icon}</span>}{l}
+    </div>
+    <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Outfit',sans-serif",letterSpacing:"-0.5px"}}>{v}</div>
+    {sub&&<div style={{fontSize:11,color:t.textMuted,marginTop:4}}>{sub}</div>}
+  </div>
+);
+
+const MiniCard = ({l,v,c,t}) => (
+  <div style={{background:t.bgPanel,borderRadius:10,padding:"10px 14px",border:`1px solid ${t.border}`}}>
+    <div style={{fontSize:10,color:t.textMuted,marginBottom:4,fontWeight:600}}>{l}</div>
+    <div style={{fontSize:14,fontWeight:700,color:c||t.text}}>{v}</div>
+  </div>
+);
+
+const Btn = ({children,onClick,secondary,sm,disabled,t,color}) => {
+  const bg = disabled ? t.bgPanel : secondary ? t.bgPanel : (color||t.accent);
+  const fg = disabled ? t.textMuted : secondary ? t.textSub : "#fff";
+  const brd = secondary ? `1px solid ${t.border}` : "none";
+  return (
+    <button onClick={onClick} disabled={disabled} className="btn-primary"
+      style={{display:"flex",alignItems:"center",gap:7,padding:sm?"6px 12px":"10px 18px",
+        background:bg,color:fg,border:brd,borderRadius:10,fontSize:sm?12:13,fontWeight:700,
+        cursor:disabled?"not-allowed":"pointer",whiteSpace:"nowrap",fontFamily:"'Outfit',sans-serif",
+        opacity:disabled?.5:1}}>
+      {children}
+    </button>
+  );
 };
 
-const Spinner = ({size=20}) => (
-  <div style={{width:size,height:size,border:"2px solid #0c1f35",borderTop:"2px solid #38bdf8",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
+const IBtn = ({children,onClick,color,t}) => (
+  <button onClick={onClick}
+    style={{background:color+"15",color,border:`1px solid ${color}30`,borderRadius:8,
+      padding:"6px 9px",cursor:"pointer",display:"flex",alignItems:"center",transition:"all .15s"}}
+    onMouseEnter={e=>{e.currentTarget.style.background=color+"30";}}
+    onMouseLeave={e=>{e.currentTarget.style.background=color+"15";}}>
+    {children}
+  </button>
 );
+
+const FaixaBadge = ({faixa,t}) => {
+  if (!faixa) return null;
+  const ok = faixa.id==="r1";
+  return (
+    <span style={{background:ok?`#f59e0b18`:`${t.border}44`,color:ok?"#f59e0b":t.textMuted,
+      padding:"2px 10px",borderRadius:99,fontSize:11,fontWeight:700,
+      border:ok?"1px solid #f59e0b33":`1px solid ${t.border}`,whiteSpace:"nowrap"}}>
+      {ok?"⭐ ":""}{faixa.label}
+    </span>
+  );
+};
+
+const Badge = ({children,color,t}) => (
+  <span style={{background:`${color}18`,color,border:`1px solid ${color}30`,
+    padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
+    {children}
+  </span>
+);
+
+const Spinner = ({size=20,color}) => (
+  <div style={{width:size,height:size,border:`2px solid ${color||"#ffffff30"}`,
+    borderTop:`2px solid ${color||"#ffffff"}`,borderRadius:"50%",animation:"spin 0.7s linear infinite",flexShrink:0}}/>
+);
+
+const ProgressBar = ({value,max,color,height=8,t}) => {
+  const pct = max>0?Math.min((value/max)*100,100):0;
+  return (
+    <div style={{height,background:t.bgInput,borderRadius:99,overflow:"hidden",position:"relative"}}>
+      <div style={{position:"absolute",inset:0,width:`${pct}%`,background:`linear-gradient(90deg,${color},${color}cc)`,borderRadius:99,transition:"width .6s cubic-bezier(.4,0,.2,1)"}}/>
+    </div>
+  );
+};
+
+const OverBar = ({ating,t}) => {
+  const color = ating>=200?t.amber:ating>=150?t.green:t.accent;
+  const pct   = Math.min(ating,220)/220*100;
+  return (
+    <div>
+      <div style={{position:"relative",height:10,background:t.bgInput,borderRadius:99,overflow:"hidden",marginBottom:4}}>
+        <div style={{position:"absolute",left:"68.2%",top:0,bottom:0,width:1,background:t.accent+"55",zIndex:1}}/>
+        <div style={{position:"absolute",left:"90.9%",top:0,bottom:0,width:1,background:t.green+"55",zIndex:1}}/>
+        <div style={{position:"absolute",inset:0,width:`${pct}%`,background:`linear-gradient(90deg,${color}aa,${color})`,borderRadius:99,transition:"width .6s cubic-bezier(.4,0,.2,1)"}}/>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:t.textMuted}}>
+        <span>0%</span>
+        <span style={{color:t.accent}}>150%</span>
+        <span style={{color:t.green}}>200%</span>
+      </div>
+      <div style={{fontSize:11,color,fontWeight:700,marginTop:2}}>{ating.toFixed(1)}% da meta</div>
+    </div>
+  );
+};
 
 const Ic = ({n,s=18}) => {
   const d={
@@ -316,8 +480,14 @@ const Ic = ({n,s=18}) => {
     arrow: "M5 12h14 M12 5l7 7-7 7",
     db:    "M12 2C6.48 2 2 4.24 2 7s4.48 5 10 5 10-2.24 10-5-4.48-5-10-5z M2 7v5c0 2.76 4.48 5 10 5s10-2.24 10-5V7 M2 12v5c0 2.76 4.48 5 10 5s10-2.24 10-5v-5",
     cloud: "M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z",
+    sun:   "M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 6a6 6 0 0 0 0 12 6 6 0 0 0 0-12z",
+    moon:  "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z",
+    menu:  "M3 12h18 M3 6h18 M3 18h18",
+    x:     "M18 6L6 18 M6 6l12 12",
+    chart: "M18 20V10 M12 20V4 M6 20v-6",
+    trophy:"M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22 M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22 M18 2H6v7a6 6 0 0 0 12 0V2z",
   };
-  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d[n]}/></svg>;
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d[n]||d.arrow}/></svg>;
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -505,15 +675,17 @@ function useSupabase(session) {
 //  APP ROOT
 // ══════════════════════════════════════════════════════════════════
 export default function App() {
-  const [session, setSession] = useState(undefined); // undefined = carregando
+  const [session, setSession] = useState(undefined);
   const [page,    setPage]    = useState("dash");
   const [mes,     setMes]     = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
   });
   const [toast,   setToast]   = useState(null);
+  const [themeName, setThemeName] = useState("dark");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const t = THEMES[themeName];
 
-  // Escuta auth state
   useEffect(() => {
     sb.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: { subscription } } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
@@ -521,165 +693,273 @@ export default function App() {
   }, []);
 
   const notify = (msg, type="ok") => { setToast({msg,type}); setTimeout(()=>setToast(null), 3400); };
-
   const db = useSupabase(session);
 
-  // Enquanto verifica sessão
-  if (session === undefined) {
-    return (
-      <div style={{minHeight:"100vh",background:"#080f1a",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
-        <FontLink/>
-        <Spinner size={32}/>
-        <div style={{color:"#1e4060",fontSize:13}}>Conectando ao Supabase…</div>
-      </div>
-    );
-  }
+  if (session === undefined) return (
+    <div style={{minHeight:"100vh",background:THEMES.dark.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
+      <FontLink/><Spinner size={32} color="#3b82f6"/>
+      <div style={{color:"#64748b",fontSize:13,fontFamily:"'Outfit',sans-serif"}}>Conectando…</div>
+    </div>
+  );
 
-  if (!session) {
-    return <Login notify={notify} toast={toast}/>;
-  }
+  if (!session) return <Login notify={notify} toast={toast} t={t} themeName={themeName} setThemeName={setThemeName}/>;
 
-  if (db.loading) {
-    return (
-      <div style={{minHeight:"100vh",background:"#080f1a",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
-        <FontLink/>
-        <Spinner size={32}/>
-        <div style={{color:"#1e4060",fontSize:13}}>Carregando dados…</div>
-      </div>
-    );
-  }
+  if (db.loading) return (
+    <div style={{minHeight:"100vh",background:t.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
+      <FontLink/><GlobalCSS t={t}/><Spinner size={32} color={t.accent}/>
+      <div style={{color:t.textMuted,fontSize:13,fontFamily:"'Outfit',sans-serif"}}>Carregando dados…</div>
+    </div>
+  );
 
-  // Encontra perfil do usuário logado
   const me = db.users.find(u => u.id === session.user.id) || {
-    id: session.user.id,
-    name: session.user.user_metadata?.name || session.user.email,
-    role: "consultor",
-    cargo: "junior",
-    active: true,
+    id: session.user.id, name: session.user.user_metadata?.name || session.user.email,
+    role: "consultor", cargo: "junior", active: true,
   };
   const role = me.role;
 
   const nav=[
-    {id:"dash",      label:"Dashboard",  icon:"dash",    roles:["consultor","gestor","parametros"]},
-    {id:"vendas",    label:"Vendas",     icon:"sales",   roles:["consultor","gestor","parametros"]},
-    {id:"equipe",    label:"Equipe",     icon:"team",    roles:["gestor","parametros"]},
-    {id:"cal",       label:"Calendário", icon:"cal",     roles:["consultor","gestor","parametros"]},
-    {id:"hist",      label:"Histórico",  icon:"hist",    roles:["consultor","gestor","parametros"]},
-    {id:"relatorio", label:"Relatórios", icon:"dl",      roles:["gestor","parametros"]},
-    {id:"params",    label:"Parâmetros", icon:"params",  roles:["parametros"]},
-    {id:"prod",      label:"Produtos",   icon:"prod",    roles:["parametros"]},
-    {id:"users",     label:"Usuários",   icon:"users",   roles:["gestor","parametros"]},
+    {id:"dash",      label:"Dashboard",  icon:"dash",   roles:["consultor","gestor","parametros"]},
+    {id:"vendas",    label:"Vendas",     icon:"sales",  roles:["consultor","gestor","parametros"]},
+    {id:"equipe",    label:"Equipe",     icon:"team",   roles:["gestor","parametros"]},
+    {id:"cal",       label:"Calendário", icon:"cal",    roles:["consultor","gestor","parametros"]},
+    {id:"hist",      label:"Histórico",  icon:"hist",   roles:["consultor","gestor","parametros"]},
+    {id:"relatorio", label:"Relatórios", icon:"dl",     roles:["gestor","parametros"]},
+    {id:"params",    label:"Parâmetros", icon:"params", roles:["parametros"]},
+    {id:"prod",      label:"Produtos",   icon:"prod",   roles:["parametros"]},
+    {id:"users",     label:"Usuários",   icon:"users",  roles:["gestor","parametros"]},
   ].filter(n=>n.roles.includes(role));
 
-  const logout = async () => {
-    await sb.auth.signOut();
-    setSession(null);
+  const logout = async () => { await sb.auth.signOut(); setSession(null); };
+
+  const CARGO_GRADIENT = {
+    junior: `linear-gradient(135deg,${t.accent},${t.cyan})`,
+    pleno:  `linear-gradient(135deg,${t.purple},${t.accent})`,
+    senior: `linear-gradient(135deg,${t.amber},${t.red})`,
   };
 
-  return (
-    <div style={{minHeight:"100vh",background:"#080f1a",color:"#cbd5e1",fontFamily:"'IBM Plex Sans',sans-serif",display:"flex"}}>
-      <FontLink/>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} * { scrollbar-width:thin; scrollbar-color:#0c1f35 #040b14; }`}</style>
-
-      {/* SIDEBAR */}
-      <aside style={{width:224,background:"#060d18",borderRight:"1px solid #0c1f35",display:"flex",flexDirection:"column",position:"fixed",top:0,bottom:0,left:0,zIndex:10}}>
-        <div style={{padding:"26px 20px 20px",borderBottom:"1px solid #0c1f35"}}>
-          <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#fff",letterSpacing:"-0.5px"}}><span style={{color:"#38bdf8"}}>Z</span>ucchetti</div>
-          <div style={{fontSize:9,color:"#1a3a54",marginTop:3,textTransform:"uppercase",letterSpacing:2.5,fontWeight:700}}>Comissionamento</div>
-          {/* Indicador online */}
-          <div style={{display:"flex",alignItems:"center",gap:5,marginTop:8}}>
-            <div style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/>
-            <span style={{fontSize:10,color:"#1e4060"}}>Supabase conectado</span>
-            {db.syncing && <Spinner size={10}/>}
-          </div>
+  // Sidebar content
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div style={{padding:"24px 20px 18px",borderBottom:`1px solid ${t.sidebarBorder}`}}>
+        <div style={{fontFamily:"'Outfit',sans-serif",fontSize:22,fontWeight:900,letterSpacing:"-1px",lineHeight:1}}>
+          <span style={{background:`linear-gradient(135deg,${t.accent},${t.cyan})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Z</span>
+          <span style={{color:t.text}}>ucchetti</span>
         </div>
-        <nav style={{flex:1,padding:"12px 10px",display:"flex",flexDirection:"column",gap:2}}>
-          {nav.map(n=>(
-            <button key={n.id} onClick={()=>setPage(n.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,background:page===n.id?"#0c2a42":"transparent",color:page===n.id?"#38bdf8":"#2a4e6a",border:"none",cursor:"pointer",fontSize:13,fontWeight:page===n.id?600:400,textAlign:"left",transition:"all .15s"}}>
-              <Ic n={n.icon} s={15}/>{n.label}
-            </button>
-          ))}
-        </nav>
-        <div style={{padding:"12px 10px",borderTop:"1px solid #0c1f35"}}>
-          <div style={{padding:"8px 12px",marginBottom:4}}>
-            <div style={{fontSize:13,fontWeight:600,color:"#7fa8c0"}}>{me.name?.split(" ")[0]}</div>
-            <div style={{fontSize:10,color:"#1a3a54",marginTop:1}}>{ROLE_LABEL[role]||role}{me.cargo?` · ${CARGO_LABEL[me.cargo]}`:""}</div>
-            <div style={{fontSize:9,color:"#0c2a42",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{session.user.email}</div>
-          </div>
-          <button onClick={logout} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:7,background:"transparent",color:"#ef4444",border:"none",cursor:"pointer",fontSize:12,width:"100%"}}>
-            <Ic n="logout" s={13}/> Sair
+        <div style={{fontSize:9,color:t.textMuted,marginTop:4,textTransform:"uppercase",letterSpacing:3,fontWeight:600}}>Comissionamento</div>
+        <div style={{display:"flex",alignItems:"center",gap:5,marginTop:8}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:t.green,boxShadow:`0 0 6px ${t.green}`}}/>
+          <span style={{fontSize:10,color:t.textMuted}}>Online</span>
+          {db.syncing&&<Spinner size={10} color={t.accent}/>}
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav style={{flex:1,padding:"12px 10px",display:"flex",flexDirection:"column",gap:2}}>
+        {nav.map(n=>(
+          <button key={n.id} onClick={()=>{setPage(n.id);setSidebarOpen(false);}}
+            className={`nav-item${page===n.id?" active":""}`}
+            style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,
+              background:page===n.id?t.accentGlow:"transparent",
+              color:page===n.id?t.accent:t.textMuted,
+              border:"none",cursor:"pointer",fontSize:13,fontWeight:page===n.id?700:500,
+              textAlign:"left",width:"100%",position:"relative"}}>
+            {page===n.id&&<div style={{position:"absolute",left:0,top:"20%",bottom:"20%",width:3,background:t.accent,borderRadius:"0 4px 4px 0"}}/>}
+            <Ic n={n.icon} s={15}/>{n.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* User + controls */}
+      <div style={{padding:"12px 10px",borderTop:`1px solid ${t.sidebarBorder}`}}>
+        {/* Theme toggle */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 12px",marginBottom:6}}>
+          <span style={{fontSize:11,color:t.textMuted,fontWeight:600}}>Tema</span>
+          <button onClick={()=>setThemeName(n=>n==="dark"?"light":"dark")}
+            style={{display:"flex",alignItems:"center",gap:6,background:t.bgPanel,border:`1px solid ${t.border}`,borderRadius:20,padding:"4px 10px",cursor:"pointer",color:t.text,fontSize:11,fontWeight:600}}>
+            <Ic n={themeName==="dark"?"sun":"moon"} s={12}/>
+            {themeName==="dark"?"Claro":"Escuro"}
           </button>
         </div>
+        {/* User info */}
+        <div style={{padding:"10px 12px",background:t.bgPanel,borderRadius:10,marginBottom:6,border:`1px solid ${t.border}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:CARGO_GRADIENT[me.cargo]||`linear-gradient(135deg,${t.accent},${t.cyan})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0}}>
+              {me.name?.[0]?.toUpperCase()||"?"}
+            </div>
+            <div style={{minWidth:0}}>
+              <div style={{fontSize:13,fontWeight:700,color:t.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{me.name?.split(" ")[0]}</div>
+              <div style={{fontSize:10,color:t.textMuted}}>{ROLE_LABEL[role]}{me.cargo?` · ${CARGO_LABEL[me.cargo]}`:""}</div>
+            </div>
+          </div>
+        </div>
+        <button onClick={logout}
+          style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:10,
+            background:"transparent",color:t.red,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,width:"100%",transition:"all .15s"}}
+          onMouseEnter={e=>e.currentTarget.style.background=t.red+"15"}
+          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          <Ic n="logout" s={13}/> Sair
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'Outfit',sans-serif",display:"flex"}}>
+      <FontLink/>
+      <GlobalCSS t={t}/>
+
+      {/* TOAST */}
+      {toast&&(
+        <div className="fade-in" style={{position:"fixed",top:20,right:20,zIndex:9999,
+          background:toast.type==="ok"?t.green:t.red,color:"#fff",
+          padding:"12px 20px",borderRadius:12,fontSize:13,fontWeight:600,
+          display:"flex",alignItems:"center",gap:8,boxShadow:"0 8px 32px rgba(0,0,0,.3)",maxWidth:340}}>
+          <Ic n="check" s={14}/>{toast.msg}
+        </div>
+      )}
+
+      {/* MOBILE OVERLAY */}
+      {sidebarOpen&&(
+        <div onClick={()=>setSidebarOpen(false)}
+          style={{position:"fixed",inset:0,background:"#00000088",zIndex:19,backdropFilter:"blur(2px)"}}/>
+      )}
+
+      {/* SIDEBAR — desktop fixed, mobile drawer */}
+      <aside style={{
+        width:220, background:t.sidebarBg, borderRight:`1px solid ${t.sidebarBorder}`,
+        display:"flex", flexDirection:"column", position:"fixed", top:0, bottom:0, left:0, zIndex:20,
+        transition:"transform .25s cubic-bezier(.4,0,.2,1)",
+        transform: sidebarOpen?"translateX(0)":"translateX(0)",
+      }}
+        className="sidebar-desktop">
+        <SidebarContent/>
+      </aside>
+
+      {/* MOBILE SIDEBAR */}
+      <aside style={{
+        width:240, background:t.sidebarBg, borderRight:`1px solid ${t.sidebarBorder}`,
+        display:"flex", flexDirection:"column", position:"fixed", top:0, bottom:0, left:0, zIndex:21,
+        transition:"transform .25s cubic-bezier(.4,0,.2,1)",
+        transform: sidebarOpen?"translateX(0)":"translateX(-100%)",
+      }}
+        className="sidebar-mobile">
+        <div style={{display:"flex",justifyContent:"flex-end",padding:"12px 12px 0"}}>
+          <button onClick={()=>setSidebarOpen(false)} style={{background:"transparent",border:"none",cursor:"pointer",color:t.textMuted,padding:4}}>
+            <Ic n="x" s={18}/>
+          </button>
+        </div>
+        <SidebarContent/>
       </aside>
 
       {/* MAIN */}
-      <main style={{flex:1,marginLeft:224,minHeight:"100vh"}}>
-        {/* TOAST */}
-        {toast&&<div style={{position:"fixed",top:20,right:20,zIndex:999,background:toast.type==="ok"?"#052e16":"#450a0a",color:toast.type==="ok"?"#86efac":"#fca5a5",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:500,border:`1px solid ${toast.type==="ok"?"#166534":"#991b1b"}`,display:"flex",alignItems:"center",gap:8,boxShadow:"0 8px 24px rgba(0,0,0,.4)"}}>
-          <Ic n="check" s={14}/>{toast.msg}
-        </div>}
+      <main style={{flex:1,marginLeft:220,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
 
-        {/* TOPBAR com seletor de período inteligente */}
-        <PeriodBar page={page} mes={mes} setMes={setMes} anoAtual={mes.split("-")[0]} />
+        {/* TOPBAR */}
+        <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.sidebarBorder}`,position:"sticky",top:0,zIndex:10}}>
+          {/* Mobile header */}
+          <div style={{display:"none",padding:"12px 16px",alignItems:"center",gap:12,borderBottom:`1px solid ${t.border}`}} className="mobile-header">
+            <button onClick={()=>setSidebarOpen(true)} style={{background:"transparent",border:"none",cursor:"pointer",color:t.textSub,padding:4}}>
+              <Ic n="menu" s={20}/>
+            </button>
+            <span style={{fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:18,color:t.text}}>
+              <span style={{color:t.accent}}>Z</span>ucchetti
+            </span>
+          </div>
+          <PeriodBar page={page} mes={mes} setMes={setMes} t={t}/>
+        </div>
 
-        <div style={{padding:"28px 32px 48px"}}>
-          {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas}/>}
-          {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="cal"       && <CalPage       me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="hist"      && <HistPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas}/>}
-          {page==="relatorio" && <RelatorioPage me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas}/>}
-          {page==="params"    && <ParamsPage    produtos={db.produtos} setProdutos={db.setProdutos} me={me} notify={notify} metas={db.metas} saveMetas={db.saveMetas}/>}
-          {page==="prod"      && <ProdPage      produtos={db.produtos} setProdutos={db.setProdutos} notify={notify}/>}
-          {page==="users"     && <UsersPage     users={db.users} createUserProfile={db.createUserProfile} updateProfile={db.updateProfile} notify={notify} me={me}/>}
+        {/* PAGE CONTENT */}
+        <div style={{padding:"28px 32px 60px",flex:1}} className="fade-in">
+          {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
+          {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas} t={t}/>}
+          {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
+          {page==="cal"       && <CalPage       me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
+          {page==="hist"      && <HistPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas} t={t}/>}
+          {page==="relatorio" && <RelatorioPage me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas} t={t}/>}
+          {page==="params"    && <ParamsPage    produtos={db.produtos} setProdutos={db.setProdutos} me={me} notify={notify} metas={db.metas} saveMetas={db.saveMetas} t={t}/>}
+          {page==="prod"      && <ProdPage      produtos={db.produtos} setProdutos={db.setProdutos} notify={notify} t={t}/>}
+          {page==="users"     && <UsersPage     users={db.users} createUserProfile={db.createUserProfile} updateProfile={db.updateProfile} notify={notify} me={me} t={t}/>}
         </div>
       </main>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .sidebar-desktop { display: none !important; }
+          .mobile-header { display: flex !important; }
+          main { margin-left: 0 !important; }
+          main > div:last-child { padding: 16px !important; }
+        }
+        @media (min-width: 769px) {
+          .sidebar-mobile { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  LOGIN (Supabase Auth)
+//  LOGIN
 // ══════════════════════════════════════════════════════════════════
-function Login({notify, toast}) {
+function Login({notify, toast, t, themeName, setThemeName}) {
   const [email,setEmail]=useState(""); const [pw,setPw]=useState("");
   const [err,setErr]=useState(""); const [load,setLoad]=useState(false);
 
   const go = async () => {
     setLoad(true); setErr("");
     const { error } = await sb.auth.signInWithPassword({ email, password:pw });
-    if (error) { setErr(error.message === "Invalid login credentials" ? "E-mail ou senha inválidos." : error.message); }
+    if (error) setErr(error.message==="Invalid login credentials"?"E-mail ou senha inválidos.":error.message);
     setLoad(false);
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#080f1a",display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <div style={{minHeight:"100vh",background:t.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}>
       <FontLink/>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      {toast&&<div style={{position:"fixed",top:20,right:20,zIndex:999,background:"#052e16",color:"#86efac",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:500,border:"1px solid #166534"}}>{toast.msg}</div>}
-      <div style={{width:420,padding:"44px 40px",background:"#060d18",borderRadius:16,border:"1px solid #0c1f35",boxShadow:"0 30px 60px rgba(0,0,0,.6)"}}>
-        <div style={{textAlign:"center",marginBottom:34}}>
-          <div style={{fontFamily:"'Syne',sans-serif",fontSize:34,fontWeight:800,color:"#fff",letterSpacing:"-1px"}}><span style={{color:"#38bdf8"}}>Z</span>ucchetti</div>
-          <div style={{color:"#1a3a54",fontSize:11,marginTop:5,textTransform:"uppercase",letterSpacing:3,fontWeight:700}}>Comissionamento</div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10}}>
-            <Ic n="cloud" s={12}/><span style={{fontSize:10,color:"#1e4060"}}>Powered by Supabase</span>
+      <GlobalCSS t={t}/>
+      {/* Background decoration */}
+      <div style={{position:"absolute",top:"-20%",left:"-10%",width:500,height:500,background:`radial-gradient(circle,${t.accent}18,transparent 60%)`,pointerEvents:"none"}}/>
+      <div style={{position:"absolute",bottom:"-10%",right:"-5%",width:400,height:400,background:`radial-gradient(circle,${t.purple}15,transparent 60%)`,pointerEvents:"none"}}/>
+
+      {toast&&<div className="fade-in" style={{position:"fixed",top:20,right:20,zIndex:999,background:t.green,color:"#fff",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:600}}>{toast.msg}</div>}
+
+      <div className="fade-in" style={{width:"100%",maxWidth:420,padding:"44px 40px",background:t.bgCard,borderRadius:24,border:`1px solid ${t.border}`,boxShadow:`0 32px 80px rgba(0,0,0,.3),0 0 0 1px ${t.border}`}}>
+        {/* Header */}
+        <div style={{textAlign:"center",marginBottom:36}}>
+          <div style={{fontFamily:"'Outfit',sans-serif",fontSize:40,fontWeight:900,letterSpacing:"-2px",lineHeight:1,marginBottom:6}}>
+            <span style={{background:`linear-gradient(135deg,${t.accent},${t.cyan})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Z</span>
+            <span style={{color:t.text}}>ucchetti</span>
           </div>
+          <div style={{color:t.textMuted,fontSize:11,textTransform:"uppercase",letterSpacing:3,fontWeight:600}}>Comissionamento</div>
         </div>
-        {err&&<div style={{background:"#450a0a",color:"#fca5a5",padding:"10px 14px",borderRadius:8,fontSize:13,marginBottom:16,border:"1px solid #7f1d1d"}}>{err}</div>}
+
+        {err&&<div className="fade-in" style={{background:`${t.red}18`,color:t.red,padding:"10px 14px",borderRadius:10,fontSize:13,marginBottom:16,border:`1px solid ${t.red}30`}}>{err}</div>}
+
         <div style={{marginBottom:14}}>
-          <Label>E-MAIL</Label>
-          <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="seu@email.com" style={inp}/>
+          <Label t={t} t={t}>E-mail</Label>
+          <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="seu@zucchetti.com" style={{...inp(t),border:`1px solid ${err?t.red:t.border}`}}/>
         </div>
-        <div style={{marginBottom:14}}>
-          <Label>SENHA</Label>
-          <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••" style={inp}/>
+        <div style={{marginBottom:20}}>
+          <Label t={t} t={t}>Senha</Label>
+          <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={{...inp(t),border:`1px solid ${err?t.red:t.border}`}}/>
         </div>
-        <button onClick={go} disabled={load} style={{width:"100%",padding:"13px",background:load?"#0c1a2e":"#0369a1",color:load?"#1e4060":"#fff",border:"none",borderRadius:8,fontSize:15,fontWeight:700,cursor:load?"not-allowed":"pointer",marginTop:8,fontFamily:"'Syne',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-          {load ? <><Spinner size={16}/> Verificando…</> : "Entrar"}
+
+        <button onClick={go} disabled={load} className="btn-primary"
+          style={{width:"100%",padding:"13px",background:load?t.bgPanel:`linear-gradient(135deg,${t.accent},${t.cyan})`,
+            color:load?t.textMuted:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,
+            cursor:load?"not-allowed":"pointer",fontFamily:"'Outfit',sans-serif",
+            display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+          {load?<><Spinner size={16} color={t.accent}/> Verificando…</>:"Entrar"}
         </button>
-        <div style={{marginTop:20,padding:14,background:"#040b14",borderRadius:8,fontSize:12,color:"#1a3a54",border:"1px solid #0c1f35"}}>
-          <div style={{fontWeight:700,color:"#1e4060",marginBottom:8,fontSize:10,textTransform:"uppercase",letterSpacing:.5}}>ℹ️ Primeiro acesso?</div>
-          <div style={{color:"#1e5070",lineHeight:1.6}}>Peça ao administrador para criar sua conta na aba <b style={{color:"#38bdf8"}}>Usuários</b> do sistema. O e-mail de confirmação chegará na sua caixa de entrada.</div>
+
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:24}}>
+          <div style={{fontSize:11,color:t.textMuted}}>
+            Primeiro acesso? Peça ao <span style={{color:t.accent}}>administrador</span>.
+          </div>
+          <button onClick={()=>setThemeName(n=>n==="dark"?"light":"dark")}
+            style={{background:t.bgPanel,border:`1px solid ${t.border}`,borderRadius:20,padding:"4px 10px",cursor:"pointer",color:t.text,fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
+            <Ic n={themeName==="dark"?"sun":"moon"} s={12}/>
+            {themeName==="dark"?"Claro":"Escuro"}
+          </button>
         </div>
       </div>
     </div>
@@ -759,7 +1039,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
     <div>
       {/* HEADER */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <STitle style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
+        <STitle t={t} t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
         {/* Toggle mensal / trimestral */}
         <div style={{display:"flex",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
           {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"]].map(([v,l])=>(
@@ -782,23 +1062,23 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
       {role!=="consultor"&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:22}}>
           {viewMode==="mensal"&&<>
-            <StatCard l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
-            <StatCard l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
-            <StatCard l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
-            <StatCard l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
+            <StatCard t={t} t={t} l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
+            <StatCard t={t} t={t} l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
+            <StatCard t={t} t={t} l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
+            <StatCard t={t} t={t} l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
           </>}
           {viewMode==="trimestral"&&<>
-            <StatCard l={`MRR Total ${porConsultor[0]?.trim.trim.label||""}`} v={R$(totMRRTrim)} c="#34d399"/>
-            <StatCard l="Consultores c/ Over Trim." v={porConsultor.filter(c=>c.trim.atingMRRTrim>=150).length} c="#f59e0b"/>
-            <StatCard l="Total Acerto Over"  v={R$(totAcerto)} c="#a78bfa"/>
-            <StatCard l="🚀 200%+ Trim."     v={porConsultor.filter(c=>c.trim.atingMRRTrim>=200).length} c="#f59e0b"/>
+            <StatCard t={t} t={t} l={`MRR Total ${porConsultor[0]?.trim.trim.label||""}`} v={R$(totMRRTrim)} c="#34d399"/>
+            <StatCard t={t} t={t} l="Consultores c/ Over Trim." v={porConsultor.filter(c=>c.trim.atingMRRTrim>=150).length} c="#f59e0b"/>
+            <StatCard t={t} t={t} l="Total Acerto Over"  v={R$(totAcerto)} c="#a78bfa"/>
+            <StatCard t={t} t={t} l="🚀 200%+ Trim."     v={porConsultor.filter(c=>c.trim.atingMRRTrim>=200).length} c="#f59e0b"/>
           </>}
         </div>
       )}
 
       {/* CARDS POR CONSULTOR */}
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty msg="Sem vendas neste mês."/></div>}
+        {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} t={t} msg="Sem vendas neste mês."/></div>}
         {porConsultor.map(c=>{
           const t = c.trim;
           const borderColor = viewMode==="mensal"
@@ -839,7 +1119,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
               <div style={{padding:"14px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
                 <div>
                   <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
-                  <OverBar ating={c.atingMRR}/>
+                  <OverBar t={t} t={t} ating={c.atingMRR}/>
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
@@ -860,7 +1140,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
                     <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
                       Meta MRR Trimestral — {R$(t.metaTrimMRR)} · Vendido: {R$(t.totalMRRTrim)}
                     </div>
-                    <OverBar ating={t.atingMRRTrim}/>
+                    <OverBar t={t} t={t} ating={t.atingMRRTrim}/>
                   </div>
                   {/* Quanto falta para o próximo nível */}
                   <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c2a42"}}>
@@ -885,7 +1165,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
                 {/* Gráfico de evolução */}
                 <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c1f35"}}>
                   <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>Evolução MRR no trimestre — {t.trim.label}</div>
-                  <GraficoEvolucao evolucao={t.evolucao} overInfo={t.overInfoTrim}/>
+                  <GraficoEvolucao t={t} evolucao={t.evolucao} overInfo={t.overInfoTrim}/>
                 </div>
               </div>
             )}
@@ -895,29 +1175,29 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
               <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",minWidth:860}}>
                 <thead><tr style={{background:"#030810"}}>
-                  <TH>Produto</TH><TH>Cliente</TH>
-                  <TH>MRR</TH><TH>Impl. (h×R$/h)</TH><TH>Licença</TH><TH>NR</TH>
-                  <TH>Faixa NR</TH>
-                  <TH right>Com. MRR ({c.pctMRR}%)</TH><TH right>Com. NR</TH><TH right>Total</TH>
-                  <TH right>1ª parc.</TH><TH right>2ª parc.</TH>
+                  <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH>
+                  <TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl. (h×R$/h)</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>NR</TH>
+                  <TH t={t} t={t}>Faixa NR</TH>
+                  <TH t={t} t={t} right>Com. MRR ({c.pctMRR}%)</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
+                  <TH t={t} t={t} right>1ª parc.</TH><TH t={t} t={t} right>2ª parc.</TH>
                 </tr></thead>
                 <tbody>
                   {c.vendasCalc.map((v,i)=>{
                     const prod=produtos.find(p=>p.id===v.produtoId);
                     return (
                       <tr key={v.id||i} style={{borderBottom:i<c.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                        <TD bold color="#e2e8f0">{prod?.nome}</TD>
-                        <TD>{v.cliente}</TD>
-                        <TD bold color="#38bdf8">{R$(v.mrr)}</TD>
-                        <TD>{R$(v.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
-                        <TD color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                        <TD bold color="#e2e8f0">{R$(v.nr)}</TD>
-                        <TD><FaixaBadge faixa={v.faixa}/></TD>
-                        <TD right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
-                        <TD right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
-                        <TD right bold color="#e2e8f0">{R$(v.total)}</TD>
-                        <TD right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                        <TD right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                        <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                        <TD t={t} t={t}>{v.cliente}</TD>
+                        <TD t={t} t={t} bold color="#38bdf8">{R$(v.mrr)}</TD>
+                        <TD t={t} t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
+                        <TD t={t} t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                        <TD t={t} t={t} bold color="#e2e8f0">{R$(v.nr)}</TD>
+                        <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={v.faixa}/></TD>
+                        <TD t={t} t={t} right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
+                        <TD t={t} t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                        <TD t={t} t={t} right bold color="#e2e8f0">{R$(v.total)}</TD>
+                        <TD t={t} t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
+                        <TD t={t} t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
                       </tr>
                     );
                   })}
@@ -998,43 +1278,43 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 
   return (
     <div>
-      <STitle>Lançar Venda — {ML(mes)}</STitle>
+      <STitle t={t} t={t}>Lançar Venda — {ML(mes)}</STitle>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:14}}>
-          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
-          <div><Label>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
-          <div style={{gridColumn:"span 2"}}><Label>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp}/></div>
+          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label t={t} t={t}>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS(t)}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
+          <div><Label t={t} t={t}>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS(t)}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
+          <div style={{gridColumn:"span 2"}}><Label t={t} t={t}>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp(t)}/></div>
 
           {/* MRR — oculto para Horas Extras */}
           {!isSoImpl&&(
             <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
-              <Label>💳 MRR — Mensalidade (R$)</Label>
-              <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp,background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/>
+              <Label t={t} t={t}>💳 MRR — Mensalidade (R$)</Label>
+              <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp(t),background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/>
             </div>
           )}
 
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp,background:"#0c1a2e"}}/></div>
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp,background:"#0c1a2e"}}/></div>
+          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t} t={t}>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp(t),background:"#0c1a2e"}}/></div>
+          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t} t={t}>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp(t),background:"#0c1a2e"}}/></div>
 
           {/* Licença — oculto para sem_licenca e so_impl */}
           {!isSemLic&&(
             <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
-              <Label>📦 Licença (R$)</Label>
-              <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp,background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
+              <Label t={t} t={t}>📦 Licença (R$)</Label>
+              <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp(t),background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
             </div>
           )}
 
           {isManual&&(
             <div style={{background:"#0c2a42",borderRadius:8,padding:"10px 12px",border:"1px solid #1e4060"}}>
-              <Label>⚡ Faixa (manual)</Label>
-              <select value={form.faixaIdManual} onChange={e=>F("faixaIdManual",e.target.value)} style={{...selS,background:"#0c1a2e",color:"#ca8a04",fontWeight:700}}>
+              <Label t={t} t={t}>⚡ Faixa (manual)</Label>
+              <select value={form.faixaIdManual} onChange={e=>F("faixaIdManual",e.target.value)} style={{...selS(t),background:"#0c1a2e",color:"#ca8a04",fontWeight:700}}>
                 <option value="">— Selecione —</option>
                 {prodSel?.regras.map(r=><option key={r.id} value={r.id}>{r.label} ({r.pctImpl}%)</option>)}
               </select>
             </div>
           )}
-          <div><Label>Observação</Label><input value={form.obs} onChange={e=>F("obs",e.target.value)} placeholder="Opcional" style={inp}/></div>
+          <div><Label t={t} t={t}>Observação</Label><input value={form.obs} onChange={e=>F("obs",e.target.value)} placeholder="Opcional" style={inp(t)}/></div>
         </div>
 
         {/* PRÉVIA */}
@@ -1042,7 +1322,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"16px 18px",marginBottom:14}}>
             <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>Prévia da Comissão</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
-              <FaixaBadge faixa={prev.faixa}/>
+              <FaixaBadge t={t} t={t} faixa={prev.faixa}/>
               {isSoImpl&&<span style={{background:"#f59e0b22",color:"#f59e0b",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,border:"1px solid #f59e0b33"}}>⏱ Apenas Implantação</span>}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:12}}>
@@ -1059,8 +1339,8 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           </div>
         )}
         <div style={{display:"flex",gap:8}}>
-          <Btn onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Lançar venda"}</Btn>
-          {editId&&<Btn secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>Cancelar</Btn>}
+          <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Lançar venda"}</Btn>
+          {editId&&<Btn t={t} t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>Cancelar</Btn>}
         </div>
       </div>
 
@@ -1070,35 +1350,35 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:1000}}>
           <thead><tr style={{background:"#040b14"}}>
-            {role!=="consultor"&&<TH>Consultor</TH>}
-            <TH>Produto</TH><TH>Cliente</TH><TH>MRR</TH><TH>Impl. Total</TH><TH>Licença</TH><TH>NR</TH><TH>Faixa</TH>
-            <TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
-            <TH right>1ª ({ML(addMonths(mes,2))})</TH><TH right>2ª ({ML(addMonths(mes,3))})</TH><TH>Ações</TH>
+            {role!=="consultor"&&<TH t={t} t={t}>Consultor</TH>}
+            <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH><TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl. Total</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>NR</TH><TH t={t} t={t}>Faixa</TH>
+            <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
+            <TH t={t} t={t} right>1ª ({ML(addMonths(mes,2))})</TH><TH t={t} t={t} right>2ª ({ML(addMonths(mes,3))})</TH><TH t={t} t={t}>Ações</TH>
           </tr></thead>
           <tbody>
-            {vendasMes.length===0?<tr><td colSpan={14}><Empty/></td></tr>:vendasMes.map((v,i)=>{
+            {vendasMes.length===0?<tr><td colSpan={14}><Empty t={t} t={t}/></td></tr>:vendasMes.map((v,i)=>{
               const c=calcVenda(v,produtos); if(!c)return null;
               const prod=produtos.find(p=>p.id===(v.produtoId||v.produto_id));
               const cId = v.consultorId||v.consultor_id;
               return (
                 <tr key={v.id} style={{borderBottom:i<vendasMes.length-1?"1px solid #080f1a":"none"}}>
-                  {role!=="consultor"&&<TD bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
-                  <TD bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
-                  <TD>{v.cliente}</TD>
-                  <TD bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
-                  <TD>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
-                  <TD color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                  <TD bold color="#e2e8f0">{R$(c.nr)}</TD>
-                  <TD><FaixaBadge faixa={c.faixa}/></TD>
-                  <TD right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
-                  <TD right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
-                  <TD right bold color="#e2e8f0">{R$(c.total)}</TD>
-                  <TD right color="#38bdf8" bold>{R$(c.parcela)}</TD>
-                  <TD right color="#818cf8" bold>{R$(c.parcela)}</TD>
-                  <TD>
+                  {role!=="consultor"&&<TD t={t} t={t} bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
+                  <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
+                  <TD t={t} t={t}>{v.cliente}</TD>
+                  <TD t={t} t={t} bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
+                  <TD t={t} t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
+                  <TD t={t} t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                  <TD t={t} t={t} bold color="#e2e8f0">{R$(c.nr)}</TD>
+                  <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={c.faixa}/></TD>
+                  <TD t={t} t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
+                  <TD t={t} t={t} right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
+                  <TD t={t} t={t} right bold color="#e2e8f0">{R$(c.total)}</TD>
+                  <TD t={t} t={t} right color="#38bdf8" bold>{R$(c.parcela)}</TD>
+                  <TD t={t} t={t} right color="#818cf8" bold>{R$(c.parcela)}</TD>
+                  <TD t={t} t={t}>
                     <div style={{display:"flex",gap:5}}>
-                      <IBtn color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
-                      <IBtn color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
+                      <IBtn t={t} t={t} color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
+                      <IBtn t={t} t={t} color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
                     </div>
                   </TD>
                 </tr>
@@ -1124,12 +1404,12 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
   const totGeral=rows.reduce((s,r)=>s+r.totalCom,0);
   return (
     <div>
-      <STitle>Equipe — {ML(mes)}</STitle>
+      <STitle t={t} t={t}>Equipe — {ML(mes)}</STitle>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
-        <StatCard l="Total Comissões"    v={R$(totGeral)} c="#34d399"/>
-        <StatCard l="Consultores"        v={rows.length}  c="#38bdf8"/>
-        <StatCard l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
-        <StatCard l="🚀 200%+"           v={rows.filter(r=>r.atingMRR>=200).length} c="#f59e0b"/>
+        <StatCard t={t} t={t} l="Total Comissões"    v={R$(totGeral)} c="#34d399"/>
+        <StatCard t={t} t={t} l="Consultores"        v={rows.length}  c="#38bdf8"/>
+        <StatCard t={t} t={t} l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
+        <StatCard t={t} t={t} l="🚀 200%+"           v={rows.filter(r=>r.atingMRR>=200).length} c="#f59e0b"/>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
         {rows.map((r,idx)=>(
@@ -1157,8 +1437,8 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
               <div style={{height:6,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingNR,100)}%`,height:"100%",background:r.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99}}/></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              <MiniCard l="Com. MRR" v={R$(r.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} c={r.overInfo.color}/>
-              <MiniCard l="Com. NR"  v={R$(r.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))} c="#a78bfa"/>
+              <MiniCard t={t} t={t} l="Com. MRR" v={R$(r.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} c={r.overInfo.color}/>
+              <MiniCard t={t} t={t} l="Com. NR"  v={R$(r.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))} c="#a78bfa"/>
             </div>
           </div>
         ))}
@@ -1184,7 +1464,7 @@ function CalPage({me,users,vendas,produtos}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <STitle style={{margin:0}}>Calendário de Recebimentos</STitle>
+        <STitle t={t} t={t} style={{margin:0}}>Calendário de Recebimentos</STitle>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
           <span style={{fontSize:11,color:"#1e4060",fontWeight:700}}>Total {ano}: <span style={{color:"#34d399"}}>{R$(totalAno)}</span></span>
           <div style={{display:"flex",gap:4,marginLeft:8,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
@@ -1253,10 +1533,10 @@ function HistPage({me,users,vendas,produtos,metas}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <STitle>Histórico</STitle>
-        {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS,width:"auto",minWidth:200}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
+        <STitle t={t} t={t}>Histórico</STitle>
+        {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:200}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
       </div>
-      {porMes.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty/></div>}
+      {porMes.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} t={t}/></div>}
       {porMes.map(({mes,rows,total})=>(
         <div key={mes} style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
           <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:"#040b14"}}>
@@ -1269,29 +1549,29 @@ function HistPage({me,users,vendas,produtos,metas}) {
           <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:900}}>
             <thead><tr style={{background:"#030810"}}>
-              {filtro==="todos"&&<TH>Consultor</TH>}
-              <TH>Produto</TH><TH>Cliente</TH><TH>MRR</TH><TH>Impl.</TH><TH>Licença</TH><TH>Faixa</TH>
-              <TH right>Over MRR</TH><TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
-              <TH right>1ª Parcela</TH><TH right>2ª Parcela</TH>
+              {filtro==="todos"&&<TH t={t} t={t}>Consultor</TH>}
+              <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH><TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl.</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>Faixa</TH>
+              <TH t={t} t={t} right>Over MRR</TH><TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
+              <TH t={t} t={t} right>1ª Parcela</TH><TH t={t} t={t} right>2ª Parcela</TH>
             </tr></thead>
             <tbody>
               {rows.map((r,i)=>{
                 const prod=produtos.find(p=>p.id===r.produtoId);
                 return (
                   <tr key={(r.id||i)+"-"+mes} style={{borderBottom:i<rows.length-1?"1px solid #080f1a":"none"}}>
-                    {filtro==="todos"&&<TD bold color="#e2e8f0">{r.nomeConsultor}</TD>}
-                    <TD bold color="#e2e8f0">{prod?.nome}</TD>
-                    <TD>{r.cliente}</TD>
-                    <TD bold color="#38bdf8">{R$(r.mrr)}</TD>
-                    <TD>{R$(r.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
-                    <TD color={r.licenca>0?"#a78bfa":"#1e4060"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
-                    <TD><FaixaBadge faixa={r.faixa}/></TD>
-                    <TD right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
-                    <TD right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
-                    <TD right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
-                    <TD right bold color="#e2e8f0">{R$(r.total)}</TD>
-                    <TD right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela1)}</div></TD>
-                    <TD right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela2)}</div></TD>
+                    {filtro==="todos"&&<TD t={t} t={t} bold color="#e2e8f0">{r.nomeConsultor}</TD>}
+                    <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                    <TD t={t} t={t}>{r.cliente}</TD>
+                    <TD t={t} t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
+                    <TD t={t} t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
+                    <TD t={t} t={t} color={r.licenca>0?"#a78bfa":"#1e4060"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
+                    <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={r.faixa}/></TD>
+                    <TD t={t} t={t} right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
+                    <TD t={t} t={t} right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
+                    <TD t={t} t={t} right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
+                    <TD t={t} t={t} right bold color="#e2e8f0">{R$(r.total)}</TD>
+                    <TD t={t} t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela1)}</div></TD>
+                    <TD t={t} t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -1344,7 +1624,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
     else notify("Metas salvas!");
   };
 
-  if(!draft) return <STitle>Nenhum produto.</STitle>;
+  if(!draft) return <STitle t={t} t={t}>Nenhum produto.</STitle>;
 
   const simCenarios=[
     {mrr:2000,h:40,vh:170,lic:0},{mrr:2500,h:60,vh:185,lic:0},
@@ -1353,7 +1633,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
 
   return (
     <div>
-      <STitle>Parâmetros</STitle>
+      <STitle t={t} t={t}>Parâmetros</STitle>
       <div style={{display:"flex",gap:8,marginBottom:20}}>
         {[["produtos","🎛 Comissões por Produto"],["metas","🎯 Metas Mensais"]].map(([id,label])=>(
           <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 18px",borderRadius:8,border:`1px solid ${tab===id?"#1e4060":"#0c1f35"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:tab===id?"#0c2a42":"#060d18",color:tab===id?"#38bdf8":"#2a5a80"}}>{label}</button>
@@ -1387,19 +1667,19 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                     <span style={{fontWeight:700,color,fontSize:14}}>{CARGO_LABEL[cargo]}</span>
                   </div>
                   <div style={{marginBottom:12}}>
-                    <Label>Meta MRR (R$)</Label>
-                    <input type="number" value={m.mrr||""} onChange={e=>updMeta(cargo,"mrr",e.target.value)} placeholder="Ex: 15000" style={{...inp,color:"#38bdf8",fontWeight:700,fontSize:16,textAlign:"right"}}/>
+                    <Label t={t} t={t}>Meta MRR (R$)</Label>
+                    <input type="number" value={m.mrr||""} onChange={e=>updMeta(cargo,"mrr",e.target.value)} placeholder="Ex: 15000" style={{...inp(t),color:"#38bdf8",fontWeight:700,fontSize:16,textAlign:"right"}}/>
                     <div style={{fontSize:10,color:"#1e4060",marginTop:4}}>⚡ 150%: {R$((m.mrr||0)*1.5)} · 🚀 200%: {R$((m.mrr||0)*2)}</div>
                   </div>
                   <div>
-                    <Label>Meta NR (R$)</Label>
-                    <input type="number" value={m.nr||""} onChange={e=>updMeta(cargo,"nr",e.target.value)} placeholder="Ex: 22000" style={{...inp,color:"#a78bfa",fontWeight:700,fontSize:16,textAlign:"right"}}/>
+                    <Label t={t} t={t}>Meta NR (R$)</Label>
+                    <input type="number" value={m.nr||""} onChange={e=>updMeta(cargo,"nr",e.target.value)} placeholder="Ex: 22000" style={{...inp(t),color:"#a78bfa",fontWeight:700,fontSize:16,textAlign:"right"}}/>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div style={{marginTop:14}}><Btn onClick={saveMetasMes} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Metas"}</Btn></div>
+          <div style={{marginTop:14}}><Btn t={t} t={t} onClick={saveMetasMes} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Metas"}</Btn></div>
         </div>
       )}
 
@@ -1413,7 +1693,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
               <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:16}}>Configurações</div>
               <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #0c2a42"}}>
                 <div style={{fontSize:12,color:"#38bdf8",fontWeight:700,marginBottom:10}}>💳 MRR — Mensalidade</div>
-                <div><Label>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp,color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
+                <div><Label t={t} t={t}>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp(t),color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
               </div>
               <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #1e4060"}}>
                 <div style={{fontSize:12,color:"#ca8a04",fontWeight:700,marginBottom:10}}>⚡ Modo de Seleção de Faixa</div>
@@ -1425,16 +1705,16 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                 <div key={r.id} style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:10,border:`1px solid ${i===0?"#ca8a0433":"#0c1f35"}`}}>
                   <div style={{fontSize:12,fontWeight:700,color:i===0?"#ca8a04":"#64748b",marginBottom:10}}>{i===0?"⭐":""} {r.label}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-                    <div><Label>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp}/></div>
-                    <div><Label>Mín. R$/h</Label><input type="number" value={r.minValorH} onChange={e=>updRegra(i,"minValorH",e.target.value)} style={inp}/></div>
-                    <div><Label>% NR</Label><input type="number" value={r.pctImpl} onChange={e=>updRegra(i,"pctImpl",e.target.value)} style={{...inp,color:"#a78bfa",fontWeight:800,fontSize:16}}/></div>
+                    <div><Label t={t} t={t}>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp(t)}/></div>
+                    <div><Label t={t} t={t}>Mín. R$/h</Label><input type="number" value={r.minValorH} onChange={e=>updRegra(i,"minValorH",e.target.value)} style={inp(t)}/></div>
+                    <div><Label t={t} t={t}>% NR</Label><input type="number" value={r.pctImpl} onChange={e=>updRegra(i,"pctImpl",e.target.value)} style={{...inp(t),color:"#a78bfa",fontWeight:800,fontSize:16}}/></div>
                   </div>
                 </div>
               ))}
               <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c1f35"}}>
                 💡 <b style={{color:"#38bdf8"}}>MRR</b> = mensalidade × {draft.pctMRR}% · <b style={{color:"#a78bfa"}}>NR</b> = (impl+lic) × faixa% · Pago em 2× (+2 e +3 meses)
               </div>
-              <Btn onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
+              <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
             </div>
             <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
               <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:14}}>Simulador — {draft.nome}</div>
@@ -1445,7 +1725,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                   <div key={i} style={{background:"#040b14",borderRadius:8,padding:"12px 14px",marginBottom:8,border:`1px solid ${c.isPremium?"#ca8a0422":"#0c1f35"}`}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                       <span style={{fontSize:12,color:"#7fa8c0",fontWeight:600}}>MRR {R$(s.mrr)} · {s.h}h×{R$(s.vh)}{s.lic>0?` · Lic ${R$(s.lic)}`:""}</span>
-                      <FaixaBadge faixa={c.faixa}/>
+                      <FaixaBadge t={t} t={t} faixa={c.faixa}/>
                     </div>
                     <div style={{display:"flex",gap:14,fontSize:12,flexWrap:"wrap"}}>
                       <span style={{color:"#1e4060"}}>MRR: <b style={{color:"#38bdf8"}}>{R$(c.comMRR)}</b></span>
@@ -1478,12 +1758,12 @@ function ProdPage({produtos,setProdutos,notify}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <STitle>Produtos</STitle>
-        <Btn onClick={()=>setShowNew(s=>!s)}><Ic n="plus" s={14}/>Novo Produto</Btn>
+        <STitle t={t} t={t}>Produtos</STitle>
+        <Btn t={t} t={t} onClick={()=>setShowNew(s=>!s)}><Ic n="plus" s={14}/>Novo Produto</Btn>
       </div>
       {showNew&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20,marginBottom:14,display:"flex",gap:12,alignItems:"flex-end"}}>
-        <div style={{flex:1}}><Label>Nome do Produto</Label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Mago RH" style={inp} onKeyDown={e=>e.key==="Enter"&&add()}/></div>
-        <Btn onClick={add}>Adicionar</Btn><Btn secondary onClick={()=>setShowNew(false)}>Cancelar</Btn>
+        <div style={{flex:1}}><Label t={t} t={t}>Nome do Produto</Label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Mago RH" style={inp(t)} onKeyDown={e=>e.key==="Enter"&&add()}/></div>
+        <Btn t={t} t={t} onClick={add}>Adicionar</Btn><Btn t={t} t={t} secondary onClick={()=>setShowNew(false)}>Cancelar</Btn>
       </div>}
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         {produtos.map(p=>{
@@ -1502,7 +1782,7 @@ function ProdPage({produtos,setProdutos,notify}) {
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <span style={{background:p.ativo?"#14532d22":"#450a0a22",color:p.ativo?"#4ade80":"#f87171",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>{p.ativo?"Ativo":"Inativo"}</span>
-              <IBtn color={p.ativo?"#f87171":"#4ade80"} onClick={()=>setProdutos(prev=>prev.map(x=>x.id===p.id?{...x,ativo:!x.ativo}:x))}><Ic n={p.ativo?"lock":"check"} s={13}/></IBtn>
+              <IBtn t={t} t={t} color={p.ativo?"#f87171":"#4ade80"} onClick={()=>setProdutos(prev=>prev.map(x=>x.id===p.id?{...x,ativo:!x.ativo}:x))}><Ic n={p.ativo?"lock":"check"} s={13}/></IBtn>
             </div>
           </div>
           );
@@ -1515,37 +1795,34 @@ function ProdPage({produtos,setProdutos,notify}) {
 // ══════════════════════════════════════════════════════════════════
 //  PERIOD BAR — seletor inteligente de período na topbar
 // ══════════════════════════════════════════════════════════════════
-function PeriodBar({page, mes, setMes}) {
-  // Páginas sem seletor de período
+function PeriodBar({page, mes, setMes, t}) {
   const semPeriodo = ["params","prod","users","relatorio","cal"];
   if (semPeriodo.includes(page)) {
-    return <div style={{padding:"12px 32px",borderBottom:"1px solid #0c1f35",background:"#060d18",height:52,display:"flex",alignItems:"center"}}>
-      <span style={{fontSize:11,color:"#1a3a54",fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
-        {page==="relatorio"?"Selecione o período dentro da página":
-         page==="cal"?"Calendário anual — selecione o ano na página":"—"}
+    return <div style={{padding:"12px 32px",borderBottom:`1px solid ${t.border}`,background:t.topbarBg,height:50,display:"flex",alignItems:"center"}}>
+      <span style={{fontSize:11,color:t.textMuted,fontWeight:500}}>
+        {page==="relatorio"?"📊 Selecione o período dentro da página":
+         page==="cal"?"🗓 Selecione o ano dentro da página":""}
       </span>
     </div>;
   }
-
-  const now    = new Date();
-  const anoAtual = now.getFullYear();
-  const mesAtual = `${anoAtual}-${String(now.getMonth()+1).padStart(2,"0")}`;
-  const [y,m] = mes.split("-").map(Number);
-
-  // Gera 18 meses (12 passados + atual + 5 futuros)
+  const now = new Date();
+  const mesAtual = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
   const meses = Array.from({length:18},(_,i)=>{
     const d = new Date(now.getFullYear(), now.getMonth()-12+i, 1);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
   });
-
   return (
-    <div style={{padding:"10px 32px",borderBottom:"1px solid #0c1f35",background:"#060d18",position:"sticky",top:0,zIndex:5,display:"flex",alignItems:"center",gap:6,overflowX:"auto"}}>
-      <span style={{fontSize:9,color:"#1a3a54",fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginRight:6,whiteSpace:"nowrap"}}>Competência</span>
+    <div style={{padding:"8px 28px",borderBottom:`1px solid ${t.border}`,background:t.topbarBg,display:"flex",alignItems:"center",gap:4,overflowX:"auto"}}>
+      <span style={{fontSize:9,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginRight:8,whiteSpace:"nowrap"}}>Competência</span>
       {meses.map(mm=>{
-        const isAtual = mm===mesAtual;
-        const isSel   = mm===mes;
+        const isAtual=mm===mesAtual, isSel=mm===mes;
         return (
-          <button key={mm} onClick={()=>setMes(mm)} style={{padding:"4px 10px",borderRadius:6,border:isAtual&&!isSel?"1px solid #1e4060":"none",cursor:"pointer",fontSize:11,fontWeight:isSel?700:400,background:isSel?"#0369a1":"transparent",color:isSel?"#fff":isAtual?"#38bdf8":"#1e4060",transition:"all .15s",whiteSpace:"nowrap",flexShrink:0}}>
+          <button key={mm} onClick={()=>setMes(mm)}
+            style={{padding:"4px 10px",borderRadius:7,border:isAtual&&!isSel?`1px solid ${t.accent}55`:"none",
+              cursor:"pointer",fontSize:11,fontWeight:isSel?700:500,
+              background:isSel?t.accent:"transparent",
+              color:isSel?"#fff":isAtual?t.accent:t.textMuted,
+              transition:"all .15s",whiteSpace:"nowrap",flexShrink:0}}>
             {ML(mm)}
           </button>
         );
@@ -1632,7 +1909,7 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
 
   return (
     <div>
-      <STitle>Relatórios — {labelPeriodo}</STitle>
+      <STitle t={t} t={t}>Relatórios — {labelPeriodo}</STitle>
 
       {/* SELETOR DE TIPO */}
       <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
@@ -1671,7 +1948,7 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
           </div>
         )}
         {/* Filtro consultor */}
-        <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)} style={{...selS,width:"auto",minWidth:180,marginLeft:"auto"}}>
+        <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)} style={{...selS(t),width:"auto",minWidth:180,marginLeft:"auto"}}>
           <option value="todos">Toda a equipe</option>
           {consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
@@ -1684,11 +1961,11 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
 
       {/* TOTAIS GERAIS */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,marginBottom:22}}>
-        <StatCard l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
-        <StatCard l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
-        <StatCard l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
-        <StatCard l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
-        <StatCard l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
+        <StatCard t={t} t={t} l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
+        <StatCard t={t} t={t} l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
+        <StatCard t={t} t={t} l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
+        <StatCard t={t} t={t} l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
+        <StatCard t={t} t={t} l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
       </div>
 
       {/* TABELA POR CONSULTOR */}
@@ -1699,27 +1976,27 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
           <thead><tr style={{background:"#030810"}}>
-            <TH>Consultor</TH><TH>Cargo</TH><TH>Contratos</TH>
-            <TH right>MRR</TH><TH right>Meta MRR</TH><TH right>Ating. MRR</TH>
-            <TH right>NR</TH><TH right>Meta NR</TH><TH right>Ating. NR</TH>
-            <TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
+            <TH t={t} t={t}>Consultor</TH><TH t={t} t={t}>Cargo</TH><TH t={t} t={t}>Contratos</TH>
+            <TH t={t} t={t} right>MRR</TH><TH t={t} t={t} right>Meta MRR</TH><TH t={t} t={t} right>Ating. MRR</TH>
+            <TH t={t} t={t} right>NR</TH><TH t={t} t={t} right>Meta NR</TH><TH t={t} t={t} right>Ating. NR</TH>
+            <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
           </tr></thead>
           <tbody>
-            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty msg="Nenhum dado no período."/></td></tr>:
+            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty t={t} t={t} msg="Nenhum dado no período."/></td></tr>:
             dadosPeriodo.map((d,i)=>(
               <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?"1px solid #080f1a":"none"}}>
-                <TD bold color="#e2e8f0">{d.name}</TD>
-                <TD><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
-                <TD>{d.nVendas}</TD>
-                <TD right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
-                <TD right color="#1e4060">{R$(d.metaMRR)}</TD>
-                <TD right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
-                <TD right bold color="#a78bfa">{R$(d.totalNR)}</TD>
-                <TD right color="#1e4060">{R$(d.metaNR)}</TD>
-                <TD right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
-                <TD right bold color="#34d399">{R$(d.comMRR)}</TD>
-                <TD right bold color="#a78bfa">{R$(d.comNR)}</TD>
-                <TD right bold color="#f59e0b">{R$(d.totalCom)}</TD>
+                <TD t={t} t={t} bold color="#e2e8f0">{d.name}</TD>
+                <TD t={t} t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
+                <TD t={t} t={t}>{d.nVendas}</TD>
+                <TD t={t} t={t} right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
+                <TD t={t} t={t} right color="#1e4060">{R$(d.metaMRR)}</TD>
+                <TD t={t} t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
+                <TD t={t} t={t} right bold color="#a78bfa">{R$(d.totalNR)}</TD>
+                <TD t={t} t={t} right color="#1e4060">{R$(d.metaNR)}</TD>
+                <TD t={t} t={t} right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
+                <TD t={t} t={t} right bold color="#34d399">{R$(d.comMRR)}</TD>
+                <TD t={t} t={t} right bold color="#a78bfa">{R$(d.comNR)}</TD>
+                <TD t={t} t={t} right bold color="#f59e0b">{R$(d.totalCom)}</TD>
               </tr>
             ))}
           </tbody>
@@ -1741,27 +2018,27 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
           <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
             <thead><tr style={{background:"#030810"}}>
-              <TH>Mês</TH><TH>Produto</TH><TH>Cliente</TH>
-              <TH right>MRR</TH><TH right>NR</TH><TH>Faixa</TH>
-              <TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
-              <TH right>1ª Parc.</TH><TH right>2ª Parc.</TH>
+              <TH t={t} t={t}>Mês</TH><TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH>
+              <TH t={t} t={t} right>MRR</TH><TH t={t} t={t} right>NR</TH><TH t={t} t={t}>Faixa</TH>
+              <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
+              <TH t={t} t={t} right>1ª Parc.</TH><TH t={t} t={t} right>2ª Parc.</TH>
             </tr></thead>
             <tbody>
               {d.vendasCalc.map((v,i)=>{
                 const prod=produtos.find(p=>p.id===v.produtoId);
                 return (
                   <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                    <TD color="#1e4060">{ML(v.mes)}</TD>
-                    <TD bold color="#e2e8f0">{prod?.nome}</TD>
-                    <TD>{v.cliente}</TD>
-                    <TD right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
-                    <TD right color="#a78bfa">{R$(v.nr)}</TD>
-                    <TD><FaixaBadge faixa={v.faixa}/></TD>
-                    <TD right bold color="#34d399">{R$(v.comMRR)}</TD>
-                    <TD right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
-                    <TD right bold color="#f59e0b">{R$(v.total)}</TD>
-                    <TD right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                    <TD right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                    <TD t={t} t={t} color="#1e4060">{ML(v.mes)}</TD>
+                    <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                    <TD t={t} t={t}>{v.cliente}</TD>
+                    <TD t={t} t={t} right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
+                    <TD t={t} t={t} right color="#a78bfa">{R$(v.nr)}</TD>
+                    <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={v.faixa}/></TD>
+                    <TD t={t} t={t} right bold color="#34d399">{R$(v.comMRR)}</TD>
+                    <TD t={t} t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                    <TD t={t} t={t} right bold color="#f59e0b">{R$(v.total)}</TD>
+                    <TD t={t} t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
+                    <TD t={t} t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -1801,38 +2078,38 @@ function UsersPage({users,createUserProfile,updateProfile,notify,me}) {
   const RC={consultor:"#38bdf8",gestor:"#a78bfa",parametros:"#f59e0b"};
   return (
     <div>
-      <STitle>Usuários</STitle>
+      <STitle t={t} t={t}>Usuários</STitle>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:14}}>{editId?"✏ Editando":"➕ Novo usuário"}</div>
         <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c2a42"}}>
           <Ic n="db" s={12}/> Usuários são criados via <b style={{color:"#38bdf8"}}>Supabase Auth</b>. Um e-mail de confirmação será enviado automaticamente.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,alignItems:"end"}}>
-          <div><Label>Nome</Label><input value={form.name} onChange={e=>F("name",e.target.value)} placeholder="Nome completo" style={inp}/></div>
-          {!editId&&<div><Label>E-mail</Label><input value={form.email} onChange={e=>F("email",e.target.value)} placeholder="email@empresa.com" style={inp}/></div>}
-          {!editId&&<div><Label>Senha inicial</Label><input type="password" value={form.password} onChange={e=>F("password",e.target.value)} placeholder="mín. 6 caracteres" style={inp}/></div>}
-          <div><Label>Perfil</Label><select value={form.role} onChange={e=>F("role",e.target.value)} style={selS}><option value="consultor">Consultor</option><option value="gestor">Gestor</option><option value="parametros">Parâmetros</option></select></div>
-          {form.role==="consultor"&&<div><Label>Cargo</Label><select value={form.cargo} onChange={e=>F("cargo",e.target.value)} style={selS}><option value="junior">Júnior</option><option value="pleno">Pleno</option><option value="senior">Sênior</option></select></div>}
+          <div><Label t={t} t={t}>Nome</Label><input value={form.name} onChange={e=>F("name",e.target.value)} placeholder="Nome completo" style={inp(t)}/></div>
+          {!editId&&<div><Label t={t} t={t}>E-mail</Label><input value={form.email} onChange={e=>F("email",e.target.value)} placeholder="email@empresa.com" style={inp(t)}/></div>}
+          {!editId&&<div><Label t={t} t={t}>Senha inicial</Label><input type="password" value={form.password} onChange={e=>F("password",e.target.value)} placeholder="mín. 6 caracteres" style={inp(t)}/></div>}
+          <div><Label t={t} t={t}>Perfil</Label><select value={form.role} onChange={e=>F("role",e.target.value)} style={selS(t)}><option value="consultor">Consultor</option><option value="gestor">Gestor</option><option value="parametros">Parâmetros</option></select></div>
+          {form.role==="consultor"&&<div><Label t={t} t={t}>Cargo</Label><select value={form.cargo} onChange={e=>F("cargo",e.target.value)} style={selS(t)}><option value="junior">Júnior</option><option value="pleno">Pleno</option><option value="senior">Sênior</option></select></div>}
           <div style={{display:"flex",gap:8}}>
-            <Btn onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Criar"}</Btn>
-            {editId&&<Btn secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>✕</Btn>}
+            <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Criar"}</Btn>
+            {editId&&<Btn t={t} t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>✕</Btn>}
           </div>
         </div>
       </div>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{background:"#040b14"}}><TH>Nome</TH><TH>Perfil</TH><TH>Cargo</TH><TH>Status</TH><TH>Ações</TH></tr></thead>
+          <thead><tr style={{background:"#040b14"}}><TH t={t} t={t}>Nome</TH><TH t={t} t={t}>Perfil</TH><TH t={t} t={t}>Cargo</TH><TH t={t} t={t}>Status</TH><TH t={t} t={t}>Ações</TH></tr></thead>
           <tbody>
             {users.map((u,i)=>(
               <tr key={u.id} style={{borderBottom:i<users.length-1?"1px solid #080f1a":"none",opacity:u.active?1:.45}}>
-                <TD bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#0c2a42",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
-                <TD><span style={{background:RC[u.role]+"22",color:RC[u.role],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{ROLE_LABEL[u.role]||u.role}</span></TD>
-                <TD>{u.cargo?<span style={{background:CARGO_COLOR[u.cargo]+"22",color:CARGO_COLOR[u.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[u.cargo]}</span>:"—"}</TD>
-                <TD><span style={{background:u.active?"#14532d22":"#450a0a22",color:u.active?"#4ade80":"#f87171",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{u.active?"Ativo":"Inativo"}</span></TD>
-                <TD>
+                <TD t={t} t={t} bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#0c2a42",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
+                <TD t={t} t={t}><span style={{background:RC[u.role]+"22",color:RC[u.role],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{ROLE_LABEL[u.role]||u.role}</span></TD>
+                <TD t={t} t={t}>{u.cargo?<span style={{background:CARGO_COLOR[u.cargo]+"22",color:CARGO_COLOR[u.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[u.cargo]}</span>:"—"}</TD>
+                <TD t={t} t={t}><span style={{background:u.active?"#14532d22":"#450a0a22",color:u.active?"#4ade80":"#f87171",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{u.active?"Ativo":"Inativo"}</span></TD>
+                <TD t={t} t={t}>
                   <div style={{display:"flex",gap:5}}>
-                    <IBtn color="#38bdf8" onClick={()=>{setEditId(u.id);setForm({name:u.name,email:u.email||"",password:"",role:u.role,cargo:u.cargo||"junior"});}}><Ic n="edit" s={13}/></IBtn>
-                    {u.id!==me.id&&<IBtn color={u.active?"#f87171":"#4ade80"} onClick={async()=>{const {error}=await updateProfile(u.id,{active:!u.active});if(error)notify("Erro","err");}}><Ic n={u.active?"lock":"check"} s={13}/></IBtn>}
+                    <IBtn t={t} t={t} color="#38bdf8" onClick={()=>{setEditId(u.id);setForm({name:u.name,email:u.email||"",password:"",role:u.role,cargo:u.cargo||"junior"});}}><Ic n="edit" s={13}/></IBtn>
+                    {u.id!==me.id&&<IBtn t={t} t={t} color={u.active?"#f87171":"#4ade80"} onClick={async()=>{const {error}=await updateProfile(u.id,{active:!u.active});if(error)notify("Erro","err");}}><Ic n={u.active?"lock":"check"} s={13}/></IBtn>}
                   </div>
                 </TD>
               </tr>
