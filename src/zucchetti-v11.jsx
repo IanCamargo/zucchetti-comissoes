@@ -935,11 +935,11 @@ function Login({notify, toast, t, themeName, setThemeName}) {
         {err&&<div className="fade-in" style={{background:`${t.red}18`,color:t.red,padding:"10px 14px",borderRadius:10,fontSize:13,marginBottom:16,border:`1px solid ${t.red}30`}}>{err}</div>}
 
         <div style={{marginBottom:14}}>
-          <Label t={t} t={t}>E-mail</Label>
+          <Label t={t}>E-mail</Label>
           <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="seu@zucchetti.com" style={{...inp(t),border:`1px solid ${err?t.red:t.border}`}}/>
         </div>
         <div style={{marginBottom:20}}>
-          <Label t={t} t={t}>Senha</Label>
+          <Label t={t}>Senha</Label>
           <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={{...inp(t),border:`1px solid ${err?t.red:t.border}`}}/>
         </div>
 
@@ -1036,7 +1036,7 @@ function GraficoEvolucao({evolucao, overInfo, t}) {
   );
 }
 
-function DashPage({me,users,vendas,produtos,mes,metas}) {
+function DashPage({me,users,vendas,produtos,mes,metas,t}) {
   const role=me.role;
   const [viewMode, setViewMode] = useState("mensal"); // "mensal" | "trimestral"
   const consultores = role==="consultor" ? [me] : users.filter(u=>u.role==="consultor"&&u.active);
@@ -1055,7 +1055,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
     <div>
       {/* HEADER */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <STitle t={t} t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
+        <STitle t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
         {/* Toggle mensal / trimestral */}
         <div style={{display:"flex",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
           {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"]].map(([v,l])=>(
@@ -1078,23 +1078,23 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
       {role!=="consultor"&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:22}}>
           {viewMode==="mensal"&&<>
-            <StatCard t={t} t={t} l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
-            <StatCard t={t} t={t} l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
-            <StatCard t={t} t={t} l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
-            <StatCard t={t} t={t} l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
+            <StatCard t={t} l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
+            <StatCard t={t} l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
+            <StatCard t={t} l="Em Overperformance"  v={porConsultor.filter(c=>c.atingMRR>=150).length} c="#f59e0b"/>
+            <StatCard t={t} l="MRR Total do Mês"    v={R$(porConsultor.reduce((s,c)=>s+c.totalMRR,0))} c="#a78bfa"/>
           </>}
           {viewMode==="trimestral"&&<>
-            <StatCard t={t} t={t} l={`MRR Total ${porConsultor[0]?.trim.trim.label||""}`} v={R$(totMRRTrim)} c="#34d399"/>
-            <StatCard t={t} t={t} l="Consultores c/ Over Trim." v={porConsultor.filter(c=>c.trim.atingMRRTrim>=150).length} c="#f59e0b"/>
-            <StatCard t={t} t={t} l="Total Acerto Over"  v={R$(totAcerto)} c="#a78bfa"/>
-            <StatCard t={t} t={t} l="🚀 200%+ Trim."     v={porConsultor.filter(c=>c.trim.atingMRRTrim>=200).length} c="#f59e0b"/>
+            <StatCard t={t} l={`MRR Total ${porConsultor[0]?.trim.trim.label||""}`} v={R$(totMRRTrim)} c="#34d399"/>
+            <StatCard t={t} l="Consultores c/ Over Trim." v={porConsultor.filter(c=>c.trim.atingMRRTrim>=150).length} c="#f59e0b"/>
+            <StatCard t={t} l="Total Acerto Over"  v={R$(totAcerto)} c="#a78bfa"/>
+            <StatCard t={t} l="🚀 200%+ Trim."     v={porConsultor.filter(c=>c.trim.atingMRRTrim>=200).length} c="#f59e0b"/>
           </>}
         </div>
       )}
 
       {/* CARDS POR CONSULTOR */}
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} t={t} msg="Sem vendas neste mês."/></div>}
+        {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} msg="Sem vendas neste mês."/></div>}
         {porConsultor.map(c=>{
           const t = c.trim;
           const borderColor = viewMode==="mensal"
@@ -1135,7 +1135,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
               <div style={{padding:"14px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
                 <div>
                   <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
-                  <OverBar t={t} t={t} ating={c.atingMRR}/>
+                  <OverBar t={t} ating={c.atingMRR}/>
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
@@ -1156,7 +1156,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
                     <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
                       Meta MRR Trimestral — {R$(t.metaTrimMRR)} · Vendido: {R$(t.totalMRRTrim)}
                     </div>
-                    <OverBar t={t} t={t} ating={t.atingMRRTrim}/>
+                    <OverBar t={t} ating={t.atingMRRTrim}/>
                   </div>
                   {/* Quanto falta para o próximo nível */}
                   <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c2a42"}}>
@@ -1191,29 +1191,29 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
               <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",minWidth:860}}>
                 <thead><tr style={{background:"#030810"}}>
-                  <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH>
-                  <TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl. (h×R$/h)</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>NR</TH>
-                  <TH t={t} t={t}>Faixa NR</TH>
-                  <TH t={t} t={t} right>Com. MRR ({c.pctMRR}%)</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
-                  <TH t={t} t={t} right>1ª parc.</TH><TH t={t} t={t} right>2ª parc.</TH>
+                  <TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
+                  <TH t={t}>MRR</TH><TH t={t}>Impl. (h×R$/h)</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH>
+                  <TH t={t}>Faixa NR</TH>
+                  <TH t={t} right>Com. MRR ({c.pctMRR}%)</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+                  <TH t={t} right>1ª parc.</TH><TH t={t} right>2ª parc.</TH>
                 </tr></thead>
                 <tbody>
                   {c.vendasCalc.map((v,i)=>{
                     const prod=produtos.find(p=>p.id===v.produtoId);
                     return (
                       <tr key={v.id||i} style={{borderBottom:i<c.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                        <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
-                        <TD t={t} t={t}>{v.cliente}</TD>
-                        <TD t={t} t={t} bold color="#38bdf8">{R$(v.mrr)}</TD>
-                        <TD t={t} t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
-                        <TD t={t} t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                        <TD t={t} t={t} bold color="#e2e8f0">{R$(v.nr)}</TD>
-                        <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={v.faixa}/></TD>
-                        <TD t={t} t={t} right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
-                        <TD t={t} t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
-                        <TD t={t} t={t} right bold color="#e2e8f0">{R$(v.total)}</TD>
-                        <TD t={t} t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                        <TD t={t} t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                        <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                        <TD t={t}>{v.cliente}</TD>
+                        <TD t={t} bold color="#38bdf8">{R$(v.mrr)}</TD>
+                        <TD t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
+                        <TD t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                        <TD t={t} bold color="#e2e8f0">{R$(v.nr)}</TD>
+                        <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
+                        <TD t={t} right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
+                        <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                        <TD t={t} right bold color="#e2e8f0">{R$(v.total)}</TD>
+                        <TD t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
+                        <TD t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
                       </tr>
                     );
                   })}
@@ -1233,7 +1233,7 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
 // ══════════════════════════════════════════════════════════════════
 //  VENDAS
 // ══════════════════════════════════════════════════════════════════
-function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,mes,notify,metas}) {
+function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,mes,notify,metas,t}) {
   const role=me.role;
   // Jennifer (parametros) também pode lançar vendas
   const podeVender = role==="consultor" || role==="parametros" || role==="gestor";
@@ -1294,43 +1294,43 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 
   return (
     <div>
-      <STitle t={t} t={t}>Lançar Venda — {ML(mes)}</STitle>
+      <STitle t={t}>Lançar Venda — {ML(mes)}</STitle>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:14}}>
-          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label t={t} t={t}>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS(t)}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
-          <div><Label t={t} t={t}>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS(t)}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
-          <div style={{gridColumn:"span 2"}}><Label t={t} t={t}>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp(t)}/></div>
+          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label t={t}>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS(t)}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
+          <div><Label t={t}>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS(t)}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
+          <div style={{gridColumn:"span 2"}}><Label t={t}>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp(t)}/></div>
 
           {/* MRR — oculto para Horas Extras */}
           {!isSoImpl&&(
             <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
-              <Label t={t} t={t}>💳 MRR — Mensalidade (R$)</Label>
+              <Label t={t}>💳 MRR — Mensalidade (R$)</Label>
               <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp(t),background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/>
             </div>
           )}
 
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t} t={t}>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp(t),background:"#0c1a2e"}}/></div>
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t} t={t}>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp(t),background:"#0c1a2e"}}/></div>
+          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp(t),background:"#0c1a2e"}}/></div>
+          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp(t),background:"#0c1a2e"}}/></div>
 
           {/* Licença — oculto para sem_licenca e so_impl */}
           {!isSemLic&&(
             <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
-              <Label t={t} t={t}>📦 Licença (R$)</Label>
+              <Label t={t}>📦 Licença (R$)</Label>
               <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp(t),background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
             </div>
           )}
 
           {isManual&&(
             <div style={{background:"#0c2a42",borderRadius:8,padding:"10px 12px",border:"1px solid #1e4060"}}>
-              <Label t={t} t={t}>⚡ Faixa (manual)</Label>
+              <Label t={t}>⚡ Faixa (manual)</Label>
               <select value={form.faixaIdManual} onChange={e=>F("faixaIdManual",e.target.value)} style={{...selS(t),background:"#0c1a2e",color:"#ca8a04",fontWeight:700}}>
                 <option value="">— Selecione —</option>
                 {prodSel?.regras.map(r=><option key={r.id} value={r.id}>{r.label} ({r.pctImpl}%)</option>)}
               </select>
             </div>
           )}
-          <div><Label t={t} t={t}>Observação</Label><input value={form.obs} onChange={e=>F("obs",e.target.value)} placeholder="Opcional" style={inp(t)}/></div>
+          <div><Label t={t}>Observação</Label><input value={form.obs} onChange={e=>F("obs",e.target.value)} placeholder="Opcional" style={inp(t)}/></div>
         </div>
 
         {/* PRÉVIA */}
@@ -1338,7 +1338,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"16px 18px",marginBottom:14}}>
             <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>Prévia da Comissão</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
-              <FaixaBadge t={t} t={t} faixa={prev.faixa}/>
+              <FaixaBadge t={t} faixa={prev.faixa}/>
               {isSoImpl&&<span style={{background:"#f59e0b22",color:"#f59e0b",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,border:"1px solid #f59e0b33"}}>⏱ Apenas Implantação</span>}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:12}}>
@@ -1355,8 +1355,8 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           </div>
         )}
         <div style={{display:"flex",gap:8}}>
-          <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Lançar venda"}</Btn>
-          {editId&&<Btn t={t} t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>Cancelar</Btn>}
+          <Btn t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Lançar venda"}</Btn>
+          {editId&&<Btn t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>Cancelar</Btn>}
         </div>
       </div>
 
@@ -1366,35 +1366,35 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:1000}}>
           <thead><tr style={{background:"#040b14"}}>
-            {role!=="consultor"&&<TH t={t} t={t}>Consultor</TH>}
-            <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH><TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl. Total</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>NR</TH><TH t={t} t={t}>Faixa</TH>
-            <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
-            <TH t={t} t={t} right>1ª ({ML(addMonths(mes,2))})</TH><TH t={t} t={t} right>2ª ({ML(addMonths(mes,3))})</TH><TH t={t} t={t}>Ações</TH>
+            {role!=="consultor"&&<TH t={t}>Consultor</TH>}
+            <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
+            <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+            <TH t={t} right>1ª ({ML(addMonths(mes,2))})</TH><TH t={t} right>2ª ({ML(addMonths(mes,3))})</TH><TH t={t}>Ações</TH>
           </tr></thead>
           <tbody>
-            {vendasMes.length===0?<tr><td colSpan={14}><Empty t={t} t={t}/></td></tr>:vendasMes.map((v,i)=>{
+            {vendasMes.length===0?<tr><td colSpan={14}><Empty t={t}/></td></tr>:vendasMes.map((v,i)=>{
               const c=calcVenda(v,produtos); if(!c)return null;
               const prod=produtos.find(p=>p.id===(v.produtoId||v.produto_id));
               const cId = v.consultorId||v.consultor_id;
               return (
                 <tr key={v.id} style={{borderBottom:i<vendasMes.length-1?"1px solid #080f1a":"none"}}>
-                  {role!=="consultor"&&<TD t={t} t={t} bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
-                  <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
-                  <TD t={t} t={t}>{v.cliente}</TD>
-                  <TD t={t} t={t} bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
-                  <TD t={t} t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
-                  <TD t={t} t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                  <TD t={t} t={t} bold color="#e2e8f0">{R$(c.nr)}</TD>
-                  <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={c.faixa}/></TD>
-                  <TD t={t} t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
-                  <TD t={t} t={t} right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
-                  <TD t={t} t={t} right bold color="#e2e8f0">{R$(c.total)}</TD>
-                  <TD t={t} t={t} right color="#38bdf8" bold>{R$(c.parcela)}</TD>
-                  <TD t={t} t={t} right color="#818cf8" bold>{R$(c.parcela)}</TD>
-                  <TD t={t} t={t}>
+                  {role!=="consultor"&&<TD t={t} bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
+                  <TD t={t} bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
+                  <TD t={t}>{v.cliente}</TD>
+                  <TD t={t} bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
+                  <TD t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
+                  <TD t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                  <TD t={t} bold color="#e2e8f0">{R$(c.nr)}</TD>
+                  <TD t={t}><FaixaBadge t={t} faixa={c.faixa}/></TD>
+                  <TD t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
+                  <TD t={t} right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
+                  <TD t={t} right bold color="#e2e8f0">{R$(c.total)}</TD>
+                  <TD t={t} right color="#38bdf8" bold>{R$(c.parcela)}</TD>
+                  <TD t={t} right color="#818cf8" bold>{R$(c.parcela)}</TD>
+                  <TD t={t}>
                     <div style={{display:"flex",gap:5}}>
-                      <IBtn t={t} t={t} color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
-                      <IBtn t={t} t={t} color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
+                      <IBtn t={t} color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
+                      <IBtn t={t} color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
                     </div>
                   </TD>
                 </tr>
@@ -1411,7 +1411,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 // ══════════════════════════════════════════════════════════════════
 //  EQUIPE
 // ══════════════════════════════════════════════════════════════════
-function EquipePage({users,vendas,produtos,mes,metas}) {
+function EquipePage({users,vendas,produtos,mes,metas,t}) {
   const consultores=users.filter(u=>u.role==="consultor"&&u.active);
   const rows=consultores.map(u=>{
     const r=calcMesConsultor(u.id,mes,vendas,produtos,metas,users);
@@ -1420,12 +1420,12 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
   const totGeral=rows.reduce((s,r)=>s+r.totalCom,0);
   return (
     <div>
-      <STitle t={t} t={t}>Equipe — {ML(mes)}</STitle>
+      <STitle t={t}>Equipe — {ML(mes)}</STitle>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
-        <StatCard t={t} t={t} l="Total Comissões"    v={R$(totGeral)} c="#34d399"/>
-        <StatCard t={t} t={t} l="Consultores"        v={rows.length}  c="#38bdf8"/>
-        <StatCard t={t} t={t} l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
-        <StatCard t={t} t={t} l="🚀 200%+"           v={rows.filter(r=>r.atingMRR>=200).length} c="#f59e0b"/>
+        <StatCard t={t} l="Total Comissões"    v={R$(totGeral)} c="#34d399"/>
+        <StatCard t={t} l="Consultores"        v={rows.length}  c="#38bdf8"/>
+        <StatCard t={t} l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
+        <StatCard t={t} l="🚀 200%+"           v={rows.filter(r=>r.atingMRR>=200).length} c="#f59e0b"/>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
         {rows.map((r,idx)=>(
@@ -1453,8 +1453,8 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
               <div style={{height:6,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingNR,100)}%`,height:"100%",background:r.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99}}/></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              <MiniCard t={t} t={t} l="Com. MRR" v={R$(r.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} c={r.overInfo.color}/>
-              <MiniCard t={t} t={t} l="Com. NR"  v={R$(r.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))} c="#a78bfa"/>
+              <MiniCard t={t} l="Com. MRR" v={R$(r.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} c={r.overInfo.color}/>
+              <MiniCard t={t} l="Com. NR"  v={R$(r.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))} c="#a78bfa"/>
             </div>
           </div>
         ))}
@@ -1466,7 +1466,7 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
 // ══════════════════════════════════════════════════════════════════
 //  CALENDÁRIO — 12 meses do ano + seletor de ano
 // ══════════════════════════════════════════════════════════════════
-function CalPage({me,users,vendas,produtos}) {
+function CalPage({me,users,vendas,produtos,t}) {
   const role=me.role;
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
@@ -1480,7 +1480,7 @@ function CalPage({me,users,vendas,produtos}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <STitle t={t} t={t} style={{margin:0}}>Calendário de Recebimentos</STitle>
+        <STitle t={t} style={{margin:0}}>Calendário de Recebimentos</STitle>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
           <span style={{fontSize:11,color:"#1e4060",fontWeight:700}}>Total {ano}: <span style={{color:"#34d399"}}>{R$(totalAno)}</span></span>
           <div style={{display:"flex",gap:4,marginLeft:8,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
@@ -1529,7 +1529,7 @@ function CalPage({me,users,vendas,produtos}) {
 // ══════════════════════════════════════════════════════════════════
 //  HISTÓRICO
 // ══════════════════════════════════════════════════════════════════
-function HistPage({me,users,vendas,produtos,metas}) {
+function HistPage({me,users,vendas,produtos,metas,t}) {
   const [filtro,setFiltro]=useState(me.role==="consultor"?String(me.id):"todos");
   const consultores=me.role==="consultor"?[me]:users.filter(u=>u.role==="consultor"&&u.active);
   const porMes=MESES_LIST.map(mes=>{
@@ -1549,10 +1549,10 @@ function HistPage({me,users,vendas,produtos,metas}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <STitle t={t} t={t}>Histórico</STitle>
+        <STitle t={t}>Histórico</STitle>
         {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:200}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
       </div>
-      {porMes.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} t={t}/></div>}
+      {porMes.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t}/></div>}
       {porMes.map(({mes,rows,total})=>(
         <div key={mes} style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
           <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:"#040b14"}}>
@@ -1565,29 +1565,29 @@ function HistPage({me,users,vendas,produtos,metas}) {
           <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:900}}>
             <thead><tr style={{background:"#030810"}}>
-              {filtro==="todos"&&<TH t={t} t={t}>Consultor</TH>}
-              <TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH><TH t={t} t={t}>MRR</TH><TH t={t} t={t}>Impl.</TH><TH t={t} t={t}>Licença</TH><TH t={t} t={t}>Faixa</TH>
-              <TH t={t} t={t} right>Over MRR</TH><TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
-              <TH t={t} t={t} right>1ª Parcela</TH><TH t={t} t={t} right>2ª Parcela</TH>
+              {filtro==="todos"&&<TH t={t}>Consultor</TH>}
+              <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl.</TH><TH t={t}>Licença</TH><TH t={t}>Faixa</TH>
+              <TH t={t} right>Over MRR</TH><TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+              <TH t={t} right>1ª Parcela</TH><TH t={t} right>2ª Parcela</TH>
             </tr></thead>
             <tbody>
               {rows.map((r,i)=>{
                 const prod=produtos.find(p=>p.id===r.produtoId);
                 return (
                   <tr key={(r.id||i)+"-"+mes} style={{borderBottom:i<rows.length-1?"1px solid #080f1a":"none"}}>
-                    {filtro==="todos"&&<TD t={t} t={t} bold color="#e2e8f0">{r.nomeConsultor}</TD>}
-                    <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
-                    <TD t={t} t={t}>{r.cliente}</TD>
-                    <TD t={t} t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
-                    <TD t={t} t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
-                    <TD t={t} t={t} color={r.licenca>0?"#a78bfa":"#1e4060"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
-                    <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={r.faixa}/></TD>
-                    <TD t={t} t={t} right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
-                    <TD t={t} t={t} right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
-                    <TD t={t} t={t} right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
-                    <TD t={t} t={t} right bold color="#e2e8f0">{R$(r.total)}</TD>
-                    <TD t={t} t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela1)}</div></TD>
-                    <TD t={t} t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela2)}</div></TD>
+                    {filtro==="todos"&&<TD t={t} bold color="#e2e8f0">{r.nomeConsultor}</TD>}
+                    <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                    <TD t={t}>{r.cliente}</TD>
+                    <TD t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
+                    <TD t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
+                    <TD t={t} color={r.licenca>0?"#a78bfa":"#1e4060"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
+                    <TD t={t}><FaixaBadge t={t} faixa={r.faixa}/></TD>
+                    <TD t={t} right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
+                    <TD t={t} right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
+                    <TD t={t} right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
+                    <TD t={t} right bold color="#e2e8f0">{R$(r.total)}</TD>
+                    <TD t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela1)}</div></TD>
+                    <TD t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -1603,7 +1603,7 @@ function HistPage({me,users,vendas,produtos,metas}) {
 // ══════════════════════════════════════════════════════════════════
 //  PARÂMETROS
 // ══════════════════════════════════════════════════════════════════
-function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
+function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
   const [tab,setTab]=useState("produtos");
   const [selId,setSelId]=useState(produtos[0]?.id||"");
   const prod=produtos.find(p=>p.id===selId);
@@ -1640,7 +1640,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
     else notify("Metas salvas!");
   };
 
-  if(!draft) return <STitle t={t} t={t}>Nenhum produto.</STitle>;
+  if(!draft) return <STitle t={t}>Nenhum produto.</STitle>;
 
   const simCenarios=[
     {mrr:2000,h:40,vh:170,lic:0},{mrr:2500,h:60,vh:185,lic:0},
@@ -1649,7 +1649,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
 
   return (
     <div>
-      <STitle t={t} t={t}>Parâmetros</STitle>
+      <STitle t={t}>Parâmetros</STitle>
       <div style={{display:"flex",gap:8,marginBottom:20}}>
         {[["produtos","🎛 Comissões por Produto"],["metas","🎯 Metas Mensais"]].map(([id,label])=>(
           <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 18px",borderRadius:8,border:`1px solid ${tab===id?"#1e4060":"#0c1f35"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:tab===id?"#0c2a42":"#060d18",color:tab===id?"#38bdf8":"#2a5a80"}}>{label}</button>
@@ -1683,19 +1683,19 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                     <span style={{fontWeight:700,color,fontSize:14}}>{CARGO_LABEL[cargo]}</span>
                   </div>
                   <div style={{marginBottom:12}}>
-                    <Label t={t} t={t}>Meta MRR (R$)</Label>
+                    <Label t={t}>Meta MRR (R$)</Label>
                     <input type="number" value={m.mrr||""} onChange={e=>updMeta(cargo,"mrr",e.target.value)} placeholder="Ex: 15000" style={{...inp(t),color:"#38bdf8",fontWeight:700,fontSize:16,textAlign:"right"}}/>
                     <div style={{fontSize:10,color:"#1e4060",marginTop:4}}>⚡ 150%: {R$((m.mrr||0)*1.5)} · 🚀 200%: {R$((m.mrr||0)*2)}</div>
                   </div>
                   <div>
-                    <Label t={t} t={t}>Meta NR (R$)</Label>
+                    <Label t={t}>Meta NR (R$)</Label>
                     <input type="number" value={m.nr||""} onChange={e=>updMeta(cargo,"nr",e.target.value)} placeholder="Ex: 22000" style={{...inp(t),color:"#a78bfa",fontWeight:700,fontSize:16,textAlign:"right"}}/>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div style={{marginTop:14}}><Btn t={t} t={t} onClick={saveMetasMes} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Metas"}</Btn></div>
+          <div style={{marginTop:14}}><Btn t={t} onClick={saveMetasMes} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Metas"}</Btn></div>
         </div>
       )}
 
@@ -1709,7 +1709,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
               <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:16}}>Configurações</div>
               <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #0c2a42"}}>
                 <div style={{fontSize:12,color:"#38bdf8",fontWeight:700,marginBottom:10}}>💳 MRR — Mensalidade</div>
-                <div><Label t={t} t={t}>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp(t),color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
+                <div><Label t={t}>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp(t),color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
               </div>
               <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #1e4060"}}>
                 <div style={{fontSize:12,color:"#ca8a04",fontWeight:700,marginBottom:10}}>⚡ Modo de Seleção de Faixa</div>
@@ -1721,16 +1721,16 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                 <div key={r.id} style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:10,border:`1px solid ${i===0?"#ca8a0433":"#0c1f35"}`}}>
                   <div style={{fontSize:12,fontWeight:700,color:i===0?"#ca8a04":"#64748b",marginBottom:10}}>{i===0?"⭐":""} {r.label}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-                    <div><Label t={t} t={t}>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp(t)}/></div>
-                    <div><Label t={t} t={t}>Mín. R$/h</Label><input type="number" value={r.minValorH} onChange={e=>updRegra(i,"minValorH",e.target.value)} style={inp(t)}/></div>
-                    <div><Label t={t} t={t}>% NR</Label><input type="number" value={r.pctImpl} onChange={e=>updRegra(i,"pctImpl",e.target.value)} style={{...inp(t),color:"#a78bfa",fontWeight:800,fontSize:16}}/></div>
+                    <div><Label t={t}>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp(t)}/></div>
+                    <div><Label t={t}>Mín. R$/h</Label><input type="number" value={r.minValorH} onChange={e=>updRegra(i,"minValorH",e.target.value)} style={inp(t)}/></div>
+                    <div><Label t={t}>% NR</Label><input type="number" value={r.pctImpl} onChange={e=>updRegra(i,"pctImpl",e.target.value)} style={{...inp(t),color:"#a78bfa",fontWeight:800,fontSize:16}}/></div>
                   </div>
                 </div>
               ))}
               <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c1f35"}}>
                 💡 <b style={{color:"#38bdf8"}}>MRR</b> = mensalidade × {draft.pctMRR}% · <b style={{color:"#a78bfa"}}>NR</b> = (impl+lic) × faixa% · Pago em 2× (+2 e +3 meses)
               </div>
-              <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
+              <Btn t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
             </div>
             <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
               <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:14}}>Simulador — {draft.nome}</div>
@@ -1741,7 +1741,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
                   <div key={i} style={{background:"#040b14",borderRadius:8,padding:"12px 14px",marginBottom:8,border:`1px solid ${c.isPremium?"#ca8a0422":"#0c1f35"}`}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                       <span style={{fontSize:12,color:"#7fa8c0",fontWeight:600}}>MRR {R$(s.mrr)} · {s.h}h×{R$(s.vh)}{s.lic>0?` · Lic ${R$(s.lic)}`:""}</span>
-                      <FaixaBadge t={t} t={t} faixa={c.faixa}/>
+                      <FaixaBadge t={t} faixa={c.faixa}/>
                     </div>
                     <div style={{display:"flex",gap:14,fontSize:12,flexWrap:"wrap"}}>
                       <span style={{color:"#1e4060"}}>MRR: <b style={{color:"#38bdf8"}}>{R$(c.comMRR)}</b></span>
@@ -1762,7 +1762,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas}) {
 // ══════════════════════════════════════════════════════════════════
 //  PRODUTOS
 // ══════════════════════════════════════════════════════════════════
-function ProdPage({produtos,setProdutos,notify}) {
+function ProdPage({produtos,setProdutos,notify,t}) {
   const [showNew,setShowNew]=useState(false); const [nome,setNome]=useState("");
   const add=async()=>{
     if(!nome.trim()) return notify("Informe o nome.","err");
@@ -1774,12 +1774,12 @@ function ProdPage({produtos,setProdutos,notify}) {
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <STitle t={t} t={t}>Produtos</STitle>
-        <Btn t={t} t={t} onClick={()=>setShowNew(s=>!s)}><Ic n="plus" s={14}/>Novo Produto</Btn>
+        <STitle t={t}>Produtos</STitle>
+        <Btn t={t} onClick={()=>setShowNew(s=>!s)}><Ic n="plus" s={14}/>Novo Produto</Btn>
       </div>
       {showNew&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20,marginBottom:14,display:"flex",gap:12,alignItems:"flex-end"}}>
-        <div style={{flex:1}}><Label t={t} t={t}>Nome do Produto</Label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Mago RH" style={inp(t)} onKeyDown={e=>e.key==="Enter"&&add()}/></div>
-        <Btn t={t} t={t} onClick={add}>Adicionar</Btn><Btn t={t} t={t} secondary onClick={()=>setShowNew(false)}>Cancelar</Btn>
+        <div style={{flex:1}}><Label t={t}>Nome do Produto</Label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Mago RH" style={inp(t)} onKeyDown={e=>e.key==="Enter"&&add()}/></div>
+        <Btn t={t} onClick={add}>Adicionar</Btn><Btn t={t} secondary onClick={()=>setShowNew(false)}>Cancelar</Btn>
       </div>}
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         {produtos.map(p=>{
@@ -1798,7 +1798,7 @@ function ProdPage({produtos,setProdutos,notify}) {
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <span style={{background:p.ativo?"#14532d22":"#450a0a22",color:p.ativo?"#4ade80":"#f87171",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>{p.ativo?"Ativo":"Inativo"}</span>
-              <IBtn t={t} t={t} color={p.ativo?"#f87171":"#4ade80"} onClick={()=>setProdutos(prev=>prev.map(x=>x.id===p.id?{...x,ativo:!x.ativo}:x))}><Ic n={p.ativo?"lock":"check"} s={13}/></IBtn>
+              <IBtn t={t} color={p.ativo?"#f87171":"#4ade80"} onClick={()=>setProdutos(prev=>prev.map(x=>x.id===p.id?{...x,ativo:!x.ativo}:x))}><Ic n={p.ativo?"lock":"check"} s={13}/></IBtn>
             </div>
           </div>
           );
@@ -1919,7 +1919,7 @@ function PeriodBar({page, mes, setMes, t}) {
 // ══════════════════════════════════════════════════════════════════
 //  RELATÓRIOS — Anual / Semestral / Trimestral / Mensal
 // ══════════════════════════════════════════════════════════════════
-function RelatorioPage({me,users,vendas,produtos,metas}) {
+function RelatorioPage({me,users,vendas,produtos,metas,t}) {
   const now = new Date();
   const [tipo,  setTipo]  = useState("trimestral");
   const [ano,   setAno]   = useState(now.getFullYear());
@@ -1994,7 +1994,7 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
 
   return (
     <div>
-      <STitle t={t} t={t}>Relatórios — {labelPeriodo}</STitle>
+      <STitle t={t}>Relatórios — {labelPeriodo}</STitle>
 
       {/* SELETOR DE TIPO */}
       <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
@@ -2046,11 +2046,11 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
 
       {/* TOTAIS GERAIS */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,marginBottom:22}}>
-        <StatCard t={t} t={t} l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
-        <StatCard t={t} t={t} l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
-        <StatCard t={t} t={t} l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
-        <StatCard t={t} t={t} l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
-        <StatCard t={t} t={t} l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
+        <StatCard t={t} l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
+        <StatCard t={t} l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
+        <StatCard t={t} l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
+        <StatCard t={t} l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
+        <StatCard t={t} l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
       </div>
 
       {/* TABELA POR CONSULTOR */}
@@ -2061,27 +2061,27 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
           <thead><tr style={{background:"#030810"}}>
-            <TH t={t} t={t}>Consultor</TH><TH t={t} t={t}>Cargo</TH><TH t={t} t={t}>Contratos</TH>
-            <TH t={t} t={t} right>MRR</TH><TH t={t} t={t} right>Meta MRR</TH><TH t={t} t={t} right>Ating. MRR</TH>
-            <TH t={t} t={t} right>NR</TH><TH t={t} t={t} right>Meta NR</TH><TH t={t} t={t} right>Ating. NR</TH>
-            <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
+            <TH t={t}>Consultor</TH><TH t={t}>Cargo</TH><TH t={t}>Contratos</TH>
+            <TH t={t} right>MRR</TH><TH t={t} right>Meta MRR</TH><TH t={t} right>Ating. MRR</TH>
+            <TH t={t} right>NR</TH><TH t={t} right>Meta NR</TH><TH t={t} right>Ating. NR</TH>
+            <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
           </tr></thead>
           <tbody>
-            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty t={t} t={t} msg="Nenhum dado no período."/></td></tr>:
+            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty t={t} msg="Nenhum dado no período."/></td></tr>:
             dadosPeriodo.map((d,i)=>(
               <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?"1px solid #080f1a":"none"}}>
-                <TD t={t} t={t} bold color="#e2e8f0">{d.name}</TD>
-                <TD t={t} t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
-                <TD t={t} t={t}>{d.nVendas}</TD>
-                <TD t={t} t={t} right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
-                <TD t={t} t={t} right color="#1e4060">{R$(d.metaMRR)}</TD>
-                <TD t={t} t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
-                <TD t={t} t={t} right bold color="#a78bfa">{R$(d.totalNR)}</TD>
-                <TD t={t} t={t} right color="#1e4060">{R$(d.metaNR)}</TD>
-                <TD t={t} t={t} right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
-                <TD t={t} t={t} right bold color="#34d399">{R$(d.comMRR)}</TD>
-                <TD t={t} t={t} right bold color="#a78bfa">{R$(d.comNR)}</TD>
-                <TD t={t} t={t} right bold color="#f59e0b">{R$(d.totalCom)}</TD>
+                <TD t={t} bold color="#e2e8f0">{d.name}</TD>
+                <TD t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
+                <TD t={t}>{d.nVendas}</TD>
+                <TD t={t} right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
+                <TD t={t} right color="#1e4060">{R$(d.metaMRR)}</TD>
+                <TD t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
+                <TD t={t} right bold color="#a78bfa">{R$(d.totalNR)}</TD>
+                <TD t={t} right color="#1e4060">{R$(d.metaNR)}</TD>
+                <TD t={t} right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
+                <TD t={t} right bold color="#34d399">{R$(d.comMRR)}</TD>
+                <TD t={t} right bold color="#a78bfa">{R$(d.comNR)}</TD>
+                <TD t={t} right bold color="#f59e0b">{R$(d.totalCom)}</TD>
               </tr>
             ))}
           </tbody>
@@ -2103,27 +2103,27 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
           <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
             <thead><tr style={{background:"#030810"}}>
-              <TH t={t} t={t}>Mês</TH><TH t={t} t={t}>Produto</TH><TH t={t} t={t}>Cliente</TH>
-              <TH t={t} t={t} right>MRR</TH><TH t={t} t={t} right>NR</TH><TH t={t} t={t}>Faixa</TH>
-              <TH t={t} t={t} right>Com. MRR</TH><TH t={t} t={t} right>Com. NR</TH><TH t={t} t={t} right>Total</TH>
-              <TH t={t} t={t} right>1ª Parc.</TH><TH t={t} t={t} right>2ª Parc.</TH>
+              <TH t={t}>Mês</TH><TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
+              <TH t={t} right>MRR</TH><TH t={t} right>NR</TH><TH t={t}>Faixa</TH>
+              <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+              <TH t={t} right>1ª Parc.</TH><TH t={t} right>2ª Parc.</TH>
             </tr></thead>
             <tbody>
               {d.vendasCalc.map((v,i)=>{
                 const prod=produtos.find(p=>p.id===v.produtoId);
                 return (
                   <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                    <TD t={t} t={t} color="#1e4060">{ML(v.mes)}</TD>
-                    <TD t={t} t={t} bold color="#e2e8f0">{prod?.nome}</TD>
-                    <TD t={t} t={t}>{v.cliente}</TD>
-                    <TD t={t} t={t} right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
-                    <TD t={t} t={t} right color="#a78bfa">{R$(v.nr)}</TD>
-                    <TD t={t} t={t}><FaixaBadge t={t} t={t} faixa={v.faixa}/></TD>
-                    <TD t={t} t={t} right bold color="#34d399">{R$(v.comMRR)}</TD>
-                    <TD t={t} t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
-                    <TD t={t} t={t} right bold color="#f59e0b">{R$(v.total)}</TD>
-                    <TD t={t} t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                    <TD t={t} t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                    <TD t={t} color="#1e4060">{ML(v.mes)}</TD>
+                    <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
+                    <TD t={t}>{v.cliente}</TD>
+                    <TD t={t} right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
+                    <TD t={t} right color="#a78bfa">{R$(v.nr)}</TD>
+                    <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
+                    <TD t={t} right bold color="#34d399">{R$(v.comMRR)}</TD>
+                    <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                    <TD t={t} right bold color="#f59e0b">{R$(v.total)}</TD>
+                    <TD t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
+                    <TD t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -2139,7 +2139,7 @@ function RelatorioPage({me,users,vendas,produtos,metas}) {
 // ══════════════════════════════════════════════════════════════════
 //  USUÁRIOS (via Supabase Auth)
 // ══════════════════════════════════════════════════════════════════
-function UsersPage({users,createUserProfile,updateProfile,notify,me}) {
+function UsersPage({users,createUserProfile,updateProfile,notify,me,t}) {
   const EMPTY={name:"",email:"",password:"",role:"consultor",cargo:"junior"};
   const [form,setForm]=useState(EMPTY); const [editId,setEditId]=useState(null); const [saving,setSaving]=useState(false);
   const F=(k,v)=>setForm(p=>({...p,[k]:v}));
@@ -2163,38 +2163,38 @@ function UsersPage({users,createUserProfile,updateProfile,notify,me}) {
   const RC={consultor:"#38bdf8",gestor:"#a78bfa",parametros:"#f59e0b"};
   return (
     <div>
-      <STitle t={t} t={t}>Usuários</STitle>
+      <STitle t={t}>Usuários</STitle>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:14}}>{editId?"✏ Editando":"➕ Novo usuário"}</div>
         <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c2a42"}}>
           <Ic n="db" s={12}/> Usuários são criados via <b style={{color:"#38bdf8"}}>Supabase Auth</b>. Um e-mail de confirmação será enviado automaticamente.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,alignItems:"end"}}>
-          <div><Label t={t} t={t}>Nome</Label><input value={form.name} onChange={e=>F("name",e.target.value)} placeholder="Nome completo" style={inp(t)}/></div>
-          {!editId&&<div><Label t={t} t={t}>E-mail</Label><input value={form.email} onChange={e=>F("email",e.target.value)} placeholder="email@empresa.com" style={inp(t)}/></div>}
-          {!editId&&<div><Label t={t} t={t}>Senha inicial</Label><input type="password" value={form.password} onChange={e=>F("password",e.target.value)} placeholder="mín. 6 caracteres" style={inp(t)}/></div>}
-          <div><Label t={t} t={t}>Perfil</Label><select value={form.role} onChange={e=>F("role",e.target.value)} style={selS(t)}><option value="consultor">Consultor</option><option value="gestor">Gestor</option><option value="parametros">Parâmetros</option></select></div>
-          {form.role==="consultor"&&<div><Label t={t} t={t}>Cargo</Label><select value={form.cargo} onChange={e=>F("cargo",e.target.value)} style={selS(t)}><option value="junior">Júnior</option><option value="pleno">Pleno</option><option value="senior">Sênior</option></select></div>}
+          <div><Label t={t}>Nome</Label><input value={form.name} onChange={e=>F("name",e.target.value)} placeholder="Nome completo" style={inp(t)}/></div>
+          {!editId&&<div><Label t={t}>E-mail</Label><input value={form.email} onChange={e=>F("email",e.target.value)} placeholder="email@empresa.com" style={inp(t)}/></div>}
+          {!editId&&<div><Label t={t}>Senha inicial</Label><input type="password" value={form.password} onChange={e=>F("password",e.target.value)} placeholder="mín. 6 caracteres" style={inp(t)}/></div>}
+          <div><Label t={t}>Perfil</Label><select value={form.role} onChange={e=>F("role",e.target.value)} style={selS(t)}><option value="consultor">Consultor</option><option value="gestor">Gestor</option><option value="parametros">Parâmetros</option></select></div>
+          {form.role==="consultor"&&<div><Label t={t}>Cargo</Label><select value={form.cargo} onChange={e=>F("cargo",e.target.value)} style={selS(t)}><option value="junior">Júnior</option><option value="pleno">Pleno</option><option value="senior">Sênior</option></select></div>}
           <div style={{display:"flex",gap:8}}>
-            <Btn t={t} t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Criar"}</Btn>
-            {editId&&<Btn t={t} t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>✕</Btn>}
+            <Btn t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:editId?"Salvar":"Criar"}</Btn>
+            {editId&&<Btn t={t} secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>✕</Btn>}
           </div>
         </div>
       </div>
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{background:"#040b14"}}><TH t={t} t={t}>Nome</TH><TH t={t} t={t}>Perfil</TH><TH t={t} t={t}>Cargo</TH><TH t={t} t={t}>Status</TH><TH t={t} t={t}>Ações</TH></tr></thead>
+          <thead><tr style={{background:"#040b14"}}><TH t={t}>Nome</TH><TH t={t}>Perfil</TH><TH t={t}>Cargo</TH><TH t={t}>Status</TH><TH t={t}>Ações</TH></tr></thead>
           <tbody>
             {users.map((u,i)=>(
               <tr key={u.id} style={{borderBottom:i<users.length-1?"1px solid #080f1a":"none",opacity:u.active?1:.45}}>
-                <TD t={t} t={t} bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#0c2a42",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
-                <TD t={t} t={t}><span style={{background:RC[u.role]+"22",color:RC[u.role],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{ROLE_LABEL[u.role]||u.role}</span></TD>
-                <TD t={t} t={t}>{u.cargo?<span style={{background:CARGO_COLOR[u.cargo]+"22",color:CARGO_COLOR[u.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[u.cargo]}</span>:"—"}</TD>
-                <TD t={t} t={t}><span style={{background:u.active?"#14532d22":"#450a0a22",color:u.active?"#4ade80":"#f87171",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{u.active?"Ativo":"Inativo"}</span></TD>
-                <TD t={t} t={t}>
+                <TD t={t} bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#0c2a42",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
+                <TD t={t}><span style={{background:RC[u.role]+"22",color:RC[u.role],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{ROLE_LABEL[u.role]||u.role}</span></TD>
+                <TD t={t}>{u.cargo?<span style={{background:CARGO_COLOR[u.cargo]+"22",color:CARGO_COLOR[u.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[u.cargo]}</span>:"—"}</TD>
+                <TD t={t}><span style={{background:u.active?"#14532d22":"#450a0a22",color:u.active?"#4ade80":"#f87171",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{u.active?"Ativo":"Inativo"}</span></TD>
+                <TD t={t}>
                   <div style={{display:"flex",gap:5}}>
-                    <IBtn t={t} t={t} color="#38bdf8" onClick={()=>{setEditId(u.id);setForm({name:u.name,email:u.email||"",password:"",role:u.role,cargo:u.cargo||"junior"});}}><Ic n="edit" s={13}/></IBtn>
-                    {u.id!==me.id&&<IBtn t={t} t={t} color={u.active?"#f87171":"#4ade80"} onClick={async()=>{const {error}=await updateProfile(u.id,{active:!u.active});if(error)notify("Erro","err");}}><Ic n={u.active?"lock":"check"} s={13}/></IBtn>}
+                    <IBtn t={t} color="#38bdf8" onClick={()=>{setEditId(u.id);setForm({name:u.name,email:u.email||"",password:"",role:u.role,cargo:u.cargo||"junior"});}}><Ic n="edit" s={13}/></IBtn>
+                    {u.id!==me.id&&<IBtn t={t} color={u.active?"#f87171":"#4ade80"} onClick={async()=>{const {error}=await updateProfile(u.id,{active:!u.active});if(error)notify("Erro","err");}}><Ic n={u.active?"lock":"check"} s={13}/></IBtn>}
                   </div>
                 </TD>
               </tr>
