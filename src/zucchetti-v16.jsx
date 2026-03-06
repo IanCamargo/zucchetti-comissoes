@@ -25,8 +25,8 @@ const THEMES = {
     border:"#243448", borderAccent:"#2e4a6a",
     // Textos — contraste alto garantido
     text:"#f0f6ff",          // branco levemente azulado — texto principal
-    textSub:"#94a3b8",       // cinza médio — texto secundário legível
-    textMuted:t.textMuted,     // cinza azulado — labels, subtítulos (era muito escuro antes)
+    textSub:"#b0c4d8",       // cinza claro — texto secundário legível
+    textMuted:"#7a9bbf",     // cinza azulado — labels, subtítulos
     // Accent colors
     accent:"#3b82f6", accentHover:"#60a5fa", accentGlow:"#3b82f625",
     green:"#10b981", greenGlow:"#10b98125",
@@ -48,7 +48,7 @@ const THEMES = {
     // Textos — alto contraste no fundo branco
     text:"#0f172a",          // quase preto — texto principal
     textSub:"#334155",       // cinza escuro — texto secundário legível
-    textMuted:t.textSub,     // cinza médio — labels (era #94a3b8, muito claro)
+    textMuted:"#64748b",     // cinza médio — labels (era #94a3b8, muito claro)
     // Accent colors mais escuros para contraste sobre fundo branco
     accent:"#1d4ed8", accentHover:"#1e40af", accentGlow:"#1d4ed815",
     green:"#047857", greenGlow:"#04785715",
