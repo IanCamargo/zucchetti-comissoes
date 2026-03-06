@@ -39,15 +39,17 @@ const MESES_LIST = getMesesList();
 //  DEFAULTS
 // ══════════════════════════════════════════════════════════════════
 const PRODUTOS_DEFAULT = [
-  { id:"mago_cloud", nome:"Mago Cloud", ativo:true, selecao_faixa:"auto", pct_mrr:70,
+  { id:"mago_cloud",   nome:"Mago Cloud",   ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:true,  so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"mago_web",   nome:"Mago Web",   ativo:true, selecao_faixa:"auto", pct_mrr:70,
+  { id:"mago_web",     nome:"Mago Web",     ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:true,  so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"mago4",      nome:"Mago 4",     ativo:true, selecao_faixa:"auto", pct_mrr:70,
+  { id:"mago4",        nome:"Mago 4",       ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"debx",       nome:"Debx",       ativo:true, selecao_faixa:"auto", pct_mrr:70,
+  { id:"debx",         nome:"Debx",         ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"softa",      nome:"Softa",      ativo:true, selecao_faixa:"auto", pct_mrr:70,
+  { id:"softa",        nome:"Softa",        ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
+    regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
+  { id:"horas_extras", nome:"Horas Extras", ativo:true, selecao_faixa:"auto", pct_mrr:0,  sem_licenca:true,  so_impl:true,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
 ];
 
@@ -70,8 +72,13 @@ function getOverInfo(atingPct) {
 }
 
 function normProd(p) {
-  // Normaliza campo do banco (selecao_faixa) para uso interno (selecaoFaixa)
-  return { ...p, selecaoFaixa: p.selecao_faixa || p.selecaoFaixa || "auto", pctMRR: p.pct_mrr ?? p.pctMRR ?? 70 };
+  return {
+    ...p,
+    selecaoFaixa: p.selecao_faixa || p.selecaoFaixa || "auto",
+    pctMRR:       p.pct_mrr  ?? p.pctMRR  ?? 70,
+    semLicenca:   p.sem_licenca ?? p.semLicenca ?? false,
+    soImpl:       p.so_impl  ?? p.soImpl   ?? false,
+  };
 }
 
 function getFaixa(produto, horasImpl, valorHoraImpl, faixaIdManual) {
@@ -91,15 +98,15 @@ function calcVenda(venda, produtos, pctMRRover) {
 
   const horasImpl     = venda.horasImpl     || venda.horas_impl     || 0;
   const valorHoraImpl = venda.valorHoraImpl || venda.valor_hora_impl || 0;
-  const mrr           = venda.mrr           || 0;
-  const licenca       = venda.licenca       || 0;
+  const mrr           = p.soImpl ? 0 : (venda.mrr || 0);
+  const licenca       = (p.semLicenca || p.soImpl) ? 0 : (venda.licenca || 0);
   const faixaIdManual = venda.faixaIdManual || venda.faixa_id_manual || null;
 
   const faixa     = getFaixa(p, horasImpl, valorHoraImpl, faixaIdManual);
   const implTotal = horasImpl * valorHoraImpl;
   const nr        = implTotal + licenca;
 
-  const pctMRR  = pctMRRover ?? p.pctMRR;
+  const pctMRR  = p.soImpl ? 0 : (pctMRRover ?? p.pctMRR);
   const comMRR  = mrr       * (pctMRR       / 100);
   const comImpl = implTotal * (faixa.pctImpl / 100);
   const comLic  = licenca   * (faixa.pctImpl / 100);
@@ -119,6 +126,7 @@ function calcVenda(venda, produtos, pctMRRover) {
     pctMRR, mesParcela1, mesParcela2, parcelas,
     isPremium: faixa.id === "r1",
     horasImpl, valorHoraImpl,
+    soImpl: p.soImpl, semLicenca: p.semLicenca,
   };
 }
 
@@ -552,14 +560,15 @@ export default function App() {
   const role = me.role;
 
   const nav=[
-    {id:"dash",   label:"Dashboard",  icon:"dash",   roles:["consultor","gestor","parametros"]},
-    {id:"vendas", label:"Vendas",     icon:"sales",  roles:["consultor","gestor","parametros"]},
-    {id:"equipe", label:"Equipe",     icon:"team",   roles:["gestor","parametros"]},
-    {id:"cal",    label:"Calendário", icon:"cal",    roles:["consultor","gestor","parametros"]},
-    {id:"hist",   label:"Histórico",  icon:"hist",   roles:["consultor","gestor","parametros"]},
-    {id:"params", label:"Parâmetros", icon:"params", roles:["parametros"]},
-    {id:"prod",   label:"Produtos",   icon:"prod",   roles:["parametros"]},
-    {id:"users",  label:"Usuários",   icon:"users",  roles:["gestor","parametros"]},
+    {id:"dash",      label:"Dashboard",  icon:"dash",    roles:["consultor","gestor","parametros"]},
+    {id:"vendas",    label:"Vendas",     icon:"sales",   roles:["consultor","gestor","parametros"]},
+    {id:"equipe",    label:"Equipe",     icon:"team",    roles:["gestor","parametros"]},
+    {id:"cal",       label:"Calendário", icon:"cal",     roles:["consultor","gestor","parametros"]},
+    {id:"hist",      label:"Histórico",  icon:"hist",    roles:["consultor","gestor","parametros"]},
+    {id:"relatorio", label:"Relatórios", icon:"dl",      roles:["gestor","parametros"]},
+    {id:"params",    label:"Parâmetros", icon:"params",  roles:["parametros"]},
+    {id:"prod",      label:"Produtos",   icon:"prod",    roles:["parametros"]},
+    {id:"users",     label:"Usuários",   icon:"users",   roles:["gestor","parametros"]},
   ].filter(n=>n.roles.includes(role));
 
   const logout = async () => {
@@ -610,25 +619,19 @@ export default function App() {
           <Ic n="check" s={14}/>{toast.msg}
         </div>}
 
-        {/* TOPBAR com seletor de mês */}
-        <div style={{padding:"18px 32px 14px",borderBottom:"1px solid #0c1f35",background:"#060d18",position:"sticky",top:0,zIndex:5,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-          <span style={{fontSize:10,color:"#1a3a54",fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginRight:4}}>Competência</span>
-          {MESES_LIST.slice(0,10).map(m=>(
-            <button key={m} onClick={()=>setMes(m)} style={{padding:"5px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:mes===m?"#0c2a42":"transparent",color:mes===m?"#38bdf8":"#1e4060",transition:"all .15s"}}>
-              {ML(m)}
-            </button>
-          ))}
-        </div>
+        {/* TOPBAR com seletor de período inteligente */}
+        <PeriodBar page={page} mes={mes} setMes={setMes} anoAtual={mes.split("-")[0]} />
 
         <div style={{padding:"28px 32px 48px"}}>
-          {page==="dash"   && <DashPage   me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="vendas" && <VendasPage me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas}/>}
-          {page==="equipe" && <EquipePage users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="cal"    && <CalPage    me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
-          {page==="hist"   && <HistPage   me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas}/>}
-          {page==="params" && <ParamsPage produtos={db.produtos} setProdutos={db.setProdutos} me={me} notify={notify} metas={db.metas} saveMetas={db.saveMetas}/>}
-          {page==="prod"   && <ProdPage   produtos={db.produtos} setProdutos={db.setProdutos} notify={notify}/>}
-          {page==="users"  && <UsersPage  users={db.users} createUserProfile={db.createUserProfile} updateProfile={db.updateProfile} notify={notify} me={me}/>}
+          {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
+          {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas}/>}
+          {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
+          {page==="cal"       && <CalPage       me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas}/>}
+          {page==="hist"      && <HistPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas}/>}
+          {page==="relatorio" && <RelatorioPage me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas}/>}
+          {page==="params"    && <ParamsPage    produtos={db.produtos} setProdutos={db.setProdutos} me={me} notify={notify} metas={db.metas} saveMetas={db.saveMetas}/>}
+          {page==="prod"      && <ProdPage      produtos={db.produtos} setProdutos={db.setProdutos} notify={notify}/>}
+          {page==="users"     && <UsersPage     users={db.users} createUserProfile={db.createUserProfile} updateProfile={db.updateProfile} notify={notify} me={me}/>}
         </div>
       </main>
     </div>
@@ -936,28 +939,36 @@ function DashPage({me,users,vendas,produtos,mes,metas}) {
 // ══════════════════════════════════════════════════════════════════
 function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,mes,notify,metas}) {
   const role=me.role;
-  const consultores=role==="consultor"?[me]:users.filter(u=>u.role==="consultor"&&u.active);
+  // Jennifer (parametros) também pode lançar vendas
+  const podeVender = role==="consultor" || role==="parametros" || role==="gestor";
+  const consultores = role==="consultor"
+    ? [me]
+    : users.filter(u=>(u.role==="consultor"||(u.role==="parametros"))&&u.active);
   const EMPTY={consultorId:me.id,produtoId:produtos[0]?.id||"",cliente:"",mrr:"",horasImpl:"",valorHoraImpl:"",licenca:"",faixaIdManual:"",obs:""};
   const [form,setForm]=useState(EMPTY);
   const [editId,setEditId]=useState(null);
   const [saving,setSaving]=useState(false);
   const F=(k,v)=>setForm(p=>({...p,[k]:v}));
 
-  const prodSel=produtos.find(p=>p.id===form.produtoId);
-  const isManual=normProd(prodSel||{}).selecaoFaixa==="manual";
+  const prodSel  = produtos.find(p=>p.id===form.produtoId);
+  const prodNorm = normProd(prodSel||{});
+  const isManual   = prodNorm.selecaoFaixa==="manual";
+  const isSoImpl   = prodNorm.soImpl;
+  const isSemLic   = prodNorm.semLicenca || isSoImpl;
 
   const overMes = useMemo(()=>
-    calcMesConsultor(+form.consultorId||form.consultorId, mes, vendas, produtos, metas, users),
+    calcMesConsultor(form.consultorId, mes, vendas, produtos, metas, users),
     [form.consultorId, mes, vendas, produtos, metas, users]);
 
   const prev=useMemo(()=>{
-    if(!form.mrr&&!form.horasImpl) return null;
+    if(!isSoImpl&&!form.mrr&&!form.horasImpl) return null;
+    if(isSoImpl&&!form.horasImpl) return null;
     return calcVenda({...form,mes,mrr:+form.mrr||0,horasImpl:+form.horasImpl||0,valorHoraImpl:+form.valorHoraImpl||0,licenca:+form.licenca||0},produtos,overMes.pctMRR);
-  },[form,produtos,mes,overMes]);
+  },[form,produtos,mes,overMes,isSoImpl]);
 
   const save=async()=>{
     if(!form.cliente.trim()) return notify("Informe o cliente.","err");
-    if(!form.mrr||+form.mrr<=0) return notify("Informe o MRR.","err");
+    if(!isSoImpl&&(!form.mrr||+form.mrr<=0)) return notify("Informe o MRR.","err");
     if(!form.horasImpl||+form.horasImpl<=0) return notify("Informe as horas.","err");
     if(!form.valorHoraImpl||+form.valorHoraImpl<=0) return notify("Informe o valor/hora.","err");
     if(isManual&&!form.faixaIdManual) return notify("Selecione a faixa.","err");
@@ -965,8 +976,10 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
     const entry={
       consultorId: form.consultorId,
       mes, produtoId:form.produtoId, cliente:form.cliente,
-      mrr:+form.mrr, horasImpl:+form.horasImpl, valorHoraImpl:+form.valorHoraImpl,
-      licenca:+form.licenca||0, faixaIdManual:form.faixaIdManual||null, obs:form.obs,
+      mrr:isSoImpl?0:+form.mrr||0,
+      horasImpl:+form.horasImpl, valorHoraImpl:+form.valorHoraImpl,
+      licenca:isSemLic?0:+form.licenca||0,
+      faixaIdManual:form.faixaIdManual||null, obs:form.obs,
     };
     if(editId){
       const {error}=await updateVenda(editId,entry);
@@ -989,13 +1002,29 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:14}}>
-          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name} ({CARGO_LABEL[c.cargo]})</option>)}</select></div>}
+          {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
           <div><Label>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
-          <div style={{gridColumn:"span 2"}}><Label>Nome do Cliente</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp}/></div>
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>💳 MRR (R$)</Label><input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp,background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/></div>
+          <div style={{gridColumn:"span 2"}}><Label>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp}/></div>
+
+          {/* MRR — oculto para Horas Extras */}
+          {!isSoImpl&&(
+            <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
+              <Label>💳 MRR — Mensalidade (R$)</Label>
+              <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp,background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/>
+            </div>
+          )}
+
           <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp,background:"#0c1a2e"}}/></div>
           <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp,background:"#0c1a2e"}}/></div>
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label>📦 Licença (R$)</Label><input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp,background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/></div>
+
+          {/* Licença — oculto para sem_licenca e so_impl */}
+          {!isSemLic&&(
+            <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
+              <Label>📦 Licença (R$)</Label>
+              <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp,background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
+            </div>
+          )}
+
           {isManual&&(
             <div style={{background:"#0c2a42",borderRadius:8,padding:"10px 12px",border:"1px solid #1e4060"}}>
               <Label>⚡ Faixa (manual)</Label>
@@ -1007,14 +1036,17 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           )}
           <div><Label>Observação</Label><input value={form.obs} onChange={e=>F("obs",e.target.value)} placeholder="Opcional" style={inp}/></div>
         </div>
+
+        {/* PRÉVIA */}
         {prev&&(
           <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"16px 18px",marginBottom:14}}>
             <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>Prévia da Comissão</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
               <FaixaBadge faixa={prev.faixa}/>
+              {isSoImpl&&<span style={{background:"#f59e0b22",color:"#f59e0b",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,border:"1px solid #f59e0b33"}}>⏱ Apenas Implantação</span>}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:12}}>
-              <div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>MRR</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.mrr)}</div><div style={{fontSize:11,color:"#38bdf8",marginTop:2}}>com.: {R$(prev.comMRR)}</div></div>
+              {!isSoImpl&&<div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>MRR</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.mrr)}</div><div style={{fontSize:11,color:"#38bdf8",marginTop:2}}>com.: {R$(prev.comMRR)}</div></div>}
               <div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>Implantação</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.implTotal)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comImpl)}</div></div>
               {prev.licenca>0&&<div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>Licença</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.licenca)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comLic)}</div></div>}
               <div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>NR Total</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.nr)}</div></div>
@@ -1031,6 +1063,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
           {editId&&<Btn secondary onClick={()=>{setEditId(null);setForm(EMPTY);}}>Cancelar</Btn>}
         </div>
       </div>
+
       {/* TABELA */}
       <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a"}}><span style={{fontSize:13,fontWeight:600,color:"#7fa8c0"}}>Contratos em {ML(mes)} · {vendasMes.length} registro{vendasMes.length!==1?"s":""}</span></div>
@@ -1050,21 +1083,21 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
               return (
                 <tr key={v.id} style={{borderBottom:i<vendasMes.length-1?"1px solid #080f1a":"none"}}>
                   {role!=="consultor"&&<TD bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
-                  <TD bold color="#e2e8f0">{prod?.nome}</TD>
+                  <TD bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
                   <TD>{v.cliente}</TD>
-                  <TD bold color="#38bdf8">{R$(v.mrr)}</TD>
+                  <TD bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
                   <TD>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
                   <TD color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
                   <TD bold color="#e2e8f0">{R$(c.nr)}</TD>
                   <TD><FaixaBadge faixa={c.faixa}/></TD>
-                  <TD right color="#38bdf8" bold>{R$(c.comMRR)}</TD>
+                  <TD right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
                   <TD right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
                   <TD right bold color="#e2e8f0">{R$(c.total)}</TD>
                   <TD right color="#38bdf8" bold>{R$(c.parcela)}</TD>
                   <TD right color="#818cf8" bold>{R$(c.parcela)}</TD>
                   <TD>
                     <div style={{display:"flex",gap:5}}>
-                      <IBtn color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
+                      <IBtn color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
                       <IBtn color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
                     </div>
                   </TD>
@@ -1135,37 +1168,56 @@ function EquipePage({users,vendas,produtos,mes,metas}) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  CALENDÁRIO
+//  CALENDÁRIO — 12 meses do ano + seletor de ano
 // ══════════════════════════════════════════════════════════════════
-function CalPage({me,users,vendas,produtos,mes}) {
+function CalPage({me,users,vendas,produtos}) {
   const role=me.role;
-  const mesesVis=Array.from({length:6},(_,i)=>addMonths(mes,-1+i));
-  const cal=useMemo(()=>buildCalendario(role==="consultor"?vendas.filter(v=>(v.consultorId||v.consultor_id)===me.id):vendas,produtos,users),[vendas,produtos,users,me,role]);
+  const anoAtual = new Date().getFullYear();
+  const [ano, setAno] = useState(anoAtual);
+  const anos = Array.from({length: ano - 2025 + 3}, (_,i) => 2025 + i);
+  const mesesDoAno = Array.from({length:12},(_,i)=>`${ano}-${String(i+1).padStart(2,"0")}`);
+  const vendasFiltradas = role==="consultor" ? vendas.filter(v=>(v.consultorId||v.consultor_id)===me.id) : vendas;
+  const cal = useMemo(()=>buildCalendario(vendasFiltradas,produtos,users),[vendasFiltradas,produtos,users]);
+  const mesAtual = `${anoAtual}-${String(new Date().getMonth()+1).padStart(2,"0")}`;
+  const totalAno = mesesDoAno.reduce((s,m)=>(cal[m]||[]).reduce((ss,p)=>ss+p.valor,s),0);
+
   return (
     <div>
-      <STitle>Calendário de Recebimentos</STitle>
-      <div style={{fontSize:12,color:"#1e4060",marginBottom:20}}>Visão de quando cada comissão será recebida, gerada automaticamente a partir das vendas registradas.</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
-        {mesesVis.map(m=>{
-          const parcelas=(cal[m]||[]).filter(p=>role!=="consultor"||(p.consultorId||p.consultor_id)===me.id);
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <STitle style={{margin:0}}>Calendário de Recebimentos</STitle>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          <span style={{fontSize:11,color:"#1e4060",fontWeight:700}}>Total {ano}: <span style={{color:"#34d399"}}>{R$(totalAno)}</span></span>
+          <div style={{display:"flex",gap:4,marginLeft:8,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {anos.map(a=>(
+              <button key={a} onClick={()=>setAno(a)} style={{padding:"4px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#0369a1":"transparent",color:ano===a?"#fff":"#1e4060",transition:"all .15s"}}>{a}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+        {mesesDoAno.map(m=>{
+          const parcelas=(cal[m]||[]);
           const total=parcelas.reduce((s,p)=>s+p.valor,0);
-          const isAtual=m===mes;
+          const isAtual=m===mesAtual;
           return (
-            <div key={m} style={{background:"#060d18",border:`1px solid ${isAtual?"#1e4060":"#0c1f35"}`,borderRadius:12,overflow:"hidden"}}>
-              <div style={{padding:"12px 16px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:isAtual?"#0c2a42":"#040b14"}}>
-                <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:isAtual?"#38bdf8":"#e2e8f0",fontSize:14}}>{ML(m)}</span>
-                {total>0?<span style={{fontWeight:800,color:"#34d399",fontSize:14}}>{R$(total)}</span>:<span style={{color:"#1a3a54",fontSize:12}}>R$ 0</span>}
+            <div key={m} style={{background:"#060d18",border:`1px solid ${isAtual?"#0369a1":total>0?"#0c2a42":"#0c1f35"}`,borderRadius:12,overflow:"hidden"}}>
+              <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:isAtual?"#0c2a42":"#040b14",borderBottom:"1px solid #080f1a"}}>
+                <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:isAtual?"#38bdf8":"#e2e8f0",fontSize:13}}>{ML(m)}</span>
+                <span style={{fontWeight:800,color:total>0?"#34d399":"#1a3a54",fontSize:13}}>{total>0?R$(total):"—"}</span>
               </div>
-              <div style={{padding:"6px 0",maxHeight:320,overflowY:"auto"}}>
-                {parcelas.length===0?<div style={{padding:"16px",fontSize:12,color:"#1a3a54"}}>Sem recebimentos</div>:parcelas.map((p,i)=>(
-                  <div key={i} style={{padding:"9px 14px",borderBottom:i<parcelas.length-1?"1px solid #080f1a":"none",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
+              <div style={{maxHeight:240,overflowY:"auto"}}>
+                {parcelas.length===0
+                  ? <div style={{padding:"12px 14px",fontSize:11,color:"#1a3a54"}}>Sem recebimentos</div>
+                  : parcelas.map((p,i)=>(
+                  <div key={i} style={{padding:"8px 14px",borderBottom:i<parcelas.length-1?"1px solid #080f1a":"none",display:"flex",justifyContent:"space-between",gap:8}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{marginBottom:3}}><span style={{background:p.tipo==="Parcela 1/2"?"#0c2a42":"#0c0a2e",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>{p.tipo==="Parcela 1/2"?"1ª Parcela":"2ª Parcela"}</span></div>
-                      {role!=="consultor"&&<div style={{fontSize:11,color:"#2a5a80",fontWeight:600}}>{p.nomeConsultor}</div>}
-                      <div style={{fontSize:11,color:"#1a3a54",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.cliente} · {produtos.find(x=>x.id===p.produtoId)?.nome}</div>
-                      <div style={{fontSize:10,color:"#0f2a40",marginTop:1}}>Venda de {ML(p.mesVenda)}</div>
+                      <span style={{background:p.tipo==="Parcela 1/2"?"#0c2a42":"#0c0a2e",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>
+                        {p.tipo==="Parcela 1/2"?"1ª":"2ª"}
+                      </span>
+                      {role!=="consultor"&&<span style={{fontSize:10,color:"#2a5a80",fontWeight:600}}>{p.nomeConsultor} · </span>}
+                      <span style={{fontSize:10,color:"#1a3a54"}}>{p.cliente}</span>
                     </div>
-                    <span style={{fontWeight:700,color:"#34d399",whiteSpace:"nowrap",fontSize:13}}>{R$(p.valor)}</span>
+                    <span style={{fontWeight:700,color:"#34d399",whiteSpace:"nowrap",fontSize:11}}>{R$(p.valor)}</span>
                   </div>
                 ))}
               </div>
@@ -1176,6 +1228,7 @@ function CalPage({me,users,vendas,produtos,mes}) {
     </div>
   );
 }
+
 
 // ══════════════════════════════════════════════════════════════════
 //  HISTÓRICO
@@ -1455,6 +1508,268 @@ function ProdPage({produtos,setProdutos,notify}) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PERIOD BAR — seletor inteligente de período na topbar
+// ══════════════════════════════════════════════════════════════════
+function PeriodBar({page, mes, setMes}) {
+  // Páginas sem seletor de período
+  const semPeriodo = ["params","prod","users","relatorio","cal"];
+  if (semPeriodo.includes(page)) {
+    return <div style={{padding:"12px 32px",borderBottom:"1px solid #0c1f35",background:"#060d18",height:52,display:"flex",alignItems:"center"}}>
+      <span style={{fontSize:11,color:"#1a3a54",fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
+        {page==="relatorio"?"Selecione o período dentro da página":
+         page==="cal"?"Calendário anual — selecione o ano na página":"—"}
+      </span>
+    </div>;
+  }
+
+  const now    = new Date();
+  const anoAtual = now.getFullYear();
+  const mesAtual = `${anoAtual}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const [y,m] = mes.split("-").map(Number);
+
+  // Gera 18 meses (12 passados + atual + 5 futuros)
+  const meses = Array.from({length:18},(_,i)=>{
+    const d = new Date(now.getFullYear(), now.getMonth()-12+i, 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  });
+
+  return (
+    <div style={{padding:"10px 32px",borderBottom:"1px solid #0c1f35",background:"#060d18",position:"sticky",top:0,zIndex:5,display:"flex",alignItems:"center",gap:6,overflowX:"auto"}}>
+      <span style={{fontSize:9,color:"#1a3a54",fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginRight:6,whiteSpace:"nowrap"}}>Competência</span>
+      {meses.map(mm=>{
+        const isAtual = mm===mesAtual;
+        const isSel   = mm===mes;
+        return (
+          <button key={mm} onClick={()=>setMes(mm)} style={{padding:"4px 10px",borderRadius:6,border:isAtual&&!isSel?"1px solid #1e4060":"none",cursor:"pointer",fontSize:11,fontWeight:isSel?700:400,background:isSel?"#0369a1":"transparent",color:isSel?"#fff":isAtual?"#38bdf8":"#1e4060",transition:"all .15s",whiteSpace:"nowrap",flexShrink:0}}>
+            {ML(mm)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RELATÓRIOS — Anual / Semestral / Trimestral / Mensal
+// ══════════════════════════════════════════════════════════════════
+function RelatorioPage({me,users,vendas,produtos,metas}) {
+  const now = new Date();
+  const [tipo,  setTipo]  = useState("trimestral");
+  const [ano,   setAno]   = useState(now.getFullYear());
+  const [sem,   setSem]   = useState(now.getMonth()<6?"S1":"S2");
+  const [trim,  setTrim]  = useState(`Q${Math.ceil((now.getMonth()+1)/3)}`);
+  const [mesSel,setMesSel]= useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`);
+  const [filtroConsultor, setFiltroConsultor] = useState("todos");
+
+  const anos = Array.from({length: ano - 2025 + 3}, (_,i)=>2025+i);
+  const consultores = users.filter(u=>(u.role==="consultor")&&u.active);
+
+  // Determina os meses do período selecionado
+  const mesesPeriodo = useMemo(()=>{
+    const pad = n => String(n).padStart(2,"0");
+    if (tipo==="mensal") return [mesSel];
+    if (tipo==="trimestral") {
+      const q = parseInt(trim.replace("Q",""));
+      const m1 = (q-1)*3+1;
+      return [`${ano}-${pad(m1)}`,`${ano}-${pad(m1+1)}`,`${ano}-${pad(m1+2)}`];
+    }
+    if (tipo==="semestral") {
+      const m1 = sem==="S1"?1:7;
+      return Array.from({length:6},(_,i)=>`${ano}-${pad(m1+i)}`);
+    }
+    if (tipo==="anual") {
+      return Array.from({length:12},(_,i)=>`${ano}-${pad(i+1)}`);
+    }
+    return [];
+  },[tipo,ano,sem,trim,mesSel]);
+
+  // Consultores a exibir
+  const consultoresVis = filtroConsultor==="todos" ? consultores : consultores.filter(c=>c.id===filtroConsultor);
+
+  // Agrega dados por consultor para o período
+  const dadosPeriodo = useMemo(()=>{
+    return consultoresVis.map(u=>{
+      // MRR e NR totais no período
+      const vendasP = vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id && mesesPeriodo.includes(v.mes));
+      const totalMRR = vendasP.reduce((s,v)=>s+(v.mrr||0),0);
+      const metaMRR  = mesesPeriodo.reduce((s,m)=>s+(metas[m]?.[u.cargo]?.mrr||0),0);
+      const metaNR   = mesesPeriodo.reduce((s,m)=>s+(metas[m]?.[u.cargo]?.nr||0),0);
+      const atingMRR = metaMRR>0?(totalMRR/metaMRR)*100:0;
+      const pctMRR   = getPctMRR(atingMRR);
+      const overInfo = getOverInfo(atingMRR);
+
+      const vendasCalc = vendasP.map(v=>{ const c=calcVenda(v,produtos,pctMRR); return c?{...v,...c}:null; }).filter(Boolean);
+      const totalNR    = vendasCalc.reduce((s,v)=>s+v.nr,0);
+      const totalCom   = vendasCalc.reduce((s,v)=>s+v.total,0);
+      const comMRR     = vendasCalc.reduce((s,v)=>s+v.comMRR,0);
+      const comNR      = vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0);
+      const atingNR    = metaNR>0?(totalNR/metaNR)*100:0;
+
+      // Evolução mensal
+      const evolucao = mesesPeriodo.map(m=>{
+        const vs = vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id&&v.mes===m);
+        return { mes:m, mrr:vs.reduce((s,v)=>s+(v.mrr||0),0), meta:metas[m]?.[u.cargo]?.mrr||0 };
+      });
+
+      return { ...u, totalMRR, totalNR, metaMRR, metaNR, atingMRR, atingNR, pctMRR, overInfo, totalCom, comMRR, comNR, vendasCalc, evolucao, nVendas:vendasP.length };
+    }).sort((a,b)=>b.totalCom-a.totalCom);
+  },[consultoresVis,vendas,mesesPeriodo,metas,produtos]);
+
+  const totais = {
+    mrr:  dadosPeriodo.reduce((s,d)=>s+d.totalMRR,0),
+    nr:   dadosPeriodo.reduce((s,d)=>s+d.totalNR,0),
+    com:  dadosPeriodo.reduce((s,d)=>s+d.totalCom,0),
+    comMRR: dadosPeriodo.reduce((s,d)=>s+d.comMRR,0),
+    comNR:  dadosPeriodo.reduce((s,d)=>s+d.comNR,0),
+  };
+
+  const labelPeriodo = tipo==="mensal"?ML(mesSel):tipo==="trimestral"?`${trim}/${ano}`:tipo==="semestral"?`${sem}/${ano}`:`Ano ${ano}`;
+
+  return (
+    <div>
+      <STitle>Relatórios — {labelPeriodo}</STitle>
+
+      {/* SELETOR DE TIPO */}
+      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
+        {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"],["semestral","📈 Semestral"],["anual","🗓 Anual"]].map(([v,l])=>(
+          <button key={v} onClick={()=>setTipo(v)} style={{padding:"6px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:tipo===v?"#0369a1":"transparent",color:tipo===v?"#fff":"#1e4060",transition:"all .15s"}}>{l}</button>
+        ))}
+      </div>
+
+      {/* SELETORES DE PERÍODO */}
+      <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
+        {/* Ano — sempre visível exceto mensal */}
+        {tipo!=="mensal"&&(
+          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {anos.map(a=><button key={a} onClick={()=>setAno(a)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#0c2a42":"transparent",color:ano===a?"#38bdf8":"#1e4060"}}>{a}</button>)}
+          </div>
+        )}
+        {/* Semestre */}
+        {tipo==="semestral"&&(
+          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {["S1","S2"].map(s=><button key={s} onClick={()=>setSem(s)} style={{padding:"4px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:sem===s?"#0c2a42":"transparent",color:sem===s?"#38bdf8":"#1e4060"}}>{s==="S1"?"1º Sem.":"2º Sem."}</button>)}
+          </div>
+        )}
+        {/* Trimestre */}
+        {tipo==="trimestral"&&(
+          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {["Q1","Q2","Q3","Q4"].map(q=><button key={q} onClick={()=>setTrim(q)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:trim===q?"#0c2a42":"transparent",color:trim===q?"#38bdf8":"#1e4060"}}>{q}</button>)}
+          </div>
+        )}
+        {/* Mês */}
+        {tipo==="mensal"&&(
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {Array.from({length:12},(_,i)=>{
+              const now2=new Date(); const a=now2.getFullYear();
+              return `${a}-${String(i+1).padStart(2,"0")}`;
+            }).map(m=><button key={m} onClick={()=>setMesSel(m)} style={{padding:"4px 10px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mesSel===m?"#0c2a42":"transparent",color:mesSel===m?"#38bdf8":"#1e4060"}}>{ML(m).split("/")[0]}</button>)}
+          </div>
+        )}
+        {/* Filtro consultor */}
+        <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)} style={{...selS,width:"auto",minWidth:180,marginLeft:"auto"}}>
+          <option value="todos">Toda a equipe</option>
+          {consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+
+      {/* MESES DO PERÍODO */}
+      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+        {mesesPeriodo.map(m=><span key={m} style={{background:"#0c2a42",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:600}}>{ML(m)}</span>)}
+      </div>
+
+      {/* TOTAIS GERAIS */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,marginBottom:22}}>
+        <StatCard l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
+        <StatCard l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
+        <StatCard l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
+        <StatCard l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
+        <StatCard l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
+      </div>
+
+      {/* TABELA POR CONSULTOR */}
+      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:20}}>
+        <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:"#040b14"}}>
+          <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Resumo por Consultor — {labelPeriodo}</span>
+        </div>
+        <div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
+          <thead><tr style={{background:"#030810"}}>
+            <TH>Consultor</TH><TH>Cargo</TH><TH>Contratos</TH>
+            <TH right>MRR</TH><TH right>Meta MRR</TH><TH right>Ating. MRR</TH>
+            <TH right>NR</TH><TH right>Meta NR</TH><TH right>Ating. NR</TH>
+            <TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
+          </tr></thead>
+          <tbody>
+            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty msg="Nenhum dado no período."/></td></tr>:
+            dadosPeriodo.map((d,i)=>(
+              <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?"1px solid #080f1a":"none"}}>
+                <TD bold color="#e2e8f0">{d.name}</TD>
+                <TD><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
+                <TD>{d.nVendas}</TD>
+                <TD right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
+                <TD right color="#1e4060">{R$(d.metaMRR)}</TD>
+                <TD right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
+                <TD right bold color="#a78bfa">{R$(d.totalNR)}</TD>
+                <TD right color="#1e4060">{R$(d.metaNR)}</TD>
+                <TD right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
+                <TD right bold color="#34d399">{R$(d.comMRR)}</TD>
+                <TD right bold color="#a78bfa">{R$(d.comNR)}</TD>
+                <TD right bold color="#f59e0b">{R$(d.totalCom)}</TD>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      {/* DETALHAMENTO POR CONSULTOR (expansível por período) */}
+      {dadosPeriodo.filter(d=>d.vendasCalc.length>0).map(d=>(
+        <div key={d.id} style={{background:"#060d18",border:`1px solid ${d.overInfo.border}`,borderRadius:12,overflow:"hidden",marginBottom:12}}>
+          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:"#040b14",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:CARGO_COLOR[d.cargo]}}/>
+              <span style={{fontWeight:700,color:"#e2e8f0",fontSize:14}}>{d.name}</span>
+              <span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${d.overInfo.border}`}}>{d.overInfo.label} · {d.atingMRR.toFixed(0)}%</span>
+            </div>
+            <span style={{fontWeight:800,color:"#f59e0b",fontFamily:"'Syne',sans-serif",fontSize:16}}>{R$(d.totalCom)}</span>
+          </div>
+          <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
+            <thead><tr style={{background:"#030810"}}>
+              <TH>Mês</TH><TH>Produto</TH><TH>Cliente</TH>
+              <TH right>MRR</TH><TH right>NR</TH><TH>Faixa</TH>
+              <TH right>Com. MRR</TH><TH right>Com. NR</TH><TH right>Total</TH>
+              <TH right>1ª Parc.</TH><TH right>2ª Parc.</TH>
+            </tr></thead>
+            <tbody>
+              {d.vendasCalc.map((v,i)=>{
+                const prod=produtos.find(p=>p.id===v.produtoId);
+                return (
+                  <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
+                    <TD color="#1e4060">{ML(v.mes)}</TD>
+                    <TD bold color="#e2e8f0">{prod?.nome}</TD>
+                    <TD>{v.cliente}</TD>
+                    <TD right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
+                    <TD right color="#a78bfa">{R$(v.nr)}</TD>
+                    <TD><FaixaBadge faixa={v.faixa}/></TD>
+                    <TD right bold color="#34d399">{R$(v.comMRR)}</TD>
+                    <TD right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                    <TD right bold color="#f59e0b">{R$(v.total)}</TD>
+                    <TD right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
+                    <TD right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
