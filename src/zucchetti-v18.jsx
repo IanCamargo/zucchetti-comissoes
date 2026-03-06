@@ -89,17 +89,17 @@ const MESES_LIST = getMesesList();
 //  DEFAULTS
 // ══════════════════════════════════════════════════════════════════
 const PRODUTOS_DEFAULT = [
-  { id:"mago_cloud",   nome:"Mago Cloud",   ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:true,  so_impl:false,
+  { id:"mago_cloud",   nome:"Mago Cloud",   ativo:true, selecao_faixa:"auto", pct_mrr:70, pct_lic:10, sem_licenca:true,  so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"mago_web",     nome:"Mago Web",     ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:true,  so_impl:false,
+  { id:"mago_web",     nome:"Mago Web",     ativo:true, selecao_faixa:"auto", pct_mrr:70, pct_lic:10, sem_licenca:true,  so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"mago4",        nome:"Mago 4",       ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
+  { id:"mago4",        nome:"Mago 4",       ativo:true, selecao_faixa:"auto", pct_mrr:70, pct_lic:10, sem_licenca:false, so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"debx",         nome:"Debx",         ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
+  { id:"debx",         nome:"Debx",         ativo:true, selecao_faixa:"auto", pct_mrr:70, pct_lic:10, sem_licenca:false, so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"softa",        nome:"Softa",        ativo:true, selecao_faixa:"auto", pct_mrr:70, sem_licenca:false, so_impl:false,
+  { id:"softa",        nome:"Softa",        ativo:true, selecao_faixa:"auto", pct_mrr:70, pct_lic:10, sem_licenca:false, so_impl:false,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
-  { id:"horas_extras", nome:"Horas Extras", ativo:true, selecao_faixa:"auto", pct_mrr:0,  sem_licenca:true,  so_impl:true,
+  { id:"horas_extras", nome:"Horas Extras", ativo:true, selecao_faixa:"auto", pct_mrr:0,  pct_lic:0,  sem_licenca:true,  so_impl:true,
     regras:[{id:"r1",label:"Faixa Premium",minHoras:60,minValorH:185,pctImpl:10},{id:"r2",label:"Faixa Padrão",minHoras:0,minValorH:0,pctImpl:3.5}]},
 ];
 
@@ -126,6 +126,7 @@ function normProd(p) {
     ...p,
     selecaoFaixa: p.selecao_faixa || p.selecaoFaixa || "auto",
     pctMRR:       p.pct_mrr  ?? p.pctMRR  ?? 70,
+    pctLic:       p.pct_lic  ?? p.pctLic  ?? null, // null = usa faixa.pctImpl (comportamento antigo)
     semLicenca:   p.sem_licenca ?? p.semLicenca ?? false,
     soImpl:       p.so_impl  ?? p.soImpl   ?? false,
   };
@@ -159,7 +160,8 @@ function calcVenda(venda, produtos, pctMRRover) {
   const pctMRR  = p.soImpl ? 0 : (pctMRRover ?? p.pctMRR);
   const comMRR  = mrr       * (pctMRR       / 100);
   const comImpl = implTotal * (faixa.pctImpl / 100);
-  const comLic  = licenca   * (faixa.pctImpl / 100);
+  const pctLicEfetivo = p.pctLic ?? faixa.pctImpl; // usa pctLic do produto se configurado, senão usa faixa
+  const comLic  = licenca   * (pctLicEfetivo / 100);
   const total   = comMRR + comImpl + comLic;
   const parcela = total / 2;
 
@@ -173,30 +175,47 @@ function calcVenda(venda, produtos, pctMRRover) {
   return {
     faixa, implTotal, nr, mrr, licenca,
     comMRR, comImpl, comLic, total, parcela,
-    pctMRR, mesParcela1, mesParcela2, parcelas,
+    pctMRR, pctLicEfetivo, mesParcela1, mesParcela2, parcelas,
     isPremium: faixa.id === "r1",
     horasImpl, valorHoraImpl,
     soImpl: p.soImpl, semLicenca: p.semLicenca,
   };
 }
 
+// Calcula parcelas de desconto de churn (negativas)
+// Regra: churn em mês X → desconta parcela 1 em X+2, parcela 2 em X+3
+function calcChurnParcelas(venda, produtos) {
+  if (!venda.churnMes || !venda.churnDesconta) return [];
+  const c = calcVenda({ ...venda, mes: venda.churnMes }, produtos);
+  if (!c || c.total === 0) return [];
+  const mes1 = addMonths(venda.churnMes, 2);
+  const mes2 = addMonths(venda.churnMes, 3);
+  const prod = produtos.find(p => p.id === (venda.produtoId || venda.produto_id));
+  return [
+    { tipo:"Churn 1/2", valor: -c.parcela, mesPagamento: mes1,
+      descricao:`⚠ CHURN — ${prod?.nome||"?"} / ${venda.cliente} — estorno 1ª parcela` },
+    { tipo:"Churn 2/2", valor: -c.parcela, mesPagamento: mes2,
+      descricao:`⚠ CHURN — ${prod?.nome||"?"} / ${venda.cliente} — estorno 2ª parcela` },
+  ];
+}
+
 function buildCalendario(vendas, produtos, users) {
   const cal = {};
+  const addEntry = (mesPag, entry) => { if (!cal[mesPag]) cal[mesPag] = []; cal[mesPag].push(entry); };
   vendas.forEach(v => {
     const user = users.find(u => u.id === (v.consultorId || v.consultor_id));
     const c = calcVenda(v, produtos);
     if (!c) return;
-    c.parcelas.forEach(p => {
-      if (!cal[p.mesPagamento]) cal[p.mesPagamento] = [];
-      cal[p.mesPagamento].push({
-        ...p,
-        vendaId:v.id,
-        consultorId: v.consultorId || v.consultor_id,
-        nomeConsultor:user?.name||"–", cargo:user?.cargo,
-        produtoId: v.produtoId || v.produto_id,
-        cliente:v.cliente, mesVenda:v.mes,
-      });
-    });
+    c.parcelas.forEach(p => addEntry(p.mesPagamento, {
+      ...p, vendaId:v.id, consultorId:v.consultorId||v.consultor_id,
+      nomeConsultor:user?.name||"–", cargo:user?.cargo,
+      produtoId:v.produtoId||v.produto_id, cliente:v.cliente, mesVenda:v.mes, isChurn:false,
+    }));
+    calcChurnParcelas(v, produtos).forEach(p => addEntry(p.mesPagamento, {
+      ...p, vendaId:v.id, consultorId:v.consultorId||v.consultor_id,
+      nomeConsultor:user?.name||"–", cargo:user?.cargo,
+      produtoId:v.produtoId||v.produto_id, cliente:v.cliente, mesVenda:v.churnMes, isChurn:true,
+    }));
   });
   return cal;
 }
@@ -674,6 +693,8 @@ const Ic = ({n,s=18}) => {
     menu:  "M3 12h18 M3 6h18 M3 18h18",
     x:     "M18 6L6 18 M6 6l12 12",
     chart: "M18 20V10 M12 20V4 M6 20v-6",
+    churn: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01",
+    undo:  "M3 7v6h6 M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13",
     trophy:"M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22 M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22 M18 2H6v7a6 6 0 0 0 12 0V2z",
   };
   return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d[n]||d.arrow}/></svg>;
@@ -715,11 +736,13 @@ function useSupabase(session) {
       // Vendas — normaliza campo produto_id → produtoId
       setVendasRaw((vRes.data || []).map(v => ({
         ...v,
-        consultorId: v.consultor_id,
-        produtoId:   v.produto_id,
-        horasImpl:   v.horas_impl,
+        consultorId:   v.consultor_id,
+        produtoId:     v.produto_id,
+        horasImpl:     v.horas_impl,
         valorHoraImpl: v.valor_hora_impl,
         faixaIdManual: v.faixa_id_manual,
+        churnMes:      v.churn_mes || null,
+        churnDesconta: v.churn_desconta ?? false,
       })));
 
       // Metas: transforma array em objeto { "2025-01": { junior:{...}, ... } }
@@ -802,6 +825,32 @@ function useSupabase(session) {
     return { error };
   }, []);
 
+  const registerChurn = useCallback(async (id, churnMes, desconta) => {
+    setSyncing(true);
+    const { error } = await sb.from("vendas").update({
+      churn_mes:      churnMes,
+      churn_desconta: desconta,
+    }).eq("id", id);
+    setSyncing(false);
+    if (!error) setVendasRaw(p => p.map(v => v.id === id
+      ? { ...v, churnMes, churnDesconta: desconta }
+      : v));
+    return { error };
+  }, []);
+
+  const removeChurn = useCallback(async (id) => {
+    setSyncing(true);
+    const { error } = await sb.from("vendas").update({
+      churn_mes:      null,
+      churn_desconta: false,
+    }).eq("id", id);
+    setSyncing(false);
+    if (!error) setVendasRaw(p => p.map(v => v.id === id
+      ? { ...v, churnMes: null, churnDesconta: false }
+      : v));
+    return { error };
+  }, []);
+
   const saveMetas = useCallback(async (metaObj) => {
     setSyncing(true);
     // Transforma objeto em array de rows
@@ -853,6 +902,7 @@ function useSupabase(session) {
     users, setUsers,
     produtos, setProdutos,
     vendas, addVenda, updateVenda, deleteVenda,
+    registerChurn, removeChurn,
     metas, saveMetas,
     loading, syncing,
     reload: loadAll,
@@ -1048,7 +1098,7 @@ export default function App() {
         {/* PAGE CONTENT */}
         <div className="page-content fade-in" style={{minWidth:0}}>
           {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
-          {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas} t={t}/>}
+          {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} registerChurn={db.registerChurn} removeChurn={db.removeChurn} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas} t={t}/>}
           {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
           {page==="cal"       && <CalPage       me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
           {page==="hist"      && <HistPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} metas={db.metas} t={t}/>}
@@ -1413,9 +1463,8 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
 // ══════════════════════════════════════════════════════════════════
 //  VENDAS
 // ══════════════════════════════════════════════════════════════════
-function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,mes,notify,metas,t}) {
+function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,registerChurn,removeChurn,produtos,mes,notify,metas,t}) {
   const role=me.role;
-  // Jennifer (parametros) também pode lançar vendas
   const podeVender = role==="consultor" || role==="parametros" || role==="gestor";
   const consultores = role==="consultor"
     ? [me]
@@ -1425,6 +1474,37 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
   const [editId,setEditId]=useState(null);
   const [saving,setSaving]=useState(false);
   const F=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  // ── Estado do modal de churn ──
+  const [churnModal, setChurnModal] = useState(null); // { venda }
+  const [churnMesSel, setChurnMesSel] = useState("");
+  const [churnDesconta, setChurnDesconta] = useState(true);
+  const [churnSaving, setChurnSaving] = useState(false);
+
+  const abrirChurn = (venda) => {
+    setChurnModal({ venda });
+    setChurnMesSel(mes); // padrão = mês atual
+    setChurnDesconta(true);
+  };
+  const fecharChurn = () => { setChurnModal(null); setChurnSaving(false); };
+
+  const confirmarChurn = async () => {
+    if (!churnMesSel) return notify("Selecione o mês do churn.", "err");
+    setChurnSaving(true);
+    const { error } = await registerChurn(churnModal.venda.id, churnMesSel, churnDesconta);
+    setChurnSaving(false);
+    if (error) return notify("Erro ao registrar churn.", "err");
+    notify(churnDesconta
+      ? `Churn registrado! Estornos em ${ML(addMonths(churnMesSel,2))} e ${ML(addMonths(churnMesSel,3))}.`
+      : "Churn registrado sem desconto de comissão.");
+    fecharChurn();
+  };
+
+  const confirmarRemoverChurn = async (venda) => {
+    const { error } = await removeChurn(venda.id);
+    if (error) notify("Erro ao reverter churn.", "err");
+    else notify("Churn removido — venda reativada ✅");
+  };
 
   const prodSel  = produtos.find(p=>p.id===form.produtoId);
   const prodNorm = normProd(prodSel||{});
@@ -1474,6 +1554,59 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 
   return (
     <div style={{width:"100%",minWidth:0,overflowX:"hidden"}}>
+
+      {/* ══ MODAL CHURN ══ */}
+      {churnModal && (
+        <div style={{position:"fixed",inset:0,background:"#00000099",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={fecharChurn}>
+          <div style={{background:t.bgCard,border:`1px solid ${t.red}55`,borderRadius:16,padding:28,width:"100%",maxWidth:420,boxShadow:"0 24px 80px #000a"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+              <span style={{fontSize:20}}>⚠️</span>
+              <span style={{fontSize:16,fontWeight:800,color:t.red}}>Registrar Churn</span>
+            </div>
+            <div style={{fontSize:13,color:t.textSub,marginBottom:18}}>
+              <b style={{color:t.text}}>{churnModal.venda.cliente}</b> — {produtos.find(p=>p.id===(churnModal.venda.produtoId||churnModal.venda.produto_id))?.nome}
+            </div>
+
+            {/* Mês do churn */}
+            <div style={{marginBottom:16}}>
+              <Label t={t}>Mês do cancelamento</Label>
+              <input type="month" value={churnMesSel} onChange={e=>setChurnMesSel(e.target.value)}
+                style={{...inp(t),fontWeight:700,fontSize:14}}/>
+              {churnMesSel && (
+                <div style={{marginTop:6,fontSize:11,color:t.textMuted,background:t.tableHead,borderRadius:8,padding:"8px 12px",lineHeight:1.6}}>
+                  📅 Churn em <b style={{color:t.amber}}>{ML(churnMesSel)}</b><br/>
+                  ⏭ Pula <b>{ML(addMonths(churnMesSel,1))}</b><br/>
+                  {churnDesconta ? <>
+                    💸 Estorno 1ª parcela em <b style={{color:t.red}}>{ML(addMonths(churnMesSel,2))}</b><br/>
+                    💸 Estorno 2ª parcela em <b style={{color:t.red}}>{ML(addMonths(churnMesSel,3))}</b>
+                  </> : <span style={{color:t.green}}>✅ Sem desconto de comissão</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Descontar comissão */}
+            <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:20}}>
+              <div style={{fontSize:12,color:t.textSub,fontWeight:700,marginBottom:10}}>Desconto de comissão?</div>
+              <div style={{display:"flex",gap:8}}>
+                {[{v:true,label:"💸 Sim, descontar",desc:"Estorna as 2 parcelas"},{v:false,label:"✅ Não descontar",desc:"Churn sem estorno"}].map(opt=>(
+                  <button key={String(opt.v)} onClick={()=>setChurnDesconta(opt.v)} style={{flex:1,padding:"10px 8px",borderRadius:9,border:`2px solid ${churnDesconta===opt.v?(opt.v?t.red:t.green):t.border}`,background:churnDesconta===opt.v?(opt.v?"#f8717122":"#10b98122"):t.bgPanel,cursor:"pointer",transition:"all .15s"}}>
+                    <div style={{fontSize:13,fontWeight:800,color:churnDesconta===opt.v?(opt.v?t.red:t.green):t.textSub}}>{opt.label}</div>
+                    <div style={{fontSize:10,color:t.textMuted,marginTop:2}}>{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={confirmarChurn} disabled={churnSaving} style={{flex:1,padding:"11px",borderRadius:9,border:"none",background:t.red,color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer",opacity:churnSaving?.6:1}}>
+                {churnSaving?<><Spinner size={13}/> Salvando…</>:"Confirmar Churn"}
+              </button>
+              <button onClick={fecharChurn} style={{padding:"11px 18px",borderRadius:9,border:`1px solid ${t.border}`,background:t.bgPanel,color:t.textSub,fontSize:13,fontWeight:700,cursor:"pointer"}}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <STitle t={t}>Lançar Venda — {ML(mes)}</STitle>
       <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
@@ -1547,7 +1680,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
           <thead><tr style={{background:t.tableHead}}>
             {role!=="consultor"&&<TH t={t}>Consultor</TH>}
-            <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
+            <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
             <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
             <TH t={t} right>1ª ({ML(addMonths(mes,2))})</TH><TH t={t} right>2ª ({ML(addMonths(mes,3))})</TH><TH t={t}>Ações</TH>
           </tr></thead>
@@ -1556,11 +1689,30 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
               const c=calcVenda(v,produtos); if(!c)return null;
               const prod=produtos.find(p=>p.id===(v.produtoId||v.produto_id));
               const cId = v.consultorId||v.consultor_id;
+              const isChurn = !!v.churnMes;
               return (
-                <tr key={v.id} style={{borderBottom:i<vendasMes.length-1?"1px solid #080f1a":"none"}}>
+                <tr key={v.id} style={{borderBottom:i<vendasMes.length-1?`1px solid ${t.border}`:"none",opacity:isChurn?.7:1,background:isChurn?"#f8717108":"transparent"}}>
                   {role!=="consultor"&&<TD t={t} bold color={t.text}>{users.find(u=>u.id===cId)?.name||"–"}</TD>}
                   <TD t={t} bold color={t.text}>{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
                   <TD t={t}>{v.cliente}</TD>
+                  {/* STATUS */}
+                  <TD t={t}>
+                    {isChurn ? (
+                      <div>
+                        <span style={{background:"#f8717122",color:t.red,border:`1px solid ${t.red}44`,borderRadius:99,padding:"2px 8px",fontSize:11,fontWeight:800,display:"inline-flex",alignItems:"center",gap:4}}>
+                          <Ic n="churn" s={10}/> Churn
+                        </span>
+                        <div style={{fontSize:9,color:t.textMuted,marginTop:2}}>{ML(v.churnMes)}</div>
+                        {v.churnDesconta
+                          ? <div style={{fontSize:9,color:t.red}}>💸 c/ estorno</div>
+                          : <div style={{fontSize:9,color:t.green}}>✅ sem estorno</div>}
+                      </div>
+                    ) : (
+                      <span style={{background:"#10b98122",color:t.green,border:`1px solid ${t.green}44`,borderRadius:99,padding:"2px 8px",fontSize:11,fontWeight:800,display:"inline-flex",alignItems:"center",gap:4}}>
+                        ✓ Ativo
+                      </span>
+                    )}
+                  </TD>
                   <TD t={t} bold color={c.soImpl?t.textMuted:"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
                   <TD t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
                   <TD t={t} color={v.licenca>0?"#a78bfa":t.textMuted}>{v.licenca>0?R$(v.licenca):"—"}</TD>
@@ -1569,11 +1721,25 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
                   <TD t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
                   <TD t={t} right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
                   <TD t={t} right bold color={t.text}>{R$(c.total)}</TD>
-                  <TD t={t} right color="#38bdf8" bold>{R$(c.parcela)}</TD>
-                  <TD t={t} right color="#818cf8" bold>{R$(c.parcela)}</TD>
+                  <TD t={t} right color={isChurn?"#f87171":"#38bdf8"} bold>
+                    {isChurn&&v.churnDesconta?<span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>:R$(c.parcela)}
+                  </TD>
+                  <TD t={t} right color={isChurn?"#f87171":"#818cf8"} bold>
+                    {isChurn&&v.churnDesconta?<span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>:R$(c.parcela)}
+                  </TD>
                   <TD t={t}>
-                    <div style={{display:"flex",gap:5}}>
-                      <IBtn t={t} color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                      {!isChurn && <>
+                        <IBtn t={t} color="#38bdf8" onClick={()=>{setEditId(v.id);setForm({consultorId:cId,produtoId:v.produtoId||v.produto_id,cliente:v.cliente,mrr:String(v.mrr||0),horasImpl:String(c.horasImpl),valorHoraImpl:String(c.valorHoraImpl),licenca:String(v.licenca||0),faixaIdManual:v.faixaIdManual||v.faixa_id_manual||"",obs:v.obs||""})}}><Ic n="edit" s={13}/></IBtn>
+                        <IBtn t={t} color={t.red} title="Registrar Churn" onClick={()=>abrirChurn(v)}>
+                          <Ic n="churn" s={13}/>
+                        </IBtn>
+                      </>}
+                      {isChurn && (
+                        <IBtn t={t} color={t.green} title="Reverter Churn" onClick={()=>confirmarRemoverChurn(v)}>
+                          <Ic n="undo" s={13}/>
+                        </IBtn>
+                      )}
                       <IBtn t={t} color="#ef4444" onClick={async()=>{const {error}=await deleteVenda(v.id);if(error)notify("Erro ao excluir","err");else notify("Venda removida.");}}><Ic n="trash" s={13}/></IBtn>
                     </div>
                   </TD>
@@ -1685,15 +1851,17 @@ function CalPage({me,users,vendas,produtos,t}) {
                 {parcelas.length===0
                   ? <div style={{padding:"12px 14px",fontSize:11,color:t.textMuted}}>Sem recebimentos</div>
                   : parcelas.map((p,i)=>(
-                  <div key={i} style={{padding:"8px 14px",borderBottom:i<parcelas.length-1?"1px solid #080f1a":"none",display:"flex",justifyContent:"space-between",gap:8}}>
+                  <div key={i} style={{padding:"8px 14px",borderBottom:i<parcelas.length-1?`1px solid ${t.border}`:"none",display:"flex",justifyContent:"space-between",gap:8,background:p.isChurn?"#f8717108":"transparent"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <span style={{background:p.tipo==="Parcela 1/2"?"#1a2d4a":"#1a1640",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>
-                        {p.tipo==="Parcela 1/2"?"1ª":"2ª"}
-                      </span>
+                      {p.isChurn
+                        ? <span style={{background:"#f8717122",color:t.red,padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>⚠ Churn</span>
+                        : <span style={{background:p.tipo==="Parcela 1/2"?"#1a2d4a":"#1a1640",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>
+                            {p.tipo==="Parcela 1/2"?"1ª":"2ª"}
+                          </span>}
                       {role!=="consultor"&&<span style={{fontSize:10,color:t.textSub,fontWeight:600}}>{p.nomeConsultor} · </span>}
                       <span style={{fontSize:10,color:t.textMuted}}>{p.cliente}</span>
                     </div>
-                    <span style={{fontWeight:700,color:"#34d399",whiteSpace:"nowrap",fontSize:11}}>{R$(p.valor)}</span>
+                    <span style={{fontWeight:700,color:p.isChurn?t.red:"#34d399",whiteSpace:"nowrap",fontSize:11}}>{R$(p.valor)}</span>
                   </div>
                 ))}
               </div>
@@ -1744,20 +1912,29 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
           </div>
           <div className="table-scroll">
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
-            <thead><tr style={{background:"#030810"}}>
+            <thead><tr style={{background:t.tableHead}}>
               {filtro==="todos"&&<TH t={t}>Consultor</TH>}
-              <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl.</TH><TH t={t}>Licença</TH><TH t={t}>Faixa</TH>
+              <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH><TH t={t}>Impl.</TH><TH t={t}>Licença</TH><TH t={t}>Faixa</TH>
               <TH t={t} right>Over MRR</TH><TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
               <TH t={t} right>1ª Parcela</TH><TH t={t} right>2ª Parcela</TH>
             </tr></thead>
             <tbody>
               {rows.map((r,i)=>{
                 const prod=produtos.find(p=>p.id===r.produtoId);
+                const isChurn = !!r.churnMes;
                 return (
-                  <tr key={(r.id||i)+"-"+mes} style={{borderBottom:i<rows.length-1?"1px solid #080f1a":"none"}}>
+                  <tr key={(r.id||i)+"-"+mes} style={{borderBottom:i<rows.length-1?`1px solid ${t.border}`:"none",opacity:isChurn?.7:1,background:isChurn?"#f8717108":"transparent"}}>
                     {filtro==="todos"&&<TD t={t} bold color={t.text}>{r.nomeConsultor}</TD>}
                     <TD t={t} bold color={t.text}>{prod?.nome}</TD>
                     <TD t={t}>{r.cliente}</TD>
+                    <TD t={t}>
+                      {isChurn
+                        ? <div>
+                            <span style={{background:"#f8717122",color:t.red,border:`1px solid ${t.red}44`,borderRadius:99,padding:"2px 8px",fontSize:10,fontWeight:800}}>⚠ Churn</span>
+                            <div style={{fontSize:9,color:t.textMuted,marginTop:2}}>{ML(r.churnMes)}{r.churnDesconta?" · c/ estorno":" · sem estorno"}</div>
+                          </div>
+                        : <span style={{background:"#10b98122",color:t.green,border:`1px solid ${t.green}44`,borderRadius:99,padding:"2px 8px",fontSize:10,fontWeight:800}}>✓ Ativo</span>}
+                    </TD>
                     <TD t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
                     <TD t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
                     <TD t={t} color={r.licenca>0?"#a78bfa":t.textMuted}>{r.licenca>0?R$(r.licenca):"—"}</TD>
@@ -1796,8 +1973,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
 
   const save=async()=>{
     setSaving(true);
-    // Prepara para salvar no Supabase (campo snake_case)
-    await setProdutos(p=>p.map(x=>x.id===draft.id?{...draft,selecao_faixa:draft.selecaoFaixa,pct_mrr:draft.pctMRR}:x));
+    await setProdutos(p=>p.map(x=>x.id===draft.id?{...draft,selecao_faixa:draft.selecaoFaixa,pct_mrr:draft.pctMRR,pct_lic:draft.pctLic??null}:x));
     setSaving(false);
     notify("Parâmetros salvos!");
   };
@@ -1893,6 +2069,25 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
                 <div style={{fontSize:12,color:"#38bdf8",fontWeight:700,marginBottom:10}}>💳 MRR — Mensalidade</div>
                 <div><Label t={t}>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp(t),color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
               </div>
+              {!draft.semLicenca && !draft.soImpl && (
+              <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #2a1a4a"}}>
+                <div style={{fontSize:12,color:t.purple,fontWeight:700,marginBottom:10}}>📦 Licença</div>
+                <div>
+                  <Label t={t}>% de Comissão sobre Licença</Label>
+                  <input type="number"
+                    value={draft.pctLic ?? ""}
+                    onChange={e=>updPct("pctLic", e.target.value===""?null:+e.target.value)}
+                    placeholder={`Padrão: usa % da faixa NR`}
+                    style={{...inp(t),color:t.purple,fontWeight:800,fontSize:18,textAlign:"center"}}
+                  />
+                  <div style={{fontSize:10,color:t.textMuted,marginTop:4}}>
+                    {draft.pctLic!=null
+                      ? `Licença usará ${draft.pctLic}% fixo (independente da faixa)`
+                      : `Vazio = usa % da faixa de implantação (${draft.regras[0]?.pctImpl}% / ${draft.regras[1]?.pctImpl}%)`}
+                  </div>
+                </div>
+              </div>
+              )}
               <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #1e4060"}}>
                 <div style={{fontSize:12,color:"#ca8a04",fontWeight:700,marginBottom:10}}>⚡ Modo de Seleção de Faixa</div>
                 <div style={{display:"flex",gap:8}}>
@@ -1909,8 +2104,8 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
                   </div>
                 </div>
               ))}
-              <div style={{background:t.tableHead,borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:t.textMuted,border:"1px solid #0c1f35"}}>
-                💡 <b style={{color:"#38bdf8"}}>MRR</b> = mensalidade × {draft.pctMRR}% · <b style={{color:"#a78bfa"}}>NR</b> = (impl+lic) × faixa% · Pago em 2× (+2 e +3 meses)
+              <div style={{background:t.tableHead,borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:t.textMuted,border:`1px solid ${t.border}`}}>
+                💡 <b style={{color:"#38bdf8"}}>MRR</b> = mensalidade × {draft.pctMRR}% · <b style={{color:"#a78bfa"}}>Impl.</b> = horas×valor × faixa% · <b style={{color:t.purple}}>Lic.</b> = licença × {draft.pctLic!=null?`${draft.pctLic}% (fixo)`:"faixa%"} · Pago em 2× (+2 e +3 meses)
               </div>
               <Btn t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
             </div>
@@ -1927,7 +2122,8 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
                     </div>
                     <div style={{display:"flex",gap:14,fontSize:12,flexWrap:"wrap"}}>
                       <span style={{color:t.textMuted}}>MRR: <b style={{color:"#38bdf8"}}>{R$(c.comMRR)}</b></span>
-                      <span style={{color:t.textMuted}}>NR: <b style={{color:"#a78bfa"}}>{R$(c.comImpl+c.comLic)}</b></span>
+                      <span style={{color:t.textMuted}}>Impl.: <b style={{color:"#a78bfa"}}>{R$(c.comImpl)}</b></span>
+                      {s.lic>0&&<span style={{color:t.textMuted}}>Lic.: <b style={{color:t.purple}}>{R$(c.comLic)}</b> ({c.pctLicEfetivo}%)</span>}
                       <span style={{color:"#34d399",fontWeight:700}}>= {R$(c.total)}</span>
                     </div>
                   </div>
