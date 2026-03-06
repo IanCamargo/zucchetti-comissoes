@@ -488,6 +488,12 @@ const GlobalCSS = ({t}) => (
       /* ── Histórico cabeçalho mobile ── */
       .hist-header  { flex-direction:column !important; align-items:flex-start !important; gap:6px !important; }
 
+      /* ── Tabelas: ocultar colunas secundárias no mobile ── */
+      .col-hide-mobile { display:none !important; }
+      /* Compactar colunas visíveis */
+      .table-scroll table td, .table-scroll table th { padding:8px 6px !important; font-size:11px !important; }
+      .table-scroll table { min-width:unset !important; }
+
       .mobile-bottom-nav {
         display:flex !important;
         position:fixed; bottom:0; left:0; right:0;
@@ -546,14 +552,14 @@ const Label = ({children,t}) => (
   </label>
 );
 
-const TH = ({children,right,t}) => (
-  <th style={{padding:"11px 16px",textAlign:right?"right":"left",fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap",background:t.tableHead,borderBottom:`1px solid ${t.border}`}}>
+const TH = ({children,right,t,className}) => (
+  <th className={className||""} style={{padding:"11px 16px",textAlign:right?"right":"left",fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap",background:t.tableHead,borderBottom:`1px solid ${t.border}`}}>
     {children}
   </th>
 );
 
-const TD = ({children,right,bold,color,sub,t}) => (
-  <td style={{padding:"12px 16px",fontSize:13,color:color||t.textSub,fontWeight:bold?700:400,textAlign:right?"right":"left",verticalAlign:"top",borderBottom:`1px solid ${t.border}22`}}>
+const TD = ({children,right,bold,color,sub,t,className}) => (
+  <td className={className||""} style={{padding:"12px 16px",fontSize:13,color:color||t.textSub,fontWeight:bold?700:400,textAlign:right?"right":"left",verticalAlign:"top",borderBottom:`1px solid ${t.border}22`}}>
     {children}
     {sub&&<div style={{fontSize:10,color:t.textMuted,marginTop:2}}>{sub}</div>}
   </td>
@@ -1680,9 +1686,16 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,registerCh
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
           <thead><tr style={{background:t.tableHead}}>
             {role!=="consultor"&&<TH t={t}>Consultor</TH>}
-            <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
-            <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
-            <TH t={t} right>1ª ({ML(addMonths(mes,2))})</TH><TH t={t} right>2ª ({ML(addMonths(mes,3))})</TH><TH t={t}>Ações</TH>
+            <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH>
+            <TH t={t} className="col-hide-mobile">Impl. Total</TH>
+            <TH t={t} className="col-hide-mobile">Licença</TH>
+            <TH t={t} className="col-hide-mobile">NR</TH>
+            <TH t={t} className="col-hide-mobile">Faixa</TH>
+            <TH t={t} right className="col-hide-mobile">Com. MRR</TH>
+            <TH t={t} right className="col-hide-mobile">Com. NR</TH>
+            <TH t={t} right>Total</TH>
+            <TH t={t} right>Parcelas</TH>
+            <TH t={t}>Ações</TH>
           </tr></thead>
           <tbody>
             {vendasMes.length===0?<tr><td colSpan={14}><Empty t={t}/></td></tr>:vendasMes.map((v,i)=>{
@@ -1714,18 +1727,28 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,registerCh
                     )}
                   </TD>
                   <TD t={t} bold color={c.soImpl?t.textMuted:"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
-                  <TD t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
-                  <TD t={t} color={v.licenca>0?"#a78bfa":t.textMuted}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                  <TD t={t} bold color={t.text}>{R$(c.nr)}</TD>
-                  <TD t={t}><FaixaBadge t={t} faixa={c.faixa}/></TD>
-                  <TD t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
-                  <TD t={t} right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
+                  <TD t={t} className="col-hide-mobile">{R$(c.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
+                  <TD t={t} className="col-hide-mobile" color={v.licenca>0?"#a78bfa":t.textMuted}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                  <TD t={t} className="col-hide-mobile" bold color={t.text}>{R$(c.nr)}</TD>
+                  <TD t={t} className="col-hide-mobile"><FaixaBadge t={t} faixa={c.faixa}/></TD>
+                  <TD t={t} className="col-hide-mobile" right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
+                  <TD t={t} className="col-hide-mobile" right color="#a78bfa" bold>{R$(c.comImpl+c.comLic)}</TD>
                   <TD t={t} right bold color={t.text}>{R$(c.total)}</TD>
-                  <TD t={t} right color={isChurn?"#f87171":"#38bdf8"} bold>
-                    {isChurn&&v.churnDesconta?<span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>:R$(c.parcela)}
-                  </TD>
-                  <TD t={t} right color={isChurn?"#f87171":"#818cf8"} bold>
-                    {isChurn&&v.churnDesconta?<span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>:R$(c.parcela)}
+                  <TD t={t} right>
+                    <div style={{display:"flex",flexDirection:"column",gap:2,alignItems:"flex-end"}}>
+                      <span style={{color:isChurn&&v.churnDesconta?t.red:"#38bdf8",fontWeight:700,fontSize:12}}>
+                        {isChurn&&v.churnDesconta
+                          ? <span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>
+                          : R$(c.parcela)}
+                        <span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(addMonths(mes,2))}</span>
+                      </span>
+                      <span style={{color:isChurn&&v.churnDesconta?t.red:"#818cf8",fontWeight:700,fontSize:12}}>
+                        {isChurn&&v.churnDesconta
+                          ? <span style={{textDecoration:"line-through",opacity:.5}}>{R$(c.parcela)}</span>
+                          : R$(c.parcela)}
+                        <span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(addMonths(mes,3))}</span>
+                      </span>
+                    </div>
                   </TD>
                   <TD t={t}>
                     <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
@@ -1914,9 +1937,16 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
             <thead><tr style={{background:t.tableHead}}>
               {filtro==="todos"&&<TH t={t}>Consultor</TH>}
-              <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH><TH t={t}>Impl.</TH><TH t={t}>Licença</TH><TH t={t}>Faixa</TH>
-              <TH t={t} right>Over MRR</TH><TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
-              <TH t={t} right>1ª Parcela</TH><TH t={t} right>2ª Parcela</TH>
+              <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH>
+              <TH t={t} className="col-hide-mobile">MRR</TH>
+              <TH t={t} className="col-hide-mobile">Impl.</TH>
+              <TH t={t} className="col-hide-mobile">Licença</TH>
+              <TH t={t} className="col-hide-mobile">Faixa</TH>
+              <TH t={t} right className="col-hide-mobile">Over MRR</TH>
+              <TH t={t} right className="col-hide-mobile">Com. MRR</TH>
+              <TH t={t} right className="col-hide-mobile">Com. NR</TH>
+              <TH t={t} right>Total</TH>
+              <TH t={t} right>Parcelas</TH>
             </tr></thead>
             <tbody>
               {rows.map((r,i)=>{
@@ -1935,6 +1965,13 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
                           </div>
                         : <span style={{background:"#10b98122",color:t.green,border:`1px solid ${t.green}44`,borderRadius:99,padding:"2px 8px",fontSize:10,fontWeight:800}}>✓ Ativo</span>}
                     </TD>
+                    <TD t={t} className="col-hide-mobile" bold color="#38bdf8">{R$(r.mrr)}</TD>
+                    <TD t={t} className="col-hide-mobile">{R$(r.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
+                    <TD t={t} className="col-hide-mobile" color={r.licenca>0?"#a78bfa":t.textMuted}>{r.licenca>0?R$(r.licenca):"—"}</TD>
+                    <TD t={t} className="col-hide-mobile"><FaixaBadge t={t} faixa={r.faixa}/></TD>
+                    <TD t={t} className="col-hide-mobile" right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
+                    <TD t={t} className="col-hide-mobile" right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
+                    <TD t={t} className="col-hide-mobile" right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
                     <TD t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
                     <TD t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
                     <TD t={t} color={r.licenca>0?"#a78bfa":t.textMuted}>{r.licenca>0?R$(r.licenca):"—"}</TD>
@@ -1943,8 +1980,12 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
                     <TD t={t} right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
                     <TD t={t} right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
                     <TD t={t} right bold color={t.text}>{R$(r.total)}</TD>
-                    <TD t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:t.textMuted}}>{ML(r.mesParcela1)}</div></TD>
-                    <TD t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:t.textMuted}}>{ML(r.mesParcela2)}</div></TD>
+                    <TD t={t} right>
+                      <div style={{display:"flex",flexDirection:"column",gap:2,alignItems:"flex-end"}}>
+                        <span style={{color:"#38bdf8",fontWeight:700,fontSize:12}}>{R$(r.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(r.mesParcela1)}</span></span>
+                        <span style={{color:"#818cf8",fontWeight:700,fontSize:12}}>{R$(r.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(r.mesParcela2)}</span></span>
+                      </div>
+                    </TD>
                   </tr>
                 );
               })}
