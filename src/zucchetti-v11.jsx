@@ -990,31 +990,65 @@ function OverBar({ating, height=8}) {
 }
 
 // Gráfico de barras simples (evolução mensal do MRR no trimestre)
-function GraficoEvolucao({evolucao, overInfo}) {
+function GraficoEvolucao({evolucao, overInfo, t}) {
   const maxVal = Math.max(...evolucao.map(e => Math.max(e.mrr, e.metaMRR)), 1);
+  const ALTURA = 90;
   return (
-    <div style={{display:"flex",gap:8,alignItems:"flex-end",height:80,marginTop:8}}>
+    <div style={{display:"flex",gap:6,alignItems:"flex-end",height:ALTURA+40,marginTop:8,padding:"0 4px"}}>
       {evolucao.map((e, i) => {
-        const hMRR  = (e.mrr     / maxVal) * 72;
-        const hMeta = (e.metaMRR / maxVal) * 72;
+        const hMRR  = Math.max((e.mrr     / maxVal) * ALTURA, e.mrr>0?4:0);
+        const hMeta = Math.max((e.metaMRR / maxVal) * ALTURA, e.metaMRR>0?2:0);
         const ating = e.metaMRR > 0 ? (e.mrr / e.metaMRR) * 100 : 0;
-        const cor   = ating >= 200 ? "#f59e0b" : ating >= 150 ? "#34d399" : ating >= 100 ? "#38bdf8" : "#1e4060";
+        const cor = ating >= 200 ? t.amber : ating >= 150 ? t.green : ating >= 100 ? t.accent : t.textMuted;
+        const mesLabel = ML(e.mes).split("/")[0];
         return (
-          <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-            <div style={{fontSize:9,color:cor,fontWeight:700}}>{R$(e.mrr).replace("R$","").trim()}</div>
-            <div style={{width:"100%",display:"flex",alignItems:"flex-end",gap:2,height:60,justifyContent:"center"}}>
-              {/* barra meta */}
-              <div style={{width:"40%",height:hMeta,background:"#0c2a42",borderRadius:"3px 3px 0 0",border:"1px solid #1e4060"}}/>
-              {/* barra realizado */}
-              <div style={{width:"40%",height:hMRR,background:cor,borderRadius:"3px 3px 0 0",opacity:.9}}/>
+          <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:0,position:"relative"}}>
+            {/* Valor acima */}
+            {e.mrr > 0 && (
+              <div style={{fontSize:8,color:cor,fontWeight:700,marginBottom:3,whiteSpace:"nowrap"}}>
+                {e.mrr >= 1000 ? `${(e.mrr/1000).toFixed(1)}k` : e.mrr}
+              </div>
+            )}
+            {e.mrr === 0 && <div style={{height:15}}/>}
+            {/* Barras */}
+            <div style={{width:"100%",display:"flex",alignItems:"flex-end",justifyContent:"center",gap:2,height:ALTURA}}>
+              {/* Barra meta */}
+              <div style={{
+                width:"38%", height:hMeta,
+                background:`${t.accent}22`,
+                borderRadius:"3px 3px 0 0",
+                border:`1px solid ${t.accent}33`,
+              }}/>
+              {/* Barra realizado */}
+              <div style={{
+                width:"38%", height:hMRR,
+                background: e.mrr > 0
+                  ? `linear-gradient(180deg,${cor},${cor}99)`
+                  : "transparent",
+                borderRadius:"3px 3px 0 0",
+                boxShadow: e.mrr > 0 ? `0 0 8px ${cor}44` : "none",
+                transition:"height .4s cubic-bezier(.4,0,.2,1)",
+              }}/>
             </div>
-            <div style={{fontSize:9,color:"#1e4060",fontWeight:600}}>{ML(e.mes).split("/")[0]}</div>
+            {/* Label do mês */}
+            <div style={{fontSize:9,color:t.textMuted,fontWeight:600,marginTop:4}}>{mesLabel}</div>
+            {/* Indicador atingimento */}
+            {e.metaMRR > 0 && (
+              <div style={{fontSize:8,color:cor,fontWeight:700}}>{ating.toFixed(0)}%</div>
+            )}
           </div>
         );
       })}
-      <div style={{display:"flex",flexDirection:"column",gap:4,justifyContent:"flex-end",paddingBottom:16,marginLeft:4}}>
-        <div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,background:"#0c2a42",border:"1px solid #1e4060",borderRadius:2}}/><span style={{fontSize:9,color:"#1e4060"}}>Meta</span></div>
-        <div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,background:overInfo.color,borderRadius:2}}/><span style={{fontSize:9,color:"#1e4060"}}>Realizado</span></div>
+      {/* Legenda */}
+      <div style={{display:"flex",flexDirection:"column",gap:5,justifyContent:"flex-end",paddingBottom:28,marginLeft:6,flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:4}}>
+          <div style={{width:8,height:8,background:`${t.accent}33`,border:`1px solid ${t.accent}44`,borderRadius:2}}/>
+          <span style={{fontSize:9,color:t.textMuted,whiteSpace:"nowrap"}}>Meta</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:4}}>
+          <div style={{width:8,height:8,background:overInfo.color,borderRadius:2,boxShadow:`0 0 4px ${overInfo.color}66`}}/>
+          <span style={{fontSize:9,color:t.textMuted,whiteSpace:"nowrap"}}>Realizado</span>
+        </div>
       </div>
     </div>
   );
@@ -1797,36 +1831,105 @@ function ProdPage({produtos,setProdutos,notify}) {
 // ══════════════════════════════════════════════════════════════════
 function PeriodBar({page, mes, setMes, t}) {
   const semPeriodo = ["params","prod","users","relatorio","cal"];
-  if (semPeriodo.includes(page)) {
-    return <div style={{padding:"12px 32px",borderBottom:`1px solid ${t.border}`,background:t.topbarBg,height:50,display:"flex",alignItems:"center"}}>
-      <span style={{fontSize:11,color:t.textMuted,fontWeight:500}}>
-        {page==="relatorio"?"📊 Selecione o período dentro da página":
-         page==="cal"?"🗓 Selecione o ano dentro da página":""}
-      </span>
-    </div>;
-  }
   const now = new Date();
-  const mesAtual = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-  const meses = Array.from({length:18},(_,i)=>{
-    const d = new Date(now.getFullYear(), now.getMonth()-12+i, 1);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-  });
+  const anoAtual = now.getFullYear();
+  const mesAtualStr = `${anoAtual}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const [anoVis, setAnoVis] = useState(mes ? +mes.split("-")[0] : anoAtual);
+
+  // Sync anoVis when mes changes externally
+  useEffect(() => { if (mes) setAnoVis(+mes.split("-")[0]); }, [mes]);
+
+  const MESES_LABEL = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const mesesDoAno = Array.from({length:12}, (_,i) => `${anoVis}-${String(i+1).padStart(2,"0")}`);
+
+  const mesSel   = mes || mesAtualStr;
+  const mesAno   = mesSel.split("-")[0];
+  const mesNum   = +mesSel.split("-")[1];
+
+  if (semPeriodo.includes(page)) {
+    return (
+      <div style={{padding:"0 28px",borderBottom:`1px solid ${t.border}`,background:t.topbarBg,height:52,display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:20}}>{page==="relatorio"?"📊":page==="cal"?"🗓":"⚙️"}</span>
+        <span style={{fontSize:12,color:t.textMuted,fontWeight:500}}>
+          {page==="relatorio"?"Selecione o período na página" : page==="cal"?"Selecione o ano na página" : "Configurações"}
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <div style={{padding:"8px 28px",borderBottom:`1px solid ${t.border}`,background:t.topbarBg,display:"flex",alignItems:"center",gap:4,overflowX:"auto"}}>
-      <span style={{fontSize:9,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:1.5,marginRight:8,whiteSpace:"nowrap"}}>Competência</span>
-      {meses.map(mm=>{
-        const isAtual=mm===mesAtual, isSel=mm===mes;
-        return (
-          <button key={mm} onClick={()=>setMes(mm)}
-            style={{padding:"4px 10px",borderRadius:7,border:isAtual&&!isSel?`1px solid ${t.accent}55`:"none",
-              cursor:"pointer",fontSize:11,fontWeight:isSel?700:500,
-              background:isSel?t.accent:"transparent",
-              color:isSel?"#fff":isAtual?t.accent:t.textMuted,
-              transition:"all .15s",whiteSpace:"nowrap",flexShrink:0}}>
-            {ML(mm)}
-          </button>
-        );
-      })}
+    <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.border}`,padding:"0 20px",display:"flex",alignItems:"center",height:56,gap:0,position:"relative"}}>
+
+      {/* Ano + setas */}
+      <div style={{display:"flex",alignItems:"center",gap:2,marginRight:16,flexShrink:0}}>
+        <button onClick={()=>setAnoVis(a=>a-1)}
+          style={{width:26,height:26,borderRadius:7,border:`1px solid ${t.border}`,background:"transparent",cursor:"pointer",color:t.textMuted,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s",fontSize:14,lineHeight:1}}
+          onMouseEnter={e=>{e.currentTarget.style.background=t.bgHover;e.currentTarget.style.color=t.text;}}
+          onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=t.textMuted;}}>
+          ‹
+        </button>
+        <div style={{minWidth:48,textAlign:"center",fontSize:13,fontWeight:800,color:anoVis===anoAtual?t.accent:t.text,fontFamily:"'Outfit',sans-serif",letterSpacing:"-0.5px"}}>
+          {anoVis}
+        </div>
+        <button onClick={()=>setAnoVis(a=>a+1)}
+          style={{width:26,height:26,borderRadius:7,border:`1px solid ${t.border}`,background:"transparent",cursor:"pointer",color:t.textMuted,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s",fontSize:14,lineHeight:1}}
+          onMouseEnter={e=>{e.currentTarget.style.background=t.bgHover;e.currentTarget.style.color=t.text;}}
+          onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=t.textMuted;}}>
+          ›
+        </button>
+      </div>
+
+      {/* Divisor */}
+      <div style={{width:1,height:28,background:t.border,marginRight:16,flexShrink:0}}/>
+
+      {/* 12 meses do ano */}
+      <div style={{display:"flex",gap:3,flex:1,overflowX:"auto",alignItems:"center"}}>
+        {mesesDoAno.map((mm,i) => {
+          const isSel    = mm === mesSel;
+          const isAtual  = mm === mesAtualStr;
+          const isFuturo = mm > mesAtualStr;
+          return (
+            <button key={mm} onClick={()=>setMes(mm)}
+              style={{
+                position:"relative",
+                padding:"5px 10px",
+                borderRadius:9,
+                border:"none",
+                cursor:"pointer",
+                fontSize:12,
+                fontWeight: isSel ? 700 : 500,
+                background: isSel
+                  ? `linear-gradient(135deg,${t.accent},${t.cyan})`
+                  : isAtual
+                  ? `${t.accent}15`
+                  : "transparent",
+                color: isSel ? "#fff" : isAtual ? t.accent : isFuturo ? t.textMuted+"88" : t.textSub,
+                transition:"all .18s cubic-bezier(.4,0,.2,1)",
+                whiteSpace:"nowrap",
+                flexShrink:0,
+                boxShadow: isSel ? `0 4px 14px ${t.accent}55` : "none",
+                transform: isSel ? "translateY(-1px)" : "none",
+              }}
+              onMouseEnter={e=>{ if(!isSel){ e.currentTarget.style.background=t.bgHover; e.currentTarget.style.color=t.text; }}}
+              onMouseLeave={e=>{ if(!isSel){ e.currentTarget.style.background=isAtual?`${t.accent}15`:"transparent"; e.currentTarget.style.color=isAtual?t.accent:isFuturo?t.textMuted+"88":t.textSub; }}}>
+              {MESES_LABEL[i]}
+              {isAtual && !isSel && (
+                <div style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:t.accent}}/>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Botão "Hoje" se ano não for atual */}
+      {anoVis !== anoAtual && (
+        <button onClick={()=>{ setAnoVis(anoAtual); setMes(mesAtualStr); }}
+          style={{marginLeft:12,padding:"4px 11px",borderRadius:8,border:`1px solid ${t.accent}55`,background:`${t.accent}15`,color:t.accent,fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .15s"}}
+          onMouseEnter={e=>e.currentTarget.style.background=t.accent+"30"}
+          onMouseLeave={e=>e.currentTarget.style.background=t.accent+"15"}>
+          Hoje
+        </button>
+      )}
     </div>
   );
 }
