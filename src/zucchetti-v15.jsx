@@ -354,28 +354,42 @@ const GlobalCSS = ({t}) => (
       transition:transform .28s cubic-bezier(.4,0,.2,1);
       overflow-y:auto;
     }
-    .main-wrap { margin-left:220px; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; }
-    .page-content { padding:28px 32px 60px; flex:1; width:100%; min-width:0; overflow-x:hidden; }
+    .main-wrap {
+      margin-left:220px;
+      width:calc(100% - 220px);
+      min-height:100vh;
+      display:flex; flex-direction:column;
+      overflow-x:hidden;
+      box-sizing:border-box;
+    }
+    .page-content { padding:28px 32px 60px; flex:1; width:100%; min-width:0; overflow-x:hidden; box-sizing:border-box; }
     .topbar-mobile-row { display:none; }
     .sidebar-close-btn { display:none !important; }
     .drawer-overlay { display:none; position:fixed; inset:0; background:#00000088; z-index:39; backdrop-filter:blur(2px); }
-    .period-bar-wrap { display:flex; align-items:center; min-height:50px; padding:0 14px; overflow-x:auto; }
+    .period-bar-wrap { display:flex; align-items:center; min-height:50px; padding:0 14px; overflow-x:auto; width:100%; box-sizing:border-box; }
 
-    /* ── GRIDS ── */
-    .stat-grid   { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-    .stat-grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
-    .mini-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
-    .form-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+    /* ── GRIDS — desktop usa 100% da área disponível ── */
+    .stat-grid   { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; width:100%; }
+    .stat-grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; width:100%; }
+    .mini-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; width:100%; }
+    .form-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; width:100%; }
 
-    /* ── CARDS DE CONSULTOR NO DASHBOARD ── */
-    .dash-card-body    { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:14px 20px; }
-    .dash-trim-body    { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .params-grid       { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-    .metas-grid        { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-    .equipe-grid       { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
-    .cal-grid          { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-    .preview-parcelas  { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .usuarios-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; align-items:end; }
+    /* ── CARDS DO DASHBOARD ── */
+    .dash-card-body  { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:14px 20px; }
+    .dash-trim-body  { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+    /* ── Parâmetros ── */
+    .params-grid     { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; width:100%; }
+    .metas-grid      { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%; }
+
+    /* ── Equipe: 2 colunas no desktop padrão, 3 em telas largas ── */
+    .equipe-grid     { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr)); gap:16px; width:100%; }
+
+    /* ── Calendário: preenche a largura toda ── */
+    .cal-grid        { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr)); gap:12px; width:100%; }
+
+    .preview-parcelas   { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .usuarios-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; align-items:end; width:100%; }
 
     /* ── BOTTOM NAV ── */
     .mobile-bottom-nav { display:none; }
@@ -394,7 +408,7 @@ const GlobalCSS = ({t}) => (
       .sidebar-wrap.open { transform:translateX(0); box-shadow:6px 0 40px rgba(0,0,0,.55); }
       .drawer-overlay.open { display:block; }
       .sidebar-close-btn { display:flex !important; }
-      .main-wrap { margin-left:0 !important; width:100vw; max-width:100vw; overflow-x:hidden; }
+      .main-wrap { margin-left:0 !important; width:100vw !important; max-width:100vw; overflow-x:hidden; }
       .topbar-mobile-row { display:flex; }
       .page-content { padding:14px 12px 88px; width:100%; max-width:100vw; overflow-x:hidden; }
       .stat-grid   { grid-template-columns:repeat(2,1fr); gap:10px; }
@@ -894,7 +908,7 @@ export default function App() {
 
   const nav=[
     {id:"dash",      label:"Dashboard",  icon:"dash",   roles:["consultor","gestor","parametros"]},
-    {id:"vendas",    label:"Vendas",     icon:"sales",  roles:["consultor","gestor","parametros"]},
+    {id:"vendas",    label:"Vendas",     icon:"sales",  roles:["consultor","parametros"]},
     {id:"equipe",    label:"Equipe",     icon:"team",   roles:["gestor","parametros"]},
     {id:"cal",       label:"Calendário", icon:"cal",    roles:["consultor","gestor","parametros"]},
     {id:"hist",      label:"Histórico",  icon:"hist",   roles:["consultor","gestor","parametros"]},
@@ -1009,7 +1023,7 @@ export default function App() {
       </aside>
 
       {/* MAIN */}
-      <main className="main-wrap" style={{minWidth:0,overflow:"hidden"}}>
+      <main className="main-wrap" style={{minWidth:0,overflow:"hidden",flex:1}}>
 
         {/* TOPBAR */}
         <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.sidebarBorder}`,position:"sticky",top:0,zIndex:10}}>
