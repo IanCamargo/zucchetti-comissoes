@@ -1425,31 +1425,44 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
             {/* ── TABELA DE CONTRATOS (só mensal) ── */}
             {viewMode==="mensal"&&c.vendasCalc.length>0&&(
               <div className="table-scroll">
-              <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
-                <thead><tr style={{background:"#030810"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",minWidth:"unset"}}>
+                <thead><tr style={{background:t.tableHead}}>
                   <TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
-                  <TH t={t}>MRR</TH><TH t={t}>Impl. (h×R$/h)</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH>
-                  <TH t={t}>Faixa NR</TH>
-                  <TH t={t} right>Com. MRR ({c.pctMRR}%)</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
-                  <TH t={t} right>1ª parc.</TH><TH t={t} right>2ª parc.</TH>
+                  <TH t={t} className="col-hide-mobile">MRR</TH>
+                  <TH t={t} className="col-hide-mobile">Impl. (h×R$/h)</TH>
+                  <TH t={t} className="col-hide-mobile">Licença</TH>
+                  <TH t={t} className="col-hide-mobile">NR</TH>
+                  <TH t={t} className="col-hide-mobile">Faixa NR</TH>
+                  <TH t={t} right className="col-hide-mobile">Com. MRR ({c.pctMRR}%)</TH>
+                  <TH t={t} right className="col-hide-mobile">Com. NR</TH>
+                  <TH t={t} right>Total</TH>
+                  <TH t={t} right>Parcelas</TH>
                 </tr></thead>
                 <tbody>
                   {c.vendasCalc.map((v,i)=>{
                     const prod=produtos.find(p=>p.id===v.produtoId);
+                    const isChurnV = !!v.churnMes;
                     return (
-                      <tr key={v.id||i} style={{borderBottom:i<c.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                        <TD t={t} bold color={t.text}>{prod?.nome}</TD>
+                      <tr key={v.id||i} style={{borderBottom:i<c.vendasCalc.length-1?`1px solid ${t.border}`:"none",opacity:isChurnV?.7:1,background:isChurnV?"#f8717108":"transparent"}}>
+                        <TD t={t} bold color={t.text}>
+                          {prod?.nome}
+                          {isChurnV&&<div style={{marginTop:2}}><span style={{background:"#f8717122",color:t.red,borderRadius:99,padding:"1px 6px",fontSize:9,fontWeight:800}}>⚠ Churn {ML(v.churnMes)}</span></div>}
+                        </TD>
                         <TD t={t}>{v.cliente}</TD>
-                        <TD t={t} bold color="#38bdf8">{R$(v.mrr)}</TD>
-                        <TD t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
-                        <TD t={t} color={v.licenca>0?"#a78bfa":t.textMuted}>{v.licenca>0?R$(v.licenca):"—"}</TD>
-                        <TD t={t} bold color={t.text}>{R$(v.nr)}</TD>
-                        <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
-                        <TD t={t} right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
-                        <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
+                        <TD t={t} className="col-hide-mobile" bold color="#38bdf8">{R$(v.mrr)}</TD>
+                        <TD t={t} className="col-hide-mobile">{R$(v.implTotal)}<div style={{fontSize:10,color:t.textMuted}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
+                        <TD t={t} className="col-hide-mobile" color={v.licenca>0?"#a78bfa":t.textMuted}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                        <TD t={t} className="col-hide-mobile" bold color={t.text}>{R$(v.nr)}</TD>
+                        <TD t={t} className="col-hide-mobile"><FaixaBadge t={t} faixa={v.faixa}/></TD>
+                        <TD t={t} className="col-hide-mobile" right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
+                        <TD t={t} className="col-hide-mobile" right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
                         <TD t={t} right bold color={t.text}>{R$(v.total)}</TD>
-                        <TD t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:t.textMuted}}>{ML(v.mesParcela1)}</div></TD>
-                        <TD t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:t.textMuted}}>{ML(v.mesParcela2)}</div></TD>
+                        <TD t={t} right>
+                          <div style={{display:"flex",flexDirection:"column",gap:2,alignItems:"flex-end"}}>
+                            <span style={{color:"#38bdf8",fontWeight:700,fontSize:12}}>{R$(v.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(v.mesParcela1)}</span></span>
+                            <span style={{color:"#818cf8",fontWeight:700,fontSize:12}}>{R$(v.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(v.mesParcela2)}</span></span>
+                          </div>
+                        </TD>
                       </tr>
                     );
                   })}
@@ -1683,7 +1696,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,registerCh
       <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a"}}><span style={{fontSize:13,fontWeight:600,color:t.textSub}}>Contratos em {ML(mes)} · {vendasMes.length} registro{vendasMes.length!==1?"s":""}</span></div>
         <div className="table-scroll">
-        <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:"unset"}}>
           <thead><tr style={{background:t.tableHead}}>
             {role!=="consultor"&&<TH t={t}>Consultor</TH>}
             <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH><TH t={t}>MRR</TH>
@@ -1934,7 +1947,7 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
             </div>
           </div>
           <div className="table-scroll">
-          <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:"unset"}}>
             <thead><tr style={{background:t.tableHead}}>
               {filtro==="todos"&&<TH t={t}>Consultor</TH>}
               <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>Status</TH>
@@ -2523,25 +2536,35 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
             <span style={{fontSize:13,fontWeight:700,color:t.text}}>Resumo da Equipe — {labelPeriodo}</span>
           </div>
           <div className="table-scroll">
-            <table style={{width:"100%",borderCollapse:"collapse",minWidth:550}}>
+            <table style={{width:"100%",borderCollapse:"collapse",minWidth:"unset"}}>
               <thead><tr>
-                <TH t={t}>Consultor</TH><TH t={t}>Cargo</TH><TH t={t}>Vendas</TH>
-                <TH t={t} right>MRR</TH><TH t={t} right>Meta</TH><TH t={t} right>Ating.</TH>
-                <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+                <TH t={t}>Consultor</TH>
+                <TH t={t} className="col-hide-mobile">Cargo</TH>
+                <TH t={t} className="col-hide-mobile">Vendas</TH>
+                <TH t={t} right className="col-hide-mobile">MRR</TH>
+                <TH t={t} right className="col-hide-mobile">Meta</TH>
+                <TH t={t} right className="col-hide-mobile">Ating.</TH>
+                <TH t={t} right className="col-hide-mobile">Com. MRR</TH>
+                <TH t={t} right className="col-hide-mobile">Com. NR</TH>
+                <TH t={t} right>Total</TH>
               </tr></thead>
               <tbody>
                 {dadosPeriodo.length===0
                   ? <tr><td colSpan={9}><Empty t={t} msg="Nenhum dado no período."/></td></tr>
                   : dadosPeriodo.map((d,i)=>(
                   <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?`1px solid ${t.border}22`:"none"}}>
-                    <TD t={t} bold color={t.text}>{d.name}</TD>
-                    <TD t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
-                    <TD t={t}>{d.nVendas}</TD>
-                    <TD t={t} right bold color={t.accent}>{R$(d.totalMRR)}</TD>
-                    <TD t={t} right color={t.textMuted}>{R$(d.metaMRR)}</TD>
-                    <TD t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
-                    <TD t={t} right bold color={t.green}>{R$(d.comMRR)}</TD>
-                    <TD t={t} right bold color={t.purple}>{R$(d.comNR)}</TD>
+                    <TD t={t} bold color={t.text}>
+                      {d.name}
+                      <div className="col-hide-mobile" style={{display:"none"}}/>
+                      <div style={{fontSize:10,color:t.textMuted,marginTop:1,display:"none"}} className="show-mobile-only">{CARGO_LABEL[d.cargo]} · {d.nVendas} vendas</div>
+                    </TD>
+                    <TD t={t} className="col-hide-mobile"><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
+                    <TD t={t} className="col-hide-mobile">{d.nVendas}</TD>
+                    <TD t={t} className="col-hide-mobile" right bold color={t.accent}>{R$(d.totalMRR)}</TD>
+                    <TD t={t} className="col-hide-mobile" right color={t.textMuted}>{R$(d.metaMRR)}</TD>
+                    <TD t={t} className="col-hide-mobile" right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
+                    <TD t={t} className="col-hide-mobile" right bold color={t.green}>{R$(d.comMRR)}</TD>
+                    <TD t={t} className="col-hide-mobile" right bold color={t.purple}>{R$(d.comNR)}</TD>
                     <TD t={t} right bold color={t.amber}>{R$(d.totalCom)}</TD>
                   </tr>
                 ))}
@@ -2594,33 +2617,37 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
           {/* Tabela de vendas */}
           {d.vendasCalc.length > 0 ? (
             <div className="table-scroll">
-              <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
+              <table style={{width:"100%",borderCollapse:"collapse",minWidth:"unset"}}>
                 <thead><tr>
-                  <TH t={t}>Mês</TH><TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
-                  <TH t={t} right>MRR</TH><TH t={t} right>NR</TH>
-                  <TH t={t}>Faixa</TH>
-                  <TH t={t} right>Com. Total</TH>
-                  <TH t={t} right>1ª Parcela</TH><TH t={t} right>2ª Parcela</TH>
+                  <TH t={t} className="col-hide-mobile">Mês</TH>
+                  <TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
+                  <TH t={t} right className="col-hide-mobile">MRR</TH>
+                  <TH t={t} right className="col-hide-mobile">NR</TH>
+                  <TH t={t} className="col-hide-mobile">Faixa</TH>
+                  <TH t={t} right>Total</TH>
+                  <TH t={t} right>Parcelas</TH>
                 </tr></thead>
                 <tbody>
                   {d.vendasCalc.map((v,i)=>{
                     const prod = produtos.find(p=>p.id===v.produtoId);
+                    const isChurnV = !!v.churnMes;
                     return (
-                      <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?`1px solid ${t.border}22`:"none"}}>
-                        <TD t={t} color={t.textMuted}>{ML(v.mes)}</TD>
-                        <TD t={t} bold color={t.text}>{prod?.nome}</TD>
-                        <TD t={t} color={t.textSub}>{v.cliente}</TD>
-                        <TD t={t} right bold color={t.accent}>{v.soImpl?"—":R$(v.mrr)}</TD>
-                        <TD t={t} right color={t.purple}>{R$(v.nr)}</TD>
-                        <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
-                        <TD t={t} right bold color={t.amber}>{R$(v.total)}</TD>
-                        <TD t={t} right color={t.accent}>
-                          {R$(v.parcela)}
-                          <div style={{fontSize:9,color:t.textMuted}}>{ML(v.mesParcela1)}</div>
+                      <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?`1px solid ${t.border}22`:"none",opacity:isChurnV?.7:1,background:isChurnV?"#f8717108":"transparent"}}>
+                        <TD t={t} className="col-hide-mobile" color={t.textMuted}>{ML(v.mes)}</TD>
+                        <TD t={t} bold color={t.text}>
+                          {prod?.nome}
+                          {isChurnV&&<div style={{marginTop:2}}><span style={{background:"#f8717122",color:t.red,borderRadius:99,padding:"1px 6px",fontSize:9,fontWeight:800}}>⚠ Churn {ML(v.churnMes)}</span></div>}
                         </TD>
-                        <TD t={t} right color={t.purple}>
-                          {R$(v.parcela)}
-                          <div style={{fontSize:9,color:t.textMuted}}>{ML(v.mesParcela2)}</div>
+                        <TD t={t} color={t.textSub}>{v.cliente}</TD>
+                        <TD t={t} className="col-hide-mobile" right bold color={t.accent}>{v.soImpl?"—":R$(v.mrr)}</TD>
+                        <TD t={t} className="col-hide-mobile" right color={t.purple}>{R$(v.nr)}</TD>
+                        <TD t={t} className="col-hide-mobile"><FaixaBadge t={t} faixa={v.faixa}/></TD>
+                        <TD t={t} right bold color={t.amber}>{R$(v.total)}</TD>
+                        <TD t={t} right>
+                          <div style={{display:"flex",flexDirection:"column",gap:2,alignItems:"flex-end"}}>
+                            <span style={{color:t.accent,fontWeight:700,fontSize:12}}>{R$(v.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(v.mesParcela1)}</span></span>
+                            <span style={{color:t.purple,fontWeight:700,fontSize:12}}>{R$(v.parcela)}<span style={{fontSize:9,color:t.textMuted,marginLeft:3}}>{ML(v.mesParcela2)}</span></span>
+                          </div>
                         </TD>
                       </tr>
                     );
