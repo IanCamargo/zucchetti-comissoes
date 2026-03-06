@@ -17,24 +17,48 @@ const FontLink = () => (
 // ══════════════════════════════════════════════════════════════════
 const THEMES = {
   dark: {
-    name:"dark", bg:"#07090f", bgCard:"#0d1117", bgPanel:"#111827", bgInput:"#161d2b",
-    bgHover:"#1a2235", border:"#1e2d42", borderAccent:"#2a4060",
-    text:"#e2e8f0", textSub:"#64748b", textMuted:"#2a3f58",
-    accent:"#3b82f6", accentHover:"#60a5fa", accentGlow:"#3b82f620",
-    green:"#10b981", greenGlow:"#10b98120", amber:"#f59e0b", amberGlow:"#f59e0b20",
-    purple:"#8b5cf6", purpleGlow:"#8b5cf620", red:"#ef4444", cyan:"#06b6d4",
-    sidebarBg:"#09111e", sidebarBorder:"#121e30", topbarBg:"#09111e",
-    tableHead:"#0a0f1a", tableRow:"#0d1117", tableRowAlt:"#0f1520",
+    name:"dark",
+    // Backgrounds — escalonados do mais escuro ao mais claro
+    bg:"#07090f", bgCard:"#0d1117", bgPanel:"#121c2e", bgInput:"#1a2438",
+    bgHover:"#1e2d42",
+    // Bordas
+    border:"#243448", borderAccent:"#2e4a6a",
+    // Textos — contraste alto garantido
+    text:"#f0f6ff",          // branco levemente azulado — texto principal
+    textSub:"#94a3b8",       // cinza médio — texto secundário legível
+    textMuted:"#546e8a",     // cinza azulado — labels, subtítulos (era muito escuro antes)
+    // Accent colors
+    accent:"#3b82f6", accentHover:"#60a5fa", accentGlow:"#3b82f625",
+    green:"#10b981", greenGlow:"#10b98125",
+    amber:"#f59e0b", amberGlow:"#f59e0b25",
+    purple:"#a78bfa", purpleGlow:"#a78bfa25",
+    red:"#f87171", cyan:"#22d3ee",
+    // Sidebar / topbar
+    sidebarBg:"#070d1a", sidebarBorder:"#1a2840", topbarBg:"#070d1a",
+    // Tabelas
+    tableHead:"#090f1c", tableRow:"#0d1117", tableRowAlt:"#111827",
   },
   light: {
-    name:"light", bg:"#f0f4f8", bgCard:"#ffffff", bgPanel:"#f8fafc", bgInput:"#f1f5f9",
-    bgHover:"#e8f0fe", border:"#e2e8f0", borderAccent:"#bfdbfe",
-    text:"#0f172a", textSub:"#475569", textMuted:"#94a3b8",
-    accent:"#2563eb", accentHover:"#1d4ed8", accentGlow:"#2563eb15",
-    green:"#059669", greenGlow:"#05966915", amber:"#d97706", amberGlow:"#d9770615",
-    purple:"#7c3aed", purpleGlow:"#7c3aed15", red:"#dc2626", cyan:"#0891b2",
-    sidebarBg:"#ffffff", sidebarBorder:"#e2e8f0", topbarBg:"#ffffff",
-    tableHead:"#f8fafc", tableRow:"#ffffff", tableRowAlt:"#f8fafc",
+    name:"light",
+    // Backgrounds
+    bg:"#eef2f7", bgCard:"#ffffff", bgPanel:"#f4f7fb", bgInput:"#edf1f7",
+    bgHover:"#e0eaff",
+    // Bordas
+    border:"#d1dce8", borderAccent:"#93c5fd",
+    // Textos — alto contraste no fundo branco
+    text:"#0f172a",          // quase preto — texto principal
+    textSub:"#334155",       // cinza escuro — texto secundário legível
+    textMuted:"#64748b",     // cinza médio — labels (era #94a3b8, muito claro)
+    // Accent colors mais escuros para contraste sobre fundo branco
+    accent:"#1d4ed8", accentHover:"#1e40af", accentGlow:"#1d4ed815",
+    green:"#047857", greenGlow:"#04785715",
+    amber:"#b45309", amberGlow:"#b4530915",
+    purple:"#6d28d9", purpleGlow:"#6d28d915",
+    red:"#b91c1c", cyan:"#0369a1",
+    // Sidebar / topbar
+    sidebarBg:"#ffffff", sidebarBorder:"#d1dce8", topbarBg:"#ffffff",
+    // Tabelas
+    tableHead:"#f1f5f9", tableRow:"#ffffff", tableRowAlt:"#f8fafc",
   }
 };
 
@@ -698,7 +722,7 @@ export default function App() {
   if (session === undefined) return (
     <div style={{minHeight:"100vh",background:THEMES.dark.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <FontLink/><Spinner size={32} color="#3b82f6"/>
-      <div style={{color:"#64748b",fontSize:13,fontFamily:"'Outfit',sans-serif"}}>Conectando…</div>
+      <div style={{color:t.textSub,fontSize:13,fontFamily:"'Outfit',sans-serif"}}>Conectando…</div>
     </div>
   );
 
@@ -1057,21 +1081,21 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <STitle t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
         {/* Toggle mensal / trimestral */}
-        <div style={{display:"flex",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
+        <div style={{display:"flex",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
           {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"]].map(([v,l])=>(
-            <button key={v} onClick={()=>setViewMode(v)} style={{padding:"6px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:viewMode===v?"#0c2a42":"transparent",color:viewMode===v?"#38bdf8":"#1e4060",transition:"all .15s"}}>{l}</button>
+            <button key={v} onClick={()=>setViewMode(v)} style={{padding:"6px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:viewMode===v?"#1a2d4a":"transparent",color:viewMode===v?"#38bdf8":"#546e8a",transition:"all .15s"}}>{l}</button>
           ))}
         </div>
       </div>
 
       {/* LEGENDA OVER */}
-      <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"10px 16px",marginBottom:18,display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
-        <span style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Over MRR {viewMode==="trimestral"?"trimestral":"mensal"}:</span>
+      <div style={{background:t.tableHead,border:"1px solid #0c2a42",borderRadius:10,padding:"10px 16px",marginBottom:18,display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
+        <span style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Over MRR {viewMode==="trimestral"?"trimestral":"mensal"}:</span>
         <span style={{background:"#38bdf822",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>70% · até 149%</span>
         <span style={{background:"#34d39922",color:"#34d399",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>⚡ 100% · 150–199%</span>
         <span style={{background:"#f59e0b22",color:"#f59e0b",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>🚀 200% · ≥200%</span>
-        {viewMode==="trimestral"&&<span style={{fontSize:10,color:"#1e4060",marginLeft:"auto"}}>Acerto pago em {porConsultor[0]?`${ML(porConsultor[0].trim.trim.parc1)} e ${ML(porConsultor[0].trim.trim.parc2)}`:"+5 e +6 meses"}</span>}
-        {viewMode==="mensal"&&<span style={{fontSize:10,color:"#1e4060",marginLeft:"auto"}}>Pagamento: +2 e +3 meses</span>}
+        {viewMode==="trimestral"&&<span style={{fontSize:10,color:"#546e8a",marginLeft:"auto"}}>Acerto pago em {porConsultor[0]?`${ML(porConsultor[0].trim.trim.parc1)} e ${ML(porConsultor[0].trim.trim.parc2)}`:"+5 e +6 meses"}</span>}
+        {viewMode==="mensal"&&<span style={{fontSize:10,color:"#546e8a",marginLeft:"auto"}}>Pagamento: +2 e +3 meses</span>}
       </div>
 
       {/* STAT CARDS — gestor/params */}
@@ -1094,20 +1118,20 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
 
       {/* CARDS POR CONSULTOR */}
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {porConsultor.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} msg="Sem vendas neste mês."/></div>}
+        {porConsultor.length===0&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} msg="Sem vendas neste mês."/></div>}
         {porConsultor.map(c=>{
           const t = c.trim;
           const borderColor = viewMode==="mensal"
-            ? (c.atingMRR>=200?"#f59e0b44":c.atingMRR>=150?"#34d39944":"#0c1f35")
-            : (t.atingMRRTrim>=200?"#f59e0b44":t.atingMRRTrim>=150?"#34d39944":"#0c1f35");
+            ? (c.atingMRR>=200?"#f59e0b44":c.atingMRR>=150?"#34d39944":"#243448")
+            : (t.atingMRRTrim>=200?"#f59e0b44":t.atingMRRTrim>=150?"#34d39944":"#243448");
           return (
-          <div key={c.id} style={{background:"#060d18",border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden"}}>
+          <div key={c.id} style={{background:t.bgCard,border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden"}}>
 
             {/* ── HEADER CARD ── */}
-            <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a",display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:"#040b14"}}>
+            <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a",display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:t.tableHead}}>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:CARGO_COLOR[c.cargo]||"#38bdf8"}}/>
-                <span style={{fontWeight:700,color:"#e2e8f0",fontSize:15}}>{c.name}</span>
+                <span style={{fontWeight:700,color:t.text,fontSize:15}}>{c.name}</span>
                 <span style={{background:CARGO_COLOR[c.cargo]+"22",color:CARGO_COLOR[c.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[c.cargo]}</span>
                 {viewMode==="mensal"&&<span style={{background:c.overInfo.bg,color:c.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${c.overInfo.border}`}}>{c.overInfo.label} mensal</span>}
                 {viewMode==="trimestral"&&<span style={{background:t.overInfoTrim.bg,color:t.overInfoTrim.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${t.overInfoTrim.border}`}}>{t.overInfoTrim.label} trim. · {t.trim.label}</span>}
@@ -1115,17 +1139,17 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
               {/* Valor destaque */}
               <div style={{textAlign:"right"}}>
                 {viewMode==="mensal"&&<>
-                  <div style={{fontSize:10,color:"#1e4060",marginBottom:2}}>Comissão do mês</div>
+                  <div style={{fontSize:10,color:"#546e8a",marginBottom:2}}>Comissão do mês</div>
                   <div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(c.totalCom)}</div>
-                  <div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>MRR {R$(c.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} · NR {R$(c.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))}</div>
-                  <div style={{fontSize:10,color:"#1e4060",marginTop:3}}>Parc: {ML(addMonths(mes,2))} · {ML(addMonths(mes,3))}</div>
+                  <div style={{fontSize:11,color:"#546e8a",marginTop:1}}>MRR {R$(c.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} · NR {R$(c.vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0))}</div>
+                  <div style={{fontSize:10,color:"#546e8a",marginTop:3}}>Parc: {ML(addMonths(mes,2))} · {ML(addMonths(mes,3))}</div>
                 </>}
                 {viewMode==="trimestral"&&<>
-                  <div style={{fontSize:10,color:"#1e4060",marginBottom:2}}>Acerto over trimestral</div>
-                  <div style={{fontSize:22,fontWeight:800,color:t.valorAcerto>0?"#f59e0b":"#1e4060",fontFamily:"'Syne',sans-serif"}}>{R$(t.valorAcerto)}</div>
-                  {t.valorAcerto>0&&<div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>+{t.pctAcerto}% sobre {R$(t.totalMRRTrim)}</div>}
-                  {t.valorAcerto>0&&<div style={{fontSize:10,color:"#1e4060",marginTop:3}}>Parc: {ML(t.trim.parc1)} · {ML(t.trim.parc2)}</div>}
-                  {t.valorAcerto===0&&<div style={{fontSize:11,color:"#1a3a54",marginTop:1}}>Sem acerto (abaixo de 150%)</div>}
+                  <div style={{fontSize:10,color:"#546e8a",marginBottom:2}}>Acerto over trimestral</div>
+                  <div style={{fontSize:22,fontWeight:800,color:t.valorAcerto>0?"#f59e0b":"#546e8a",fontFamily:"'Syne',sans-serif"}}>{R$(t.valorAcerto)}</div>
+                  {t.valorAcerto>0&&<div style={{fontSize:11,color:"#546e8a",marginTop:1}}>+{t.pctAcerto}% sobre {R$(t.totalMRRTrim)}</div>}
+                  {t.valorAcerto>0&&<div style={{fontSize:10,color:"#546e8a",marginTop:3}}>Parc: {ML(t.trim.parc1)} · {ML(t.trim.parc2)}</div>}
+                  {t.valorAcerto===0&&<div style={{fontSize:11,color:"#546e8a",marginTop:1}}>Sem acerto (abaixo de 150%)</div>}
                 </>}
               </div>
             </div>
@@ -1134,12 +1158,12 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
             {viewMode==="mensal"&&(
               <div style={{padding:"14px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
                 <div>
-                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
+                  <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
                   <OverBar t={t} ating={c.atingMRR}/>
                 </div>
                 <div>
-                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
-                  <div style={{height:8,background:"#0c1f35",borderRadius:99,overflow:"hidden",marginBottom:3,marginTop:16}}>
+                  <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
+                  <div style={{height:8,background:t.border,borderRadius:99,overflow:"hidden",marginBottom:3,marginTop:16}}>
                     <div style={{width:`${Math.min(c.atingNR,100)}%`,height:"100%",background:c.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99,transition:"width .4s"}}/>
                   </div>
                   <div style={{fontSize:11,color:c.atingNR>=100?"#a78bfa":"#64748b",fontWeight:700,marginTop:3}}>{c.atingNR.toFixed(1)}% da meta NR</div>
@@ -1153,14 +1177,14 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
                   {/* Barra trimestral MRR */}
                   <div>
-                    <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
+                    <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
                       Meta MRR Trimestral — {R$(t.metaTrimMRR)} · Vendido: {R$(t.totalMRRTrim)}
                     </div>
                     <OverBar t={t} ating={t.atingMRRTrim}/>
                   </div>
                   {/* Quanto falta para o próximo nível */}
-                  <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c2a42"}}>
-                    <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Falta para o próximo nível</div>
+                  <div style={{background:t.tableHead,borderRadius:10,padding:"12px 14px",border:"1px solid #0c2a42"}}>
+                    <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Falta para o próximo nível</div>
                     {t.atingMRRTrim>=200
                       ? <div style={{fontSize:13,color:"#f59e0b",fontWeight:700}}>🚀 Nível máximo atingido!</div>
                       : <>
@@ -1169,18 +1193,18 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
                         </>
                     }
                     {t.pctAcerto>0&&(
-                      <div style={{marginTop:6,padding:"6px 10px",background:"#0c2a42",borderRadius:8,fontSize:11}}>
-                        <span style={{color:"#1e4060"}}>Acerto atual: </span>
+                      <div style={{marginTop:6,padding:"6px 10px",background:"#1a2d4a",borderRadius:8,fontSize:11}}>
+                        <span style={{color:"#546e8a"}}>Acerto atual: </span>
                         <span style={{color:t.overInfoTrim.color,fontWeight:800}}>+{t.pctAcerto}% = {R$(t.valorAcerto)}</span>
-                        <div style={{color:"#1e4060",fontSize:10,marginTop:2}}>÷2: {R$(t.parcelaAcerto)} em {ML(t.trim.parc1)} e {ML(t.trim.parc2)}</div>
+                        <div style={{color:"#546e8a",fontSize:10,marginTop:2}}>÷2: {R$(t.parcelaAcerto)} em {ML(t.trim.parc1)} e {ML(t.trim.parc2)}</div>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Gráfico de evolução */}
-                <div style={{background:"#040b14",borderRadius:10,padding:"12px 14px",border:"1px solid #0c1f35"}}>
-                  <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>Evolução MRR no trimestre — {t.trim.label}</div>
+                <div style={{background:t.tableHead,borderRadius:10,padding:"12px 14px",border:"1px solid #0c1f35"}}>
+                  <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>Evolução MRR no trimestre — {t.trim.label}</div>
                   <GraficoEvolucao t={t} evolucao={t.evolucao} overInfo={t.overInfoTrim}/>
                 </div>
               </div>
@@ -1205,15 +1229,15 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
                         <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
                         <TD t={t}>{v.cliente}</TD>
                         <TD t={t} bold color="#38bdf8">{R$(v.mrr)}</TD>
-                        <TD t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
-                        <TD t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                        <TD t={t}>{R$(v.implTotal)}<div style={{fontSize:10,color:"#546e8a"}}>{v.horasImpl}h × {R$(v.valorHoraImpl)}/h</div></TD>
+                        <TD t={t} color={v.licenca>0?"#a78bfa":"#546e8a"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
                         <TD t={t} bold color="#e2e8f0">{R$(v.nr)}</TD>
                         <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
                         <TD t={t} right bold><span style={{color:c.overInfo.color}}>{R$(v.comMRR)}</span></TD>
                         <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
                         <TD t={t} right bold color="#e2e8f0">{R$(v.total)}</TD>
-                        <TD t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                        <TD t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                        <TD t={t} right color="#38bdf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#546e8a"}}>{ML(v.mesParcela1)}</div></TD>
+                        <TD t={t} right color="#818cf8" bold>{R$(v.parcela)}<div style={{fontSize:10,color:"#546e8a"}}>{ML(v.mesParcela2)}</div></TD>
                       </tr>
                     );
                   })}
@@ -1221,7 +1245,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
               </table>
               </div>
             )}
-            {viewMode==="mensal"&&c.vendasCalc.length===0&&<div style={{padding:"16px 20px",fontSize:12,color:"#1a3a54"}}>Sem contratos lançados neste mês.</div>}
+            {viewMode==="mensal"&&c.vendasCalc.length===0&&<div style={{padding:"16px 20px",fontSize:12,color:"#546e8a"}}>Sem contratos lançados neste mês.</div>}
           </div>
           );
         })}
@@ -1295,8 +1319,8 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
   return (
     <div>
       <STitle t={t}>Lançar Venda — {ML(mes)}</STitle>
-      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
-        <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
+      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
+        <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:14}}>
           {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label t={t}>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS(t)}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
           <div><Label t={t}>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS(t)}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
@@ -1304,27 +1328,27 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 
           {/* MRR — oculto para Horas Extras */}
           {!isSoImpl&&(
-            <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
+            <div style={{background:t.tableHead,borderRadius:8,padding:"10px 12px"}}>
               <Label t={t}>💳 MRR — Mensalidade (R$)</Label>
-              <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp(t),background:"#0c1a2e",color:"#38bdf8",fontWeight:700}}/>
+              <input type="number" value={form.mrr} onChange={e=>F("mrr",e.target.value)} placeholder="Ex: 2500" style={{...inp(t),background:t.bgInput,color:"#38bdf8",fontWeight:700}}/>
             </div>
           )}
 
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp(t),background:"#0c1a2e"}}/></div>
-          <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp(t),background:"#0c1a2e"}}/></div>
+          <div style={{background:t.tableHead,borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Horas Implantação</Label><input type="number" value={form.horasImpl} onChange={e=>F("horasImpl",e.target.value)} placeholder="Ex: 60" style={{...inp(t),background:t.bgInput}}/></div>
+          <div style={{background:t.tableHead,borderRadius:8,padding:"10px 12px"}}><Label t={t}>🔧 Valor/Hora (R$)</Label><input type="number" value={form.valorHoraImpl} onChange={e=>F("valorHoraImpl",e.target.value)} placeholder="Ex: 185" style={{...inp(t),background:t.bgInput}}/></div>
 
           {/* Licença — oculto para sem_licenca e so_impl */}
           {!isSemLic&&(
-            <div style={{background:"#040b14",borderRadius:8,padding:"10px 12px"}}>
+            <div style={{background:t.tableHead,borderRadius:8,padding:"10px 12px"}}>
               <Label t={t}>📦 Licença (R$)</Label>
-              <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp(t),background:"#0c1a2e",color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
+              <input type="number" value={form.licenca} onChange={e=>F("licenca",e.target.value)} placeholder="0 se não houver" style={{...inp(t),background:t.bgInput,color:+form.licenca>0?"#a78bfa":"#e2e8f0"}}/>
             </div>
           )}
 
           {isManual&&(
-            <div style={{background:"#0c2a42",borderRadius:8,padding:"10px 12px",border:"1px solid #1e4060"}}>
+            <div style={{background:"#1a2d4a",borderRadius:8,padding:"10px 12px",border:"1px solid #1e4060"}}>
               <Label t={t}>⚡ Faixa (manual)</Label>
-              <select value={form.faixaIdManual} onChange={e=>F("faixaIdManual",e.target.value)} style={{...selS(t),background:"#0c1a2e",color:"#ca8a04",fontWeight:700}}>
+              <select value={form.faixaIdManual} onChange={e=>F("faixaIdManual",e.target.value)} style={{...selS(t),background:t.bgInput,color:"#ca8a04",fontWeight:700}}>
                 <option value="">— Selecione —</option>
                 {prodSel?.regras.map(r=><option key={r.id} value={r.id}>{r.label} ({r.pctImpl}%)</option>)}
               </select>
@@ -1335,22 +1359,22 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
 
         {/* PRÉVIA */}
         {prev&&(
-          <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"16px 18px",marginBottom:14}}>
-            <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>Prévia da Comissão</div>
+          <div style={{background:t.tableHead,border:"1px solid #0c2a42",borderRadius:10,padding:"16px 18px",marginBottom:14}}>
+            <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>Prévia da Comissão</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
               <FaixaBadge t={t} faixa={prev.faixa}/>
               {isSoImpl&&<span style={{background:"#f59e0b22",color:"#f59e0b",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,border:"1px solid #f59e0b33"}}>⏱ Apenas Implantação</span>}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:12}}>
-              {!isSoImpl&&<div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>MRR</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.mrr)}</div><div style={{fontSize:11,color:"#38bdf8",marginTop:2}}>com.: {R$(prev.comMRR)}</div></div>}
-              <div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>Implantação</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.implTotal)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comImpl)}</div></div>
-              {prev.licenca>0&&<div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>Licença</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.licenca)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comLic)}</div></div>}
-              <div style={{background:"#080f1a",borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#1a3a54",marginBottom:4}}>NR Total</div><div style={{fontSize:13,color:"#e2e8f0",fontWeight:600}}>{R$(prev.nr)}</div></div>
+              {!isSoImpl&&<div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>MRR</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.mrr)}</div><div style={{fontSize:11,color:"#38bdf8",marginTop:2}}>com.: {R$(prev.comMRR)}</div></div>}
+              <div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>Implantação</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.implTotal)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comImpl)}</div></div>
+              {prev.licenca>0&&<div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>Licença</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.licenca)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comLic)}</div></div>}
+              <div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>NR Total</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.nr)}</div></div>
             </div>
             <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
-              <div style={{background:"#0c2a42",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#1e4060",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>1ª Parcela — {ML(prev.mesParcela1)}</div><div style={{fontSize:18,fontWeight:800,color:"#38bdf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
-              <div style={{background:"#0c0a2e",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#1e4060",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>2ª Parcela — {ML(prev.mesParcela2)}</div><div style={{fontSize:18,fontWeight:800,color:"#818cf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
-              <div style={{borderLeft:"1px solid #0c2a42",paddingLeft:16}}><div style={{fontSize:11,color:"#1a3a54"}}>TOTAL COMISSÃO</div><div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(prev.total)}</div></div>
+              <div style={{background:"#1a2d4a",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>1ª Parcela — {ML(prev.mesParcela1)}</div><div style={{fontSize:18,fontWeight:800,color:"#38bdf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
+              <div style={{background:"#1a1640",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>2ª Parcela — {ML(prev.mesParcela2)}</div><div style={{fontSize:18,fontWeight:800,color:"#818cf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
+              <div style={{borderLeft:"1px solid #0c2a42",paddingLeft:16}}><div style={{fontSize:11,color:"#546e8a"}}>TOTAL COMISSÃO</div><div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(prev.total)}</div></div>
             </div>
           </div>
         )}
@@ -1361,11 +1385,11 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
       </div>
 
       {/* TABELA */}
-      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
+      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a"}}><span style={{fontSize:13,fontWeight:600,color:"#7fa8c0"}}>Contratos em {ML(mes)} · {vendasMes.length} registro{vendasMes.length!==1?"s":""}</span></div>
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:1000}}>
-          <thead><tr style={{background:"#040b14"}}>
+          <thead><tr style={{background:t.tableHead}}>
             {role!=="consultor"&&<TH t={t}>Consultor</TH>}
             <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
             <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
@@ -1381,9 +1405,9 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
                   {role!=="consultor"&&<TD t={t} bold color="#e2e8f0">{users.find(u=>u.id===cId)?.name||"–"}</TD>}
                   <TD t={t} bold color="#e2e8f0">{prod?.nome}{c.soImpl&&<div style={{fontSize:9,color:"#f59e0b",marginTop:1}}>⏱ só impl.</div>}</TD>
                   <TD t={t}>{v.cliente}</TD>
-                  <TD t={t} bold color={c.soImpl?"#1e4060":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
-                  <TD t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
-                  <TD t={t} color={v.licenca>0?"#a78bfa":"#1e4060"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
+                  <TD t={t} bold color={c.soImpl?"#546e8a":"#38bdf8"}>{c.soImpl?"—":R$(v.mrr)}</TD>
+                  <TD t={t}>{R$(c.implTotal)}<div style={{fontSize:10,color:"#546e8a"}}>{c.horasImpl}h × {R$(c.valorHoraImpl)}/h</div></TD>
+                  <TD t={t} color={v.licenca>0?"#a78bfa":"#546e8a"}>{v.licenca>0?R$(v.licenca):"—"}</TD>
                   <TD t={t} bold color="#e2e8f0">{R$(c.nr)}</TD>
                   <TD t={t}><FaixaBadge t={t} faixa={c.faixa}/></TD>
                   <TD t={t} right color="#38bdf8" bold>{c.soImpl?"—":R$(c.comMRR)}</TD>
@@ -1429,11 +1453,11 @@ function EquipePage({users,vendas,produtos,mes,metas,t}) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
         {rows.map((r,idx)=>(
-          <div key={r.id} style={{background:"#060d18",border:`1px solid ${r.atingMRR>=200?"#f59e0b44":r.atingMRR>=150?"#34d39944":"#0c1f35"}`,borderRadius:12,padding:20,position:"relative"}}>
+          <div key={r.id} style={{background:t.bgCard,border:`1px solid ${r.atingMRR>=200?"#f59e0b44":r.atingMRR>=150?"#34d39944":"#243448"}`,borderRadius:12,padding:20,position:"relative"}}>
             {idx===0&&r.totalCom>0&&<span style={{position:"absolute",top:14,right:14}}>🏆</span>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
               <div>
-                <div style={{fontWeight:700,color:"#e2e8f0",fontSize:15,marginBottom:5}}>{r.name}</div>
+                <div style={{fontWeight:700,color:t.text,fontSize:15,marginBottom:5}}>{r.name}</div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                   <span style={{background:CARGO_COLOR[r.cargo]+"22",color:CARGO_COLOR[r.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[r.cargo]}</span>
                   <span style={{background:r.overInfo.bg,color:r.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${r.overInfo.border}`}}>{r.overInfo.label}</span>
@@ -1441,16 +1465,16 @@ function EquipePage({users,vendas,produtos,mes,metas,t}) {
               </div>
               <div style={{textAlign:"right"}}>
                 <div style={{fontSize:18,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(r.totalCom)}</div>
-                <div style={{fontSize:10,color:"#1a3a54",marginTop:2}}>{r.vendasCalc.length} contrato{r.vendasCalc.length!==1?"s":""}</div>
+                <div style={{fontSize:10,color:"#546e8a",marginTop:2}}>{r.vendasCalc.length} contrato{r.vendasCalc.length!==1?"s":""}</div>
               </div>
             </div>
             <div style={{marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#1e4060",marginBottom:3}}><span>MRR {R$(r.totalMRR)} / {R$(r.metaMRR)}</span><span style={{color:r.overInfo.color,fontWeight:700}}>{r.atingMRR.toFixed(0)}%</span></div>
-              <div style={{height:6,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingMRR/2,100)}%`,height:"100%",background:r.overInfo.color,borderRadius:99}}/></div>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#546e8a",marginBottom:3}}><span>MRR {R$(r.totalMRR)} / {R$(r.metaMRR)}</span><span style={{color:r.overInfo.color,fontWeight:700}}>{r.atingMRR.toFixed(0)}%</span></div>
+              <div style={{height:6,background:t.border,borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingMRR/2,100)}%`,height:"100%",background:r.overInfo.color,borderRadius:99}}/></div>
             </div>
             <div style={{marginBottom:12}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#1e4060",marginBottom:3}}><span>NR {R$(r.totalNR)} / {R$(r.metaNR)}</span><span style={{color:r.atingNR>=100?"#a78bfa":"#64748b",fontWeight:700}}>{r.atingNR.toFixed(0)}%</span></div>
-              <div style={{height:6,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingNR,100)}%`,height:"100%",background:r.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99}}/></div>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#546e8a",marginBottom:3}}><span>NR {R$(r.totalNR)} / {R$(r.metaNR)}</span><span style={{color:r.atingNR>=100?"#a78bfa":"#64748b",fontWeight:700}}>{r.atingNR.toFixed(0)}%</span></div>
+              <div style={{height:6,background:t.border,borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(r.atingNR,100)}%`,height:"100%",background:r.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99}}/></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               <MiniCard t={t} l="Com. MRR" v={R$(r.vendasCalc.reduce((s,v)=>s+v.comMRR,0))} c={r.overInfo.color}/>
@@ -1482,10 +1506,10 @@ function CalPage({me,users,vendas,produtos,t}) {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <STitle t={t} style={{margin:0}}>Calendário de Recebimentos</STitle>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-          <span style={{fontSize:11,color:"#1e4060",fontWeight:700}}>Total {ano}: <span style={{color:"#34d399"}}>{R$(totalAno)}</span></span>
-          <div style={{display:"flex",gap:4,marginLeft:8,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+          <span style={{fontSize:11,color:"#546e8a",fontWeight:700}}>Total {ano}: <span style={{color:"#34d399"}}>{R$(totalAno)}</span></span>
+          <div style={{display:"flex",gap:4,marginLeft:8,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
             {anos.map(a=>(
-              <button key={a} onClick={()=>setAno(a)} style={{padding:"4px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#0369a1":"transparent",color:ano===a?"#fff":"#1e4060",transition:"all .15s"}}>{a}</button>
+              <button key={a} onClick={()=>setAno(a)} style={{padding:"4px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#0369a1":"transparent",color:ano===a?"#fff":"#546e8a",transition:"all .15s"}}>{a}</button>
             ))}
           </div>
         </div>
@@ -1496,22 +1520,22 @@ function CalPage({me,users,vendas,produtos,t}) {
           const total=parcelas.reduce((s,p)=>s+p.valor,0);
           const isAtual=m===mesAtual;
           return (
-            <div key={m} style={{background:"#060d18",border:`1px solid ${isAtual?"#0369a1":total>0?"#0c2a42":"#0c1f35"}`,borderRadius:12,overflow:"hidden"}}>
-              <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:isAtual?"#0c2a42":"#040b14",borderBottom:"1px solid #080f1a"}}>
+            <div key={m} style={{background:t.bgCard,border:`1px solid ${isAtual?"#0369a1":total>0?"#1a2d4a":"#243448"}`,borderRadius:12,overflow:"hidden"}}>
+              <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:isAtual?"#1a2d4a":"#090f1c",borderBottom:"1px solid #080f1a"}}>
                 <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:isAtual?"#38bdf8":"#e2e8f0",fontSize:13}}>{ML(m)}</span>
-                <span style={{fontWeight:800,color:total>0?"#34d399":"#1a3a54",fontSize:13}}>{total>0?R$(total):"—"}</span>
+                <span style={{fontWeight:800,color:total>0?"#34d399":"#546e8a",fontSize:13}}>{total>0?R$(total):"—"}</span>
               </div>
               <div style={{maxHeight:240,overflowY:"auto"}}>
                 {parcelas.length===0
-                  ? <div style={{padding:"12px 14px",fontSize:11,color:"#1a3a54"}}>Sem recebimentos</div>
+                  ? <div style={{padding:"12px 14px",fontSize:11,color:"#546e8a"}}>Sem recebimentos</div>
                   : parcelas.map((p,i)=>(
                   <div key={i} style={{padding:"8px 14px",borderBottom:i<parcelas.length-1?"1px solid #080f1a":"none",display:"flex",justifyContent:"space-between",gap:8}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <span style={{background:p.tipo==="Parcela 1/2"?"#0c2a42":"#0c0a2e",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>
+                      <span style={{background:p.tipo==="Parcela 1/2"?"#1a2d4a":"#1a1640",color:p.tipo==="Parcela 1/2"?"#38bdf8":"#818cf8",padding:"1px 6px",borderRadius:99,fontSize:9,fontWeight:700,marginRight:4}}>
                         {p.tipo==="Parcela 1/2"?"1ª":"2ª"}
                       </span>
                       {role!=="consultor"&&<span style={{fontSize:10,color:"#2a5a80",fontWeight:600}}>{p.nomeConsultor} · </span>}
-                      <span style={{fontSize:10,color:"#1a3a54"}}>{p.cliente}</span>
+                      <span style={{fontSize:10,color:"#546e8a"}}>{p.cliente}</span>
                     </div>
                     <span style={{fontWeight:700,color:"#34d399",whiteSpace:"nowrap",fontSize:11}}>{R$(p.valor)}</span>
                   </div>
@@ -1552,13 +1576,13 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
         <STitle t={t}>Histórico</STitle>
         {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:200}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
       </div>
-      {porMes.length===0&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t}/></div>}
+      {porMes.length===0&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t}/></div>}
       {porMes.map(({mes,rows,total})=>(
-        <div key={mes} style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
-          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:"#040b14"}}>
-            <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:"#e2e8f0",fontSize:14}}>{ML(mes)}</span>
+        <div key={mes} style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
+          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:t.tableHead}}>
+            <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:t.text,fontSize:14}}>{ML(mes)}</span>
             <div style={{display:"flex",gap:16,alignItems:"center"}}>
-              <span style={{fontSize:11,color:"#1e4060"}}>Parcelas: {ML(addMonths(mes,2))} + {ML(addMonths(mes,3))}</span>
+              <span style={{fontSize:11,color:"#546e8a"}}>Parcelas: {ML(addMonths(mes,2))} + {ML(addMonths(mes,3))}</span>
               <span style={{color:"#34d399",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{R$(total)}</span>
             </div>
           </div>
@@ -1579,15 +1603,15 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
                     <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
                     <TD t={t}>{r.cliente}</TD>
                     <TD t={t} bold color="#38bdf8">{R$(r.mrr)}</TD>
-                    <TD t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:"#1e4060"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
-                    <TD t={t} color={r.licenca>0?"#a78bfa":"#1e4060"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
+                    <TD t={t}>{R$(r.implTotal)}<div style={{fontSize:10,color:"#546e8a"}}>{r.horasImpl}h × {R$(r.valorHoraImpl)}/h</div></TD>
+                    <TD t={t} color={r.licenca>0?"#a78bfa":"#546e8a"}>{r.licenca>0?R$(r.licenca):"—"}</TD>
                     <TD t={t}><FaixaBadge t={t} faixa={r.faixa}/></TD>
                     <TD t={t} right><span style={{background:r.overInfo?.bg,color:r.overInfo?.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{r.overInfo?.label}</span></TD>
                     <TD t={t} right bold style={{color:r.overInfo?.color}}>{R$(r.comMRR)}</TD>
                     <TD t={t} right color="#a78bfa" bold>{R$(r.comImpl+r.comLic)}</TD>
                     <TD t={t} right bold color="#e2e8f0">{R$(r.total)}</TD>
-                    <TD t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela1)}</div></TD>
-                    <TD t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#1e4060"}}>{ML(r.mesParcela2)}</div></TD>
+                    <TD t={t} right color="#38bdf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#546e8a"}}>{ML(r.mesParcela1)}</div></TD>
+                    <TD t={t} right color="#818cf8" bold>{R$(r.parcela)}<div style={{fontSize:10,color:"#546e8a"}}>{ML(r.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -1652,20 +1676,20 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
       <STitle t={t}>Parâmetros</STitle>
       <div style={{display:"flex",gap:8,marginBottom:20}}>
         {[["produtos","🎛 Comissões por Produto"],["metas","🎯 Metas Mensais"]].map(([id,label])=>(
-          <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 18px",borderRadius:8,border:`1px solid ${tab===id?"#1e4060":"#0c1f35"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:tab===id?"#0c2a42":"#060d18",color:tab===id?"#38bdf8":"#2a5a80"}}>{label}</button>
+          <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 18px",borderRadius:8,border:`1px solid ${tab===id?"#546e8a":"#243448"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:tab===id?"#1a2d4a":"#0d1117",color:tab===id?"#38bdf8":"#2a5a80"}}>{label}</button>
         ))}
       </div>
 
       {tab==="metas"&&(
         <div>
           <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
-            <span style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Mês:</span>
+            <span style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Mês:</span>
             {MESES_LIST.slice(0,12).slice().reverse().map(m=>(
-              <button key={m} onClick={()=>setMesMeta(m)} style={{padding:"5px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:mesMeta===m?"#0c2a42":"transparent",color:mesMeta===m?"#38bdf8":"#1e4060"}}>{ML(m)}</button>
+              <button key={m} onClick={()=>setMesMeta(m)} style={{padding:"5px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:mesMeta===m?"#1a2d4a":"transparent",color:mesMeta===m?"#38bdf8":"#546e8a"}}>{ML(m)}</button>
             ))}
           </div>
-          <div style={{background:"#040b14",border:"1px solid #0c2a42",borderRadius:10,padding:"12px 18px",marginBottom:20,fontSize:12}}>
-            <div style={{fontSize:10,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Regras de Overperformance MRR</div>
+          <div style={{background:t.tableHead,border:"1px solid #0c2a42",borderRadius:10,padding:"12px 18px",marginBottom:20,fontSize:12}}>
+            <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Regras de Overperformance MRR</div>
             <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
               <span style={{background:"#38bdf822",color:"#38bdf8",padding:"4px 12px",borderRadius:99,fontWeight:700}}>até 149% → 70% do MRR</span>
               <span style={{background:"#34d39922",color:"#34d399",padding:"4px 12px",borderRadius:99,fontWeight:700}}>⚡ 150–199% → 100% do MRR</span>
@@ -1677,7 +1701,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
               const m=metaDraft[cargo]||{mrr:0,nr:0};
               const color=CARGO_COLOR[cargo];
               return (
-                <div key={cargo} style={{background:"#060d18",border:`1px solid ${color}33`,borderRadius:12,padding:20}}>
+                <div key={cargo} style={{background:t.bgCard,border:`1px solid ${color}33`,borderRadius:12,padding:20}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
                     <div style={{width:8,height:8,borderRadius:"50%",background:color}}/>
                     <span style={{fontWeight:700,color,fontSize:14}}>{CARGO_LABEL[cargo]}</span>
@@ -1685,7 +1709,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
                   <div style={{marginBottom:12}}>
                     <Label t={t}>Meta MRR (R$)</Label>
                     <input type="number" value={m.mrr||""} onChange={e=>updMeta(cargo,"mrr",e.target.value)} placeholder="Ex: 15000" style={{...inp(t),color:"#38bdf8",fontWeight:700,fontSize:16,textAlign:"right"}}/>
-                    <div style={{fontSize:10,color:"#1e4060",marginTop:4}}>⚡ 150%: {R$((m.mrr||0)*1.5)} · 🚀 200%: {R$((m.mrr||0)*2)}</div>
+                    <div style={{fontSize:10,color:"#546e8a",marginTop:4}}>⚡ 150%: {R$((m.mrr||0)*1.5)} · 🚀 200%: {R$((m.mrr||0)*2)}</div>
                   </div>
                   <div>
                     <Label t={t}>Meta NR (R$)</Label>
@@ -1702,23 +1726,23 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
       {tab==="produtos"&&(
         <div>
           <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
-            {produtos.map(p=><button key={p.id} onClick={()=>{setSelId(p.id);sync(p);}} style={{padding:"7px 16px",borderRadius:8,border:`1px solid ${selId===p.id?"#1e4060":"#0c1f35"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:selId===p.id?"#0c2a42":"#060d18",color:selId===p.id?"#38bdf8":"#2a5a80"}}>{p.nome}</button>)}
+            {produtos.map(p=><button key={p.id} onClick={()=>{setSelId(p.id);sync(p);}} style={{padding:"7px 16px",borderRadius:8,border:`1px solid ${selId===p.id?"#546e8a":"#243448"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:selId===p.id?"#1a2d4a":"#0d1117",color:selId===p.id?"#38bdf8":"#2a5a80"}}>{p.nome}</button>)}
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
-            <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
-              <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:16}}>Configurações</div>
-              <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #0c2a42"}}>
+            <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
+              <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:16}}>Configurações</div>
+              <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #0c2a42"}}>
                 <div style={{fontSize:12,color:"#38bdf8",fontWeight:700,marginBottom:10}}>💳 MRR — Mensalidade</div>
                 <div><Label t={t}>% de Comissão sobre MRR</Label><input type="number" value={draft.pctMRR} onChange={e=>updPct("pctMRR",+e.target.value)} style={{...inp(t),color:"#38bdf8",fontWeight:800,fontSize:18,textAlign:"center"}}/></div>
               </div>
-              <div style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #1e4060"}}>
+              <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #1e4060"}}>
                 <div style={{fontSize:12,color:"#ca8a04",fontWeight:700,marginBottom:10}}>⚡ Modo de Seleção de Faixa</div>
                 <div style={{display:"flex",gap:8}}>
-                  {["auto","manual"].map(m=><button key={m} onClick={()=>updFaixaMode(m)} style={{flex:1,padding:"8px",border:`1px solid ${draft.selecaoFaixa===m?"#ca8a04":"#0c1f35"}`,borderRadius:7,background:draft.selecaoFaixa===m?"#ca8a0422":"#040b14",color:draft.selecaoFaixa===m?"#ca8a04":"#475569",cursor:"pointer",fontWeight:700,fontSize:13}}>{m==="auto"?"🤖 Automático":"✍️ Manual"}</button>)}
+                  {["auto","manual"].map(m=><button key={m} onClick={()=>updFaixaMode(m)} style={{flex:1,padding:"8px",border:`1px solid ${draft.selecaoFaixa===m?"#ca8a04":"#243448"}`,borderRadius:7,background:draft.selecaoFaixa===m?"#ca8a0422":"#090f1c",color:draft.selecaoFaixa===m?"#ca8a04":"#475569",cursor:"pointer",fontWeight:700,fontSize:13}}>{m==="auto"?"🤖 Automático":"✍️ Manual"}</button>)}
                 </div>
               </div>
               {draft.regras.map((r,i)=>(
-                <div key={r.id} style={{background:"#040b14",borderRadius:10,padding:"14px 16px",marginBottom:10,border:`1px solid ${i===0?"#ca8a0433":"#0c1f35"}`}}>
+                <div key={r.id} style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:10,border:`1px solid ${i===0?"#ca8a0433":"#243448"}`}}>
                   <div style={{fontSize:12,fontWeight:700,color:i===0?"#ca8a04":"#64748b",marginBottom:10}}>{i===0?"⭐":""} {r.label}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
                     <div><Label t={t}>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp(t)}/></div>
@@ -1727,25 +1751,25 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
                   </div>
                 </div>
               ))}
-              <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c1f35"}}>
+              <div style={{background:t.tableHead,borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#546e8a",border:"1px solid #0c1f35"}}>
                 💡 <b style={{color:"#38bdf8"}}>MRR</b> = mensalidade × {draft.pctMRR}% · <b style={{color:"#a78bfa"}}>NR</b> = (impl+lic) × faixa% · Pago em 2× (+2 e +3 meses)
               </div>
               <Btn t={t} onClick={save} disabled={saving}>{saving?<><Spinner size={13}/> Salvando…</>:"Salvar Parâmetros"}</Btn>
             </div>
-            <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
-              <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:14}}>Simulador — {draft.nome}</div>
+            <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
+              <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:14}}>Simulador — {draft.nome}</div>
               {simCenarios.map((s,i)=>{
                 const c=calcVenda({produtoId:draft.id,mes:"2025-01",mrr:s.mrr,horasImpl:s.h,valorHoraImpl:s.vh,licenca:s.lic,faixaIdManual:null},[draft]);
                 if(!c) return null;
                 return (
-                  <div key={i} style={{background:"#040b14",borderRadius:8,padding:"12px 14px",marginBottom:8,border:`1px solid ${c.isPremium?"#ca8a0422":"#0c1f35"}`}}>
+                  <div key={i} style={{background:t.tableHead,borderRadius:8,padding:"12px 14px",marginBottom:8,border:`1px solid ${c.isPremium?"#ca8a0422":"#243448"}`}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                       <span style={{fontSize:12,color:"#7fa8c0",fontWeight:600}}>MRR {R$(s.mrr)} · {s.h}h×{R$(s.vh)}{s.lic>0?` · Lic ${R$(s.lic)}`:""}</span>
                       <FaixaBadge t={t} faixa={c.faixa}/>
                     </div>
                     <div style={{display:"flex",gap:14,fontSize:12,flexWrap:"wrap"}}>
-                      <span style={{color:"#1e4060"}}>MRR: <b style={{color:"#38bdf8"}}>{R$(c.comMRR)}</b></span>
-                      <span style={{color:"#1e4060"}}>NR: <b style={{color:"#a78bfa"}}>{R$(c.comImpl+c.comLic)}</b></span>
+                      <span style={{color:"#546e8a"}}>MRR: <b style={{color:"#38bdf8"}}>{R$(c.comMRR)}</b></span>
+                      <span style={{color:"#546e8a"}}>NR: <b style={{color:"#a78bfa"}}>{R$(c.comImpl+c.comLic)}</b></span>
                       <span style={{color:"#34d399",fontWeight:700}}>= {R$(c.total)}</span>
                     </div>
                   </div>
@@ -1777,7 +1801,7 @@ function ProdPage({produtos,setProdutos,notify,t}) {
         <STitle t={t}>Produtos</STitle>
         <Btn t={t} onClick={()=>setShowNew(s=>!s)}><Ic n="plus" s={14}/>Novo Produto</Btn>
       </div>
-      {showNew&&<div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:20,marginBottom:14,display:"flex",gap:12,alignItems:"flex-end"}}>
+      {showNew&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:20,marginBottom:14,display:"flex",gap:12,alignItems:"flex-end"}}>
         <div style={{flex:1}}><Label t={t}>Nome do Produto</Label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Mago RH" style={inp(t)} onKeyDown={e=>e.key==="Enter"&&add()}/></div>
         <Btn t={t} onClick={add}>Adicionar</Btn><Btn t={t} secondary onClick={()=>setShowNew(false)}>Cancelar</Btn>
       </div>}
@@ -1785,14 +1809,14 @@ function ProdPage({produtos,setProdutos,notify,t}) {
         {produtos.map(p=>{
           const np=normProd(p);
           return (
-          <div key={p.id} style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",gap:16}}>
+          <div key={p.id} style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",gap:16}}>
             <div style={{flex:1}}>
               <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:6}}>
-                <span style={{fontWeight:700,color:"#e2e8f0",fontSize:15}}>{p.nome}</span>
-                <span style={{background:np.selecaoFaixa==="manual"?"#f59e0b22":"#0c2a42",color:np.selecaoFaixa==="manual"?"#f59e0b":"#38bdf8",padding:"1px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>{np.selecaoFaixa==="manual"?"✍️ Manual":"🤖 Auto"}</span>
+                <span style={{fontWeight:700,color:t.text,fontSize:15}}>{p.nome}</span>
+                <span style={{background:np.selecaoFaixa==="manual"?"#f59e0b22":"#1a2d4a",color:np.selecaoFaixa==="manual"?"#f59e0b":"#38bdf8",padding:"1px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>{np.selecaoFaixa==="manual"?"✍️ Manual":"🤖 Auto"}</span>
                 <span style={{background:"#38bdf822",color:"#38bdf8",padding:"1px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>MRR {np.pctMRR}%</span>
               </div>
-              <div style={{fontSize:12,color:"#1e4060",display:"flex",gap:16,flexWrap:"wrap"}}>
+              <div style={{fontSize:12,color:"#546e8a",display:"flex",gap:16,flexWrap:"wrap"}}>
                 {p.regras.map((r,i)=><span key={i}>{i===0?"⭐":"◎"} {r.label}: NR {r.pctImpl}%{np.selecaoFaixa==="auto"?` · ≥${r.minHoras}h, ≥R$${r.minValorH}/h`:""}</span>)}
               </div>
             </div>
@@ -1997,9 +2021,9 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
       <STitle t={t}>Relatórios — {labelPeriodo}</STitle>
 
       {/* SELETOR DE TIPO */}
-      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
+      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
         {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"],["semestral","📈 Semestral"],["anual","🗓 Anual"]].map(([v,l])=>(
-          <button key={v} onClick={()=>setTipo(v)} style={{padding:"6px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:tipo===v?"#0369a1":"transparent",color:tipo===v?"#fff":"#1e4060",transition:"all .15s"}}>{l}</button>
+          <button key={v} onClick={()=>setTipo(v)} style={{padding:"6px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:tipo===v?"#0369a1":"transparent",color:tipo===v?"#fff":"#546e8a",transition:"all .15s"}}>{l}</button>
         ))}
       </div>
 
@@ -2007,29 +2031,29 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
       <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
         {/* Ano — sempre visível exceto mensal */}
         {tipo!=="mensal"&&(
-          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {anos.map(a=><button key={a} onClick={()=>setAno(a)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#0c2a42":"transparent",color:ano===a?"#38bdf8":"#1e4060"}}>{a}</button>)}
+          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {anos.map(a=><button key={a} onClick={()=>setAno(a)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#1a2d4a":"transparent",color:ano===a?"#38bdf8":"#546e8a"}}>{a}</button>)}
           </div>
         )}
         {/* Semestre */}
         {tipo==="semestral"&&(
-          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {["S1","S2"].map(s=><button key={s} onClick={()=>setSem(s)} style={{padding:"4px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:sem===s?"#0c2a42":"transparent",color:sem===s?"#38bdf8":"#1e4060"}}>{s==="S1"?"1º Sem.":"2º Sem."}</button>)}
+          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {["S1","S2"].map(s=><button key={s} onClick={()=>setSem(s)} style={{padding:"4px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:sem===s?"#1a2d4a":"transparent",color:sem===s?"#38bdf8":"#546e8a"}}>{s==="S1"?"1º Sem.":"2º Sem."}</button>)}
           </div>
         )}
         {/* Trimestre */}
         {tipo==="trimestral"&&(
-          <div style={{display:"flex",gap:4,background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {["Q1","Q2","Q3","Q4"].map(q=><button key={q} onClick={()=>setTrim(q)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:trim===q?"#0c2a42":"transparent",color:trim===q?"#38bdf8":"#1e4060"}}>{q}</button>)}
+          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+            {["Q1","Q2","Q3","Q4"].map(q=><button key={q} onClick={()=>setTrim(q)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:trim===q?"#1a2d4a":"transparent",color:trim===q?"#38bdf8":"#546e8a"}}>{q}</button>)}
           </div>
         )}
         {/* Mês */}
         {tipo==="mensal"&&(
-          <div style={{display:"flex",gap:4,flexWrap:"wrap",background:"#040b14",border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
             {Array.from({length:12},(_,i)=>{
               const now2=new Date(); const a=now2.getFullYear();
               return `${a}-${String(i+1).padStart(2,"0")}`;
-            }).map(m=><button key={m} onClick={()=>setMesSel(m)} style={{padding:"4px 10px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mesSel===m?"#0c2a42":"transparent",color:mesSel===m?"#38bdf8":"#1e4060"}}>{ML(m).split("/")[0]}</button>)}
+            }).map(m=><button key={m} onClick={()=>setMesSel(m)} style={{padding:"4px 10px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mesSel===m?"#1a2d4a":"transparent",color:mesSel===m?"#38bdf8":"#546e8a"}}>{ML(m).split("/")[0]}</button>)}
           </div>
         )}
         {/* Filtro consultor */}
@@ -2041,7 +2065,7 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
 
       {/* MESES DO PERÍODO */}
       <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
-        {mesesPeriodo.map(m=><span key={m} style={{background:"#0c2a42",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:600}}>{ML(m)}</span>)}
+        {mesesPeriodo.map(m=><span key={m} style={{background:"#1a2d4a",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:600}}>{ML(m)}</span>)}
       </div>
 
       {/* TOTAIS GERAIS */}
@@ -2054,9 +2078,9 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
       </div>
 
       {/* TABELA POR CONSULTOR */}
-      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:20}}>
-        <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:"#040b14"}}>
-          <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Resumo por Consultor — {labelPeriodo}</span>
+      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:20}}>
+        <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:t.tableHead}}>
+          <span style={{fontSize:13,fontWeight:700,color:t.text}}>Resumo por Consultor — {labelPeriodo}</span>
         </div>
         <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
@@ -2074,10 +2098,10 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
                 <TD t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
                 <TD t={t}>{d.nVendas}</TD>
                 <TD t={t} right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
-                <TD t={t} right color="#1e4060">{R$(d.metaMRR)}</TD>
+                <TD t={t} right color="#546e8a">{R$(d.metaMRR)}</TD>
                 <TD t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
                 <TD t={t} right bold color="#a78bfa">{R$(d.totalNR)}</TD>
-                <TD t={t} right color="#1e4060">{R$(d.metaNR)}</TD>
+                <TD t={t} right color="#546e8a">{R$(d.metaNR)}</TD>
                 <TD t={t} right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
                 <TD t={t} right bold color="#34d399">{R$(d.comMRR)}</TD>
                 <TD t={t} right bold color="#a78bfa">{R$(d.comNR)}</TD>
@@ -2091,11 +2115,11 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
 
       {/* DETALHAMENTO POR CONSULTOR (expansível por período) */}
       {dadosPeriodo.filter(d=>d.vendasCalc.length>0).map(d=>(
-        <div key={d.id} style={{background:"#060d18",border:`1px solid ${d.overInfo.border}`,borderRadius:12,overflow:"hidden",marginBottom:12}}>
-          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:"#040b14",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+        <div key={d.id} style={{background:t.bgCard,border:`1px solid ${d.overInfo.border}`,borderRadius:12,overflow:"hidden",marginBottom:12}}>
+          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:t.tableHead,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:7,height:7,borderRadius:"50%",background:CARGO_COLOR[d.cargo]}}/>
-              <span style={{fontWeight:700,color:"#e2e8f0",fontSize:14}}>{d.name}</span>
+              <span style={{fontWeight:700,color:t.text,fontSize:14}}>{d.name}</span>
               <span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${d.overInfo.border}`}}>{d.overInfo.label} · {d.atingMRR.toFixed(0)}%</span>
             </div>
             <span style={{fontWeight:800,color:"#f59e0b",fontFamily:"'Syne',sans-serif",fontSize:16}}>{R$(d.totalCom)}</span>
@@ -2113,7 +2137,7 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
                 const prod=produtos.find(p=>p.id===v.produtoId);
                 return (
                   <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                    <TD t={t} color="#1e4060">{ML(v.mes)}</TD>
+                    <TD t={t} color="#546e8a">{ML(v.mes)}</TD>
                     <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
                     <TD t={t}>{v.cliente}</TD>
                     <TD t={t} right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
@@ -2122,8 +2146,8 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
                     <TD t={t} right bold color="#34d399">{R$(v.comMRR)}</TD>
                     <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
                     <TD t={t} right bold color="#f59e0b">{R$(v.total)}</TD>
-                    <TD t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela1)}</div></TD>
-                    <TD t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#1e4060"}}>{ML(v.mesParcela2)}</div></TD>
+                    <TD t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#546e8a"}}>{ML(v.mesParcela1)}</div></TD>
+                    <TD t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#546e8a"}}>{ML(v.mesParcela2)}</div></TD>
                   </tr>
                 );
               })}
@@ -2164,9 +2188,9 @@ function UsersPage({users,createUserProfile,updateProfile,notify,me,t}) {
   return (
     <div>
       <STitle t={t}>Usuários</STitle>
-      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
-        <div style={{fontSize:11,color:"#1e4060",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:14}}>{editId?"✏ Editando":"➕ Novo usuário"}</div>
-        <div style={{background:"#040b14",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1e4060",border:"1px solid #0c2a42"}}>
+      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
+        <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:14}}>{editId?"✏ Editando":"➕ Novo usuário"}</div>
+        <div style={{background:t.tableHead,borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#546e8a",border:"1px solid #0c2a42"}}>
           <Ic n="db" s={12}/> Usuários são criados via <b style={{color:"#38bdf8"}}>Supabase Auth</b>. Um e-mail de confirmação será enviado automaticamente.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,alignItems:"end"}}>
@@ -2181,13 +2205,13 @@ function UsersPage({users,createUserProfile,updateProfile,notify,me,t}) {
           </div>
         </div>
       </div>
-      <div style={{background:"#060d18",border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
+      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{background:"#040b14"}}><TH t={t}>Nome</TH><TH t={t}>Perfil</TH><TH t={t}>Cargo</TH><TH t={t}>Status</TH><TH t={t}>Ações</TH></tr></thead>
+          <thead><tr style={{background:t.tableHead}}><TH t={t}>Nome</TH><TH t={t}>Perfil</TH><TH t={t}>Cargo</TH><TH t={t}>Status</TH><TH t={t}>Ações</TH></tr></thead>
           <tbody>
             {users.map((u,i)=>(
               <tr key={u.id} style={{borderBottom:i<users.length-1?"1px solid #080f1a":"none",opacity:u.active?1:.45}}>
-                <TD t={t} bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#0c2a42",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
+                <TD t={t} bold color="#e2e8f0">{u.name}<div style={{fontSize:10,color:"#6b8caa",marginTop:1}}>ID: {String(u.id).substring(0,8)}…</div></TD>
                 <TD t={t}><span style={{background:RC[u.role]+"22",color:RC[u.role],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{ROLE_LABEL[u.role]||u.role}</span></TD>
                 <TD t={t}>{u.cargo?<span style={{background:CARGO_COLOR[u.cargo]+"22",color:CARGO_COLOR[u.cargo],padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[u.cargo]}</span>:"—"}</TD>
                 <TD t={t}><span style={{background:u.active?"#14532d22":"#450a0a22",color:u.active?"#4ade80":"#f87171",padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700}}>{u.active?"Ativo":"Inativo"}</span></TD>
