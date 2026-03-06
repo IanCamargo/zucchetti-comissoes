@@ -321,16 +321,16 @@ const GlobalCSS = ({t}) => (
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     @keyframes slideIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
-    @keyframes shimmer { from { background-position:-200% 0; } to { background-position:200% 0; } }
     @keyframes glow { 0%,100% { box-shadow:0 0 8px ${t.accent}44; } 50% { box-shadow:0 0 20px ${t.accent}88; } }
-    * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:${t.border} ${t.bgCard}; }
-    body { margin:0; background:${t.bg}; font-family:'Outfit',sans-serif; color:${t.text}; }
-    ::-webkit-scrollbar { width:5px; height:5px; }
+    *, *::before, *::after { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; touch-action:manipulation; }
+    body { margin:0; background:${t.bg}; font-family:'Outfit',sans-serif; color:${t.text}; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
     ::-webkit-scrollbar-track { background:${t.bgCard}; }
     ::-webkit-scrollbar-thumb { background:${t.border}; border-radius:99px; }
     input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
     input::placeholder { color:${t.textMuted}; }
+    select option { background:${t.bgCard}; color:${t.text}; }
     .nav-item { transition: all .18s cubic-bezier(.4,0,.2,1) !important; }
     .nav-item:hover { background:${t.bgHover} !important; color:${t.accentHover} !important; transform:translateX(2px); }
     .nav-item.active { background:${t.accentGlow} !important; color:${t.accent} !important; }
@@ -343,6 +343,80 @@ const GlobalCSS = ({t}) => (
     .slide-in { animation: slideIn .25s ease forwards; }
     table tr { transition: background .12s; }
     table tbody tr:hover { background: ${t.bgHover} !important; }
+    .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    /* ── LAYOUT ── */
+    .sidebar-wrap {
+      width:220px; background:${t.sidebarBg};
+      border-right:1px solid ${t.sidebarBorder};
+      display:flex; flex-direction:column;
+      position:fixed; top:0; bottom:0; left:0; z-index:40;
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+      overflow-y:auto;
+    }
+    .main-wrap { margin-left:220px; min-height:100vh; display:flex; flex-direction:column; }
+    .page-content { padding:28px 32px 60px; flex:1; }
+    .topbar-mobile-row { display:none; }
+    .sidebar-close-btn { display:none !important; }
+    .drawer-overlay { display:none; position:fixed; inset:0; background:#00000088; z-index:39; backdrop-filter:blur(2px); }
+    .period-bar-wrap { display:flex; align-items:center; min-height:50px; padding:0 14px; overflow-x:auto; }
+
+    /* ── GRIDS ── */
+    .stat-grid   { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .stat-grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    .mini-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+    .form-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+
+    /* ── BOTTOM NAV ── */
+    .mobile-bottom-nav { display:none; }
+
+    /* ══ TABLET ≤ 1024px ══ */
+    @media (max-width:1024px) {
+      .stat-grid   { grid-template-columns:repeat(2,1fr); }
+      .stat-grid-5 { grid-template-columns:repeat(3,1fr); }
+    }
+
+    /* ══ MOBILE ≤ 768px ══ */
+    @media (max-width:768px) {
+      .sidebar-wrap { transform:translateX(-100%); width:265px; }
+      .sidebar-wrap.open { transform:translateX(0); box-shadow:6px 0 40px rgba(0,0,0,.55); }
+      .drawer-overlay.open { display:block; }
+      .sidebar-close-btn { display:flex !important; }
+      .main-wrap { margin-left:0 !important; }
+      .topbar-mobile-row { display:flex; }
+      .page-content { padding:14px 12px 88px; }
+      .stat-grid   { grid-template-columns:repeat(2,1fr); gap:10px; }
+      .stat-grid-5 { grid-template-columns:repeat(2,1fr); gap:10px; }
+      .mini-grid   { grid-template-columns:repeat(2,1fr); }
+      .form-grid   { grid-template-columns:1fr; }
+      .period-bar-wrap { padding:6px 10px; flex-wrap:wrap; gap:4px; min-height:auto; }
+      .mobile-bottom-nav {
+        display:flex !important;
+        position:fixed; bottom:0; left:0; right:0;
+        background:${t.sidebarBg};
+        border-top:1px solid ${t.sidebarBorder};
+        z-index:30;
+        padding:5px 0 max(env(safe-area-inset-bottom,0px),5px);
+        justify-content:space-around; align-items:center;
+      }
+      .mobile-bottom-nav button {
+        flex:1; display:flex; flex-direction:column;
+        align-items:center; gap:2px; padding:4px 2px;
+        background:transparent; border:none; cursor:pointer;
+        color:${t.textMuted}; font-size:9px; font-weight:600;
+        font-family:'Outfit',sans-serif; transition:color .15s;
+        max-width:70px;
+      }
+      .mobile-bottom-nav button.active { color:${t.accent}; }
+      .mobile-bottom-nav button.active svg { filter:drop-shadow(0 0 4px ${t.accent}88); }
+    }
+
+    /* ══ SMALL ≤ 420px ══ */
+    @media (max-width:420px) {
+      .stat-grid   { grid-template-columns:1fr 1fr; gap:8px; }
+      .stat-grid-5 { grid-template-columns:1fr 1fr; gap:8px; }
+      .page-content { padding:10px 10px 88px; }
+    }
   `}</style>
 );
 
@@ -747,7 +821,7 @@ export default function App() {
     {id:"equipe",    label:"Equipe",     icon:"team",   roles:["gestor","parametros"]},
     {id:"cal",       label:"Calendário", icon:"cal",    roles:["consultor","gestor","parametros"]},
     {id:"hist",      label:"Histórico",  icon:"hist",   roles:["consultor","gestor","parametros"]},
-    {id:"relatorio", label:"Relatórios", icon:"dl",     roles:["gestor","parametros"]},
+    {id:"relatorio", label:"Relatórios", icon:"dl",     roles:["consultor","gestor","parametros"]},
     {id:"params",    label:"Parâmetros", icon:"params", roles:["parametros"]},
     {id:"prod",      label:"Produtos",   icon:"prod",   roles:["parametros"]},
     {id:"users",     label:"Usuários",   icon:"users",  roles:["gestor","parametros"]},
@@ -764,13 +838,19 @@ export default function App() {
   // Sidebar content
   const SidebarContent = () => (
     <>
-      {/* Logo */}
-      <div style={{padding:"24px 20px 18px",borderBottom:`1px solid ${t.sidebarBorder}`}}>
-        <div style={{fontFamily:"'Outfit',sans-serif",fontSize:22,fontWeight:900,letterSpacing:"-1px",lineHeight:1}}>
-          <span style={{background:`linear-gradient(135deg,${t.accent},${t.cyan})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Z</span>
-          <span style={{color:t.text}}>ucchetti</span>
+      {/* Logo + close button (mobile) */}
+      <div style={{padding:"20px 20px 16px",borderBottom:`1px solid ${t.sidebarBorder}`}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+          <div style={{fontFamily:"'Outfit',sans-serif",fontSize:22,fontWeight:900,letterSpacing:"-1px",lineHeight:1}}>
+            <span style={{background:`linear-gradient(135deg,${t.accent},${t.cyan})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Z</span>
+            <span style={{color:t.text}}>ucchetti</span>
+          </div>
+          <button onClick={()=>setSidebarOpen(false)}
+            style={{background:"transparent",border:`1px solid ${t.border}`,borderRadius:8,cursor:"pointer",color:t.textMuted,padding:"4px 6px",display:"flex",lineHeight:1}}>
+            <Ic n="x" s={14}/>
+          </button>
         </div>
-        <div style={{fontSize:9,color:t.textMuted,marginTop:4,textTransform:"uppercase",letterSpacing:3,fontWeight:600}}>Comissionamento</div>
+        <div style={{fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:3,fontWeight:600}}>Comissionamento</div>
         <div style={{display:"flex",alignItems:"center",gap:5,marginTop:8}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:t.green,boxShadow:`0 0 6px ${t.green}`}}/>
           <span style={{fontSize:10,color:t.textMuted}}>Online</span>
@@ -838,63 +918,44 @@ export default function App() {
         <div className="fade-in" style={{position:"fixed",top:20,right:20,zIndex:9999,
           background:toast.type==="ok"?t.green:t.red,color:"#fff",
           padding:"12px 20px",borderRadius:12,fontSize:13,fontWeight:600,
-          display:"flex",alignItems:"center",gap:8,boxShadow:"0 8px 32px rgba(0,0,0,.3)",maxWidth:340}}>
+          display:"flex",alignItems:"center",gap:8,boxShadow:"0 8px 32px rgba(0,0,0,.3)",maxWidth:"calc(100vw - 40px)"}}>
           <Ic n="check" s={14}/>{toast.msg}
         </div>
       )}
 
-      {/* MOBILE OVERLAY */}
-      {sidebarOpen&&(
-        <div onClick={()=>setSidebarOpen(false)}
-          style={{position:"fixed",inset:0,background:"#00000088",zIndex:19,backdropFilter:"blur(2px)"}}/>
-      )}
+      {/* OVERLAY (mobile drawer) */}
+      <div className={`drawer-overlay${sidebarOpen?" open":""}`} onClick={()=>setSidebarOpen(false)}/>
 
-      {/* SIDEBAR — desktop fixed, mobile drawer */}
-      <aside style={{
-        width:220, background:t.sidebarBg, borderRight:`1px solid ${t.sidebarBorder}`,
-        display:"flex", flexDirection:"column", position:"fixed", top:0, bottom:0, left:0, zIndex:20,
-        transition:"transform .25s cubic-bezier(.4,0,.2,1)",
-        transform: sidebarOpen?"translateX(0)":"translateX(0)",
-      }}
-        className="sidebar-desktop">
-        <SidebarContent/>
-      </aside>
-
-      {/* MOBILE SIDEBAR */}
-      <aside style={{
-        width:240, background:t.sidebarBg, borderRight:`1px solid ${t.sidebarBorder}`,
-        display:"flex", flexDirection:"column", position:"fixed", top:0, bottom:0, left:0, zIndex:21,
-        transition:"transform .25s cubic-bezier(.4,0,.2,1)",
-        transform: sidebarOpen?"translateX(0)":"translateX(-100%)",
-      }}
-        className="sidebar-mobile">
-        <div style={{display:"flex",justifyContent:"flex-end",padding:"12px 12px 0"}}>
-          <button onClick={()=>setSidebarOpen(false)} style={{background:"transparent",border:"none",cursor:"pointer",color:t.textMuted,padding:4}}>
-            <Ic n="x" s={18}/>
-          </button>
-        </div>
+      {/* SIDEBAR */}
+      <aside className={`sidebar-wrap${sidebarOpen?" open":""}`}>
         <SidebarContent/>
       </aside>
 
       {/* MAIN */}
-      <main style={{flex:1,marginLeft:220,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+      <main className="main-wrap">
 
         {/* TOPBAR */}
         <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.sidebarBorder}`,position:"sticky",top:0,zIndex:10}}>
-          {/* Mobile header */}
-          <div style={{display:"none",padding:"12px 16px",alignItems:"center",gap:12,borderBottom:`1px solid ${t.border}`}} className="mobile-header">
-            <button onClick={()=>setSidebarOpen(true)} style={{background:"transparent",border:"none",cursor:"pointer",color:t.textSub,padding:4}}>
-              <Ic n="menu" s={20}/>
+          {/* Mobile top row */}
+          <div className="topbar-mobile-row"
+            style={{padding:"10px 16px",alignItems:"center",gap:12,borderBottom:`1px solid ${t.border}`}}>
+            <button onClick={()=>setSidebarOpen(true)}
+              style={{background:"transparent",border:"none",cursor:"pointer",color:t.textSub,padding:4,display:"flex"}}>
+              <Ic n="menu" s={22}/>
             </button>
-            <span style={{fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:18,color:t.text}}>
+            <span style={{fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:20,color:t.text,flex:1,letterSpacing:"-0.5px"}}>
               <span style={{color:t.accent}}>Z</span>ucchetti
             </span>
+            <button onClick={()=>setThemeName(n=>n==="dark"?"light":"dark")}
+              style={{background:t.bgPanel,border:`1px solid ${t.border}`,borderRadius:20,padding:"5px 10px",cursor:"pointer",color:t.text,fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
+              <Ic n={themeName==="dark"?"sun":"moon"} s={13}/>
+            </button>
           </div>
           <PeriodBar page={page} mes={mes} setMes={setMes} t={t}/>
         </div>
 
         {/* PAGE CONTENT */}
-        <div style={{padding:"28px 32px 60px",flex:1}} className="fade-in">
+        <div className="page-content fade-in">
           {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
           {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas} t={t}/>}
           {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
@@ -907,17 +968,36 @@ export default function App() {
         </div>
       </main>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .sidebar-desktop { display: none !important; }
-          .mobile-header { display: flex !important; }
-          main { margin-left: 0 !important; }
-          main > div:last-child { padding: 16px !important; }
-        }
-        @media (min-width: 769px) {
-          .sidebar-mobile { display: none !important; }
-        }
-      `}</style>
+      {/* MOBILE BOTTOM NAV — 5 itens mais usados */}
+      <nav className="mobile-bottom-nav" style={{display:"none"}}>
+        {nav.slice(0,5).map(n=>(
+          <button key={n.id} onClick={()=>setPage(n.id)} className={page===n.id?"active":""}>
+            <Ic n={n.icon} s={20}/>
+            {n.label}
+          </button>
+        ))}
+        {nav.length > 5 && (
+          <button onClick={()=>setSidebarOpen(true)}>
+            <Ic n="menu" s={20}/>
+            Mais
+          </button>
+        )}
+      </nav>
+      {/* MOBILE BOTTOM NAV */}
+      <nav className="mobile-bottom-nav" style={{display:"none"}}>
+        {nav.slice(0,5).map(n=>(
+          <button key={n.id} onClick={()=>setPage(n.id)} className={page===n.id?"active":""}>
+            <Ic n={n.icon} s={20}/>
+            {n.label}
+          </button>
+        ))}
+        {nav.length>5&&(
+          <button onClick={()=>setSidebarOpen(true)}>
+            <Ic n="menu" s={20}/>
+            Mais
+          </button>
+        )}
+      </nav>
     </div>
   );
 }
@@ -1100,7 +1180,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
 
       {/* STAT CARDS — gestor/params */}
       {role!=="consultor"&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:22}}>
+        <div className="stat-grid" style={{marginBottom:20}}>
           {viewMode==="mensal"&&<>
             <StatCard t={t} l="Total Comissões"     v={R$(totGeral)} c="#34d399"/>
             <StatCard t={t} l="Consultores"         v={porConsultor.length} c="#38bdf8"/>
@@ -1212,8 +1292,8 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
 
             {/* ── TABELA DE CONTRATOS (só mensal) ── */}
             {viewMode==="mensal"&&c.vendasCalc.length>0&&(
-              <div style={{overflowX:"auto"}}>
-              <table style={{width:"100%",borderCollapse:"collapse",minWidth:860}}>
+              <div className="table-scroll">
+              <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
                 <thead><tr style={{background:"#030810"}}>
                   <TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
                   <TH t={t}>MRR</TH><TH t={t}>Impl. (h×R$/h)</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH>
@@ -1321,7 +1401,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
       <STitle t={t}>Lançar Venda — {ML(mes)}</STitle>
       <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:14}}>
+        <div className="form-grid" style={{marginBottom:14}}>
           {role!=="consultor"&&<div style={{gridColumn:"span 2"}}><Label t={t}>Consultor</Label><select value={form.consultorId} onChange={e=>F("consultorId",e.target.value)} style={selS(t)}>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}{c.cargo?` (${CARGO_LABEL[c.cargo]})`:""}</option>)}</select></div>}
           <div><Label t={t}>Produto</Label><select value={form.produtoId} onChange={e=>{F("produtoId",e.target.value);F("faixaIdManual","");}} style={selS(t)}>{produtos.filter(p=>p.ativo).map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></div>
           <div style={{gridColumn:"span 2"}}><Label t={t}>Nome do Cliente / Projeto</Label><input value={form.cliente} onChange={e=>F("cliente",e.target.value)} placeholder="Ex: Empresa XYZ Ltda" style={inp(t)}/></div>
@@ -1365,7 +1445,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
               <FaixaBadge t={t} faixa={prev.faixa}/>
               {isSoImpl&&<span style={{background:"#f59e0b22",color:"#f59e0b",padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,border:"1px solid #f59e0b33"}}>⏱ Apenas Implantação</span>}
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:12}}>
+            <div className="mini-grid" style={{marginBottom:16}}>
               {!isSoImpl&&<div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>MRR</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.mrr)}</div><div style={{fontSize:11,color:"#38bdf8",marginTop:2}}>com.: {R$(prev.comMRR)}</div></div>}
               <div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>Implantação</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.implTotal)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comImpl)}</div></div>
               {prev.licenca>0&&<div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>Licença</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.licenca)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comLic)}</div></div>}
@@ -1387,8 +1467,8 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
       {/* TABELA */}
       <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden"}}>
         <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a"}}><span style={{fontSize:13,fontWeight:600,color:"#7fa8c0"}}>Contratos em {ML(mes)} · {vendasMes.length} registro{vendasMes.length!==1?"s":""}</span></div>
-        <div style={{overflowX:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse",minWidth:1000}}>
+        <div className="table-scroll">
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:520}}>
           <thead><tr style={{background:t.tableHead}}>
             {role!=="consultor"&&<TH t={t}>Consultor</TH>}
             <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl. Total</TH><TH t={t}>Licença</TH><TH t={t}>NR</TH><TH t={t}>Faixa</TH>
@@ -1445,7 +1525,7 @@ function EquipePage({users,vendas,produtos,mes,metas,t}) {
   return (
     <div>
       <STitle t={t}>Equipe — {ML(mes)}</STitle>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
+      <div className="stat-grid" style={{marginBottom:20}}>
         <StatCard t={t} l="Total Comissões"    v={R$(totGeral)} c="#34d399"/>
         <StatCard t={t} l="Consultores"        v={rows.length}  c="#38bdf8"/>
         <StatCard t={t} l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
@@ -1586,8 +1666,8 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
               <span style={{color:"#34d399",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{R$(total)}</span>
             </div>
           </div>
-          <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse",minWidth:900}}>
+          <div className="table-scroll">
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
             <thead><tr style={{background:"#030810"}}>
               {filtro==="todos"&&<TH t={t}>Consultor</TH>}
               <TH t={t}>Produto</TH><TH t={t}>Cliente</TH><TH t={t}>MRR</TH><TH t={t}>Impl.</TH><TH t={t}>Licença</TH><TH t={t}>Faixa</TH>
@@ -1864,7 +1944,7 @@ function PeriodBar({page, mes, setMes, t}) {
   }
 
   return (
-    <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.border}`,padding:"0 20px",display:"flex",alignItems:"center",height:56,gap:0,position:"relative"}}>
+    <div className="period-bar-wrap" style={{background:t.topbarBg,borderBottom:`1px solid ${t.border}`,display:"flex",alignItems:"center",padding:"0 12px",minHeight:50,overflowX:"auto"}}>
 
       {/* Ano + setas */}
       <div style={{display:"flex",alignItems:"center",gap:2,marginRight:16,flexShrink:0}}>
@@ -1944,218 +2024,302 @@ function PeriodBar({page, mes, setMes, t}) {
 //  RELATÓRIOS — Anual / Semestral / Trimestral / Mensal
 // ══════════════════════════════════════════════════════════════════
 function RelatorioPage({me,users,vendas,produtos,metas,t}) {
+  const role = me.role;
+  const isConsultor = role === "consultor";
   const now = new Date();
-  const [tipo,  setTipo]  = useState("trimestral");
-  const [ano,   setAno]   = useState(now.getFullYear());
-  const [sem,   setSem]   = useState(now.getMonth()<6?"S1":"S2");
-  const [trim,  setTrim]  = useState(`Q${Math.ceil((now.getMonth()+1)/3)}`);
-  const [mesSel,setMesSel]= useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`);
+
+  const [tipo,   setTipo]   = useState("trimestral");
+  const [ano,    setAno]    = useState(now.getFullYear());
+  const [sem,    setSem]    = useState(now.getMonth()<6?"S1":"S2");
+  const [trim,   setTrim]   = useState(`Q${Math.ceil((now.getMonth()+1)/3)}`);
+  const [mesSel, setMesSel] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`);
   const [filtroConsultor, setFiltroConsultor] = useState("todos");
 
   const anos = Array.from({length: ano - 2025 + 3}, (_,i)=>2025+i);
-  const consultores = users.filter(u=>(u.role==="consultor")&&u.active);
+  const consultores = users.filter(u=>u.role==="consultor"&&u.active);
 
-  // Determina os meses do período selecionado
+  // Meses do período
   const mesesPeriodo = useMemo(()=>{
     const pad = n => String(n).padStart(2,"0");
-    if (tipo==="mensal") return [mesSel];
-    if (tipo==="trimestral") {
-      const q = parseInt(trim.replace("Q",""));
-      const m1 = (q-1)*3+1;
-      return [`${ano}-${pad(m1)}`,`${ano}-${pad(m1+1)}`,`${ano}-${pad(m1+2)}`];
-    }
-    if (tipo==="semestral") {
-      const m1 = sem==="S1"?1:7;
-      return Array.from({length:6},(_,i)=>`${ano}-${pad(m1+i)}`);
-    }
-    if (tipo==="anual") {
-      return Array.from({length:12},(_,i)=>`${ano}-${pad(i+1)}`);
-    }
+    if (tipo==="mensal")     return [mesSel];
+    if (tipo==="trimestral") { const q=parseInt(trim.replace("Q","")); const m1=(q-1)*3+1; return [`${ano}-${pad(m1)}`,`${ano}-${pad(m1+1)}`,`${ano}-${pad(m1+2)}`]; }
+    if (tipo==="semestral")  { const m1=sem==="S1"?1:7; return Array.from({length:6},(_,i)=>`${ano}-${pad(m1+i)}`); }
+    if (tipo==="anual")      return Array.from({length:12},(_,i)=>`${ano}-${pad(i+1)}`);
     return [];
   },[tipo,ano,sem,trim,mesSel]);
 
-  // Consultores a exibir
-  const consultoresVis = filtroConsultor==="todos" ? consultores : consultores.filter(c=>c.id===filtroConsultor);
+  // Consultores a exibir — consultor só vê ele mesmo
+  const consultoresVis = useMemo(()=>{
+    if (isConsultor) return [me];
+    return filtroConsultor==="todos" ? consultores : consultores.filter(c=>c.id===filtroConsultor);
+  },[isConsultor, me, consultores, filtroConsultor]);
 
-  // Agrega dados por consultor para o período
+  // Dados por consultor
   const dadosPeriodo = useMemo(()=>{
     return consultoresVis.map(u=>{
-      // MRR e NR totais no período
-      const vendasP = vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id && mesesPeriodo.includes(v.mes));
+      const vendasP  = vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id && mesesPeriodo.includes(v.mes));
       const totalMRR = vendasP.reduce((s,v)=>s+(v.mrr||0),0);
       const metaMRR  = mesesPeriodo.reduce((s,m)=>s+(metas[m]?.[u.cargo]?.mrr||0),0);
       const metaNR   = mesesPeriodo.reduce((s,m)=>s+(metas[m]?.[u.cargo]?.nr||0),0);
       const atingMRR = metaMRR>0?(totalMRR/metaMRR)*100:0;
       const pctMRR   = getPctMRR(atingMRR);
       const overInfo = getOverInfo(atingMRR);
-
       const vendasCalc = vendasP.map(v=>{ const c=calcVenda(v,produtos,pctMRR); return c?{...v,...c}:null; }).filter(Boolean);
-      const totalNR    = vendasCalc.reduce((s,v)=>s+v.nr,0);
-      const totalCom   = vendasCalc.reduce((s,v)=>s+v.total,0);
-      const comMRR     = vendasCalc.reduce((s,v)=>s+v.comMRR,0);
-      const comNR      = vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0);
-      const atingNR    = metaNR>0?(totalNR/metaNR)*100:0;
-
-      // Evolução mensal
-      const evolucao = mesesPeriodo.map(m=>{
-        const vs = vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id&&v.mes===m);
-        return { mes:m, mrr:vs.reduce((s,v)=>s+(v.mrr||0),0), meta:metas[m]?.[u.cargo]?.mrr||0 };
-      });
-
+      const totalNR  = vendasCalc.reduce((s,v)=>s+v.nr,0);
+      const totalCom = vendasCalc.reduce((s,v)=>s+v.total,0);
+      const comMRR   = vendasCalc.reduce((s,v)=>s+v.comMRR,0);
+      const comNR    = vendasCalc.reduce((s,v)=>s+v.comImpl+v.comLic,0);
+      const atingNR  = metaNR>0?(totalNR/metaNR)*100:0;
+      const evolucao = mesesPeriodo.map(m=>({
+        mes:m,
+        mrr: vendas.filter(v=>(v.consultorId||v.consultor_id)===u.id&&v.mes===m).reduce((s,v)=>s+(v.mrr||0),0),
+        meta: metas[m]?.[u.cargo]?.mrr||0,
+      }));
       return { ...u, totalMRR, totalNR, metaMRR, metaNR, atingMRR, atingNR, pctMRR, overInfo, totalCom, comMRR, comNR, vendasCalc, evolucao, nVendas:vendasP.length };
     }).sort((a,b)=>b.totalCom-a.totalCom);
   },[consultoresVis,vendas,mesesPeriodo,metas,produtos]);
 
   const totais = {
-    mrr:  dadosPeriodo.reduce((s,d)=>s+d.totalMRR,0),
-    nr:   dadosPeriodo.reduce((s,d)=>s+d.totalNR,0),
-    com:  dadosPeriodo.reduce((s,d)=>s+d.totalCom,0),
+    mrr:    dadosPeriodo.reduce((s,d)=>s+d.totalMRR,0),
+    nr:     dadosPeriodo.reduce((s,d)=>s+d.totalNR,0),
+    com:    dadosPeriodo.reduce((s,d)=>s+d.totalCom,0),
     comMRR: dadosPeriodo.reduce((s,d)=>s+d.comMRR,0),
     comNR:  dadosPeriodo.reduce((s,d)=>s+d.comNR,0),
   };
 
   const labelPeriodo = tipo==="mensal"?ML(mesSel):tipo==="trimestral"?`${trim}/${ano}`:tipo==="semestral"?`${sem}/${ano}`:`Ano ${ano}`;
 
+  // Botão de tipo de período
+  const TipoBtn = ({v,l}) => (
+    <button onClick={()=>setTipo(v)}
+      style={{padding:"7px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,
+        background:tipo===v?t.accent:"transparent",
+        color:tipo===v?"#fff":t.textSub,transition:"all .15s"}}>
+      {l}
+    </button>
+  );
+
+  // Botão de seleção genérico (ano, trim, sem, mês)
+  const SelBtn = ({val,cur,set,label}) => (
+    <button onClick={()=>set(val)}
+      style={{padding:"5px 12px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,
+        background:cur===val?t.bgHover:"transparent",
+        color:cur===val?t.accent:t.textSub,transition:"all .15s"}}>
+      {label||val}
+    </button>
+  );
+
+  const SelGroup = ({children}) => (
+    <div style={{display:"flex",gap:3,background:t.tableHead,border:`1px solid ${t.border}`,borderRadius:9,padding:4}}>
+      {children}
+    </div>
+  );
+
   return (
     <div>
-      <STitle t={t}>Relatórios — {labelPeriodo}</STitle>
+      {/* HEADER */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:20}}>
+        <div>
+          <STitle t={t} style={{margin:0}}>
+            {isConsultor ? `Meus Relatórios` : `Relatórios`}
+            <span style={{fontSize:14,fontWeight:500,color:t.textMuted,marginLeft:10}}>— {labelPeriodo}</span>
+          </STitle>
+          {isConsultor && (
+            <div style={{fontSize:12,color:t.textMuted,marginTop:4}}>
+              Visualizando dados de <span style={{color:t.accent,fontWeight:700}}>{me.name?.split(" ")[0]}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* SELETOR DE TIPO */}
-      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:10,padding:6,width:"fit-content"}}>
-        {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"],["semestral","📈 Semestral"],["anual","🗓 Anual"]].map(([v,l])=>(
-          <button key={v} onClick={()=>setTipo(v)} style={{padding:"6px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:tipo===v?"#0369a1":"transparent",color:tipo===v?"#fff":"#546e8a",transition:"all .15s"}}>{l}</button>
+      {/* SELETORES — tipo + período */}
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",marginBottom:16}}>
+        {/* Tipo */}
+        <SelGroup>
+          <TipoBtn v="mensal"      l="📅 Mensal"/>
+          <TipoBtn v="trimestral"  l="📊 Trimestral"/>
+          <TipoBtn v="semestral"   l="📈 Semestral"/>
+          <TipoBtn v="anual"       l="🗓 Anual"/>
+        </SelGroup>
+
+        {/* Ano */}
+        {tipo!=="mensal" && (
+          <SelGroup>{anos.map(a=><SelBtn key={a} val={a} cur={ano} set={setAno}/>)}</SelGroup>
+        )}
+
+        {/* Trimestre */}
+        {tipo==="trimestral" && (
+          <SelGroup>{["Q1","Q2","Q3","Q4"].map(q=><SelBtn key={q} val={q} cur={trim} set={setTrim}/>)}</SelGroup>
+        )}
+
+        {/* Semestre */}
+        {tipo==="semestral" && (
+          <SelGroup>
+            <SelBtn val="S1" cur={sem} set={setSem} label="1º Sem."/>
+            <SelBtn val="S2" cur={sem} set={setSem} label="2º Sem."/>
+          </SelGroup>
+        )}
+
+        {/* Mês */}
+        {tipo==="mensal" && (
+          <SelGroup>
+            {Array.from({length:12},(_,i)=>{
+              const m=`${now.getFullYear()}-${String(i+1).padStart(2,"0")}`;
+              return <SelBtn key={m} val={m} cur={mesSel} set={setMesSel} label={["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][i]}/>;
+            })}
+          </SelGroup>
+        )}
+
+        {/* Filtro consultor — só para gestor/parametros */}
+        {!isConsultor && (
+          <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)}
+            style={{...selS(t),width:"auto",minWidth:190,marginLeft:"auto"}}>
+            <option value="todos">Toda a equipe</option>
+            {consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        )}
+      </div>
+
+      {/* Pílulas dos meses */}
+      <div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+        {mesesPeriodo.map(m=>(
+          <span key={m} style={{background:t.accentGlow,color:t.accent,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:600,border:`1px solid ${t.accent}33`}}>
+            {ML(m)}
+          </span>
         ))}
       </div>
 
-      {/* SELETORES DE PERÍODO */}
-      <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
-        {/* Ano — sempre visível exceto mensal */}
-        {tipo!=="mensal"&&(
-          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {anos.map(a=><button key={a} onClick={()=>setAno(a)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:ano===a?"#1a2d4a":"transparent",color:ano===a?"#38bdf8":"#546e8a"}}>{a}</button>)}
-          </div>
-        )}
-        {/* Semestre */}
-        {tipo==="semestral"&&(
-          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {["S1","S2"].map(s=><button key={s} onClick={()=>setSem(s)} style={{padding:"4px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:sem===s?"#1a2d4a":"transparent",color:sem===s?"#38bdf8":"#546e8a"}}>{s==="S1"?"1º Sem.":"2º Sem."}</button>)}
-          </div>
-        )}
-        {/* Trimestre */}
-        {tipo==="trimestral"&&(
-          <div style={{display:"flex",gap:4,background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {["Q1","Q2","Q3","Q4"].map(q=><button key={q} onClick={()=>setTrim(q)} style={{padding:"4px 11px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:trim===q?"#1a2d4a":"transparent",color:trim===q?"#38bdf8":"#546e8a"}}>{q}</button>)}
-          </div>
-        )}
-        {/* Mês */}
-        {tipo==="mensal"&&(
-          <div style={{display:"flex",gap:4,flexWrap:"wrap",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:8,padding:4}}>
-            {Array.from({length:12},(_,i)=>{
-              const now2=new Date(); const a=now2.getFullYear();
-              return `${a}-${String(i+1).padStart(2,"0")}`;
-            }).map(m=><button key={m} onClick={()=>setMesSel(m)} style={{padding:"4px 10px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mesSel===m?"#1a2d4a":"transparent",color:mesSel===m?"#38bdf8":"#546e8a"}}>{ML(m).split("/")[0]}</button>)}
-          </div>
-        )}
-        {/* Filtro consultor */}
-        <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)} style={{...selS(t),width:"auto",minWidth:180,marginLeft:"auto"}}>
-          <option value="todos">Toda a equipe</option>
-          {consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+      {/* CARDS DE TOTAIS */}
+      <div className="stat-grid-5" style={{marginBottom:20}}>
+        <StatCard t={t} l="MRR Total"       v={R$(totais.mrr)}    c={t.accent}   icon="💳"/>
+        <StatCard t={t} l="NR Total"        v={R$(totais.nr)}     c={t.purple}   icon="🔧"/>
+        <StatCard t={t} l="Com. MRR"        v={R$(totais.comMRR)} c={t.green}    icon="📈"/>
+        <StatCard t={t} l="Com. NR"         v={R$(totais.comNR)}  c={t.green}    icon="⚙️"/>
+        <StatCard t={t} l="Total Comissões" v={R$(totais.com)}    c={t.amber}    icon="💰"/>
       </div>
 
-      {/* MESES DO PERÍODO */}
-      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
-        {mesesPeriodo.map(m=><span key={m} style={{background:"#1a2d4a",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:600}}>{ML(m)}</span>)}
-      </div>
-
-      {/* TOTAIS GERAIS */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,marginBottom:22}}>
-        <StatCard t={t} l="MRR Total"      v={R$(totais.mrr)}   c="#38bdf8"/>
-        <StatCard t={t} l="NR Total"       v={R$(totais.nr)}    c="#a78bfa"/>
-        <StatCard t={t} l="Com. MRR Total" v={R$(totais.comMRR)} c="#34d399"/>
-        <StatCard t={t} l="Com. NR Total"  v={R$(totais.comNR)} c="#34d399"/>
-        <StatCard t={t} l="Total Comissões" v={R$(totais.com)}  c="#f59e0b"/>
-      </div>
-
-      {/* TABELA POR CONSULTOR */}
-      <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:20}}>
-        <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:t.tableHead}}>
-          <span style={{fontSize:13,fontWeight:700,color:t.text}}>Resumo por Consultor — {labelPeriodo}</span>
-        </div>
-        <div style={{overflowX:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
-          <thead><tr style={{background:"#030810"}}>
-            <TH t={t}>Consultor</TH><TH t={t}>Cargo</TH><TH t={t}>Contratos</TH>
-            <TH t={t} right>MRR</TH><TH t={t} right>Meta MRR</TH><TH t={t} right>Ating. MRR</TH>
-            <TH t={t} right>NR</TH><TH t={t} right>Meta NR</TH><TH t={t} right>Ating. NR</TH>
-            <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
-          </tr></thead>
-          <tbody>
-            {dadosPeriodo.length===0?<tr><td colSpan={12}><Empty t={t} msg="Nenhum dado no período."/></td></tr>:
-            dadosPeriodo.map((d,i)=>(
-              <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?"1px solid #080f1a":"none"}}>
-                <TD t={t} bold color="#e2e8f0">{d.name}</TD>
-                <TD t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
-                <TD t={t}>{d.nVendas}</TD>
-                <TD t={t} right bold color="#38bdf8">{R$(d.totalMRR)}</TD>
-                <TD t={t} right color="#546e8a">{R$(d.metaMRR)}</TD>
-                <TD t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
-                <TD t={t} right bold color="#a78bfa">{R$(d.totalNR)}</TD>
-                <TD t={t} right color="#546e8a">{R$(d.metaNR)}</TD>
-                <TD t={t} right color={d.atingNR>=100?"#a78bfa":"#64748b"}>{d.atingNR.toFixed(0)}%</TD>
-                <TD t={t} right bold color="#34d399">{R$(d.comMRR)}</TD>
-                <TD t={t} right bold color="#a78bfa">{R$(d.comNR)}</TD>
-                <TD t={t} right bold color="#f59e0b">{R$(d.totalCom)}</TD>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      </div>
-
-      {/* DETALHAMENTO POR CONSULTOR (expansível por período) */}
-      {dadosPeriodo.filter(d=>d.vendasCalc.length>0).map(d=>(
-        <div key={d.id} style={{background:t.bgCard,border:`1px solid ${d.overInfo.border}`,borderRadius:12,overflow:"hidden",marginBottom:12}}>
-          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",background:t.tableHead,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:7,height:7,borderRadius:"50%",background:CARGO_COLOR[d.cargo]}}/>
-              <span style={{fontWeight:700,color:t.text,fontSize:14}}>{d.name}</span>
-              <span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${d.overInfo.border}`}}>{d.overInfo.label} · {d.atingMRR.toFixed(0)}%</span>
-            </div>
-            <span style={{fontWeight:800,color:"#f59e0b",fontFamily:"'Syne',sans-serif",fontSize:16}}>{R$(d.totalCom)}</span>
+      {/* TABELA RESUMO — só para gestor com múltiplos consultores */}
+      {!isConsultor && consultoresVis.length > 1 && (
+        <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:14,overflow:"hidden",marginBottom:20}}>
+          <div style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,background:t.tableHead,display:"flex",alignItems:"center",gap:10}}>
+            <Ic n="team" s={15}/>
+            <span style={{fontSize:13,fontWeight:700,color:t.text}}>Resumo da Equipe — {labelPeriodo}</span>
           </div>
-          <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
-            <thead><tr style={{background:"#030810"}}>
-              <TH t={t}>Mês</TH><TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
-              <TH t={t} right>MRR</TH><TH t={t} right>NR</TH><TH t={t}>Faixa</TH>
-              <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
-              <TH t={t} right>1ª Parc.</TH><TH t={t} right>2ª Parc.</TH>
-            </tr></thead>
-            <tbody>
-              {d.vendasCalc.map((v,i)=>{
-                const prod=produtos.find(p=>p.id===v.produtoId);
-                return (
-                  <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?"1px solid #080f1a":"none"}}>
-                    <TD t={t} color="#546e8a">{ML(v.mes)}</TD>
-                    <TD t={t} bold color="#e2e8f0">{prod?.nome}</TD>
-                    <TD t={t}>{v.cliente}</TD>
-                    <TD t={t} right bold color="#38bdf8">{v.soImpl?"—":R$(v.mrr)}</TD>
-                    <TD t={t} right color="#a78bfa">{R$(v.nr)}</TD>
-                    <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
-                    <TD t={t} right bold color="#34d399">{R$(v.comMRR)}</TD>
-                    <TD t={t} right color="#a78bfa" bold>{R$(v.comImpl+v.comLic)}</TD>
-                    <TD t={t} right bold color="#f59e0b">{R$(v.total)}</TD>
-                    <TD t={t} right color="#38bdf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#546e8a"}}>{ML(v.mesParcela1)}</div></TD>
-                    <TD t={t} right color="#818cf8">{R$(v.parcela)}<div style={{fontSize:9,color:"#546e8a"}}>{ML(v.mesParcela2)}</div></TD>
+          <div className="table-scroll">
+            <table style={{width:"100%",borderCollapse:"collapse",minWidth:550}}>
+              <thead><tr>
+                <TH t={t}>Consultor</TH><TH t={t}>Cargo</TH><TH t={t}>Vendas</TH>
+                <TH t={t} right>MRR</TH><TH t={t} right>Meta</TH><TH t={t} right>Ating.</TH>
+                <TH t={t} right>Com. MRR</TH><TH t={t} right>Com. NR</TH><TH t={t} right>Total</TH>
+              </tr></thead>
+              <tbody>
+                {dadosPeriodo.length===0
+                  ? <tr><td colSpan={9}><Empty t={t} msg="Nenhum dado no período."/></td></tr>
+                  : dadosPeriodo.map((d,i)=>(
+                  <tr key={d.id} style={{borderBottom:i<dadosPeriodo.length-1?`1px solid ${t.border}22`:"none"}}>
+                    <TD t={t} bold color={t.text}>{d.name}</TD>
+                    <TD t={t}><span style={{background:CARGO_COLOR[d.cargo]+"22",color:CARGO_COLOR[d.cargo],padding:"1px 8px",borderRadius:99,fontSize:11,fontWeight:700}}>{CARGO_LABEL[d.cargo]}</span></TD>
+                    <TD t={t}>{d.nVendas}</TD>
+                    <TD t={t} right bold color={t.accent}>{R$(d.totalMRR)}</TD>
+                    <TD t={t} right color={t.textMuted}>{R$(d.metaMRR)}</TD>
+                    <TD t={t} right><span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"2px 8px",borderRadius:99,fontSize:11,fontWeight:800}}>{d.atingMRR.toFixed(0)}%</span></TD>
+                    <TD t={t} right bold color={t.green}>{R$(d.comMRR)}</TD>
+                    <TD t={t} right bold color={t.purple}>{R$(d.comNR)}</TD>
+                    <TD t={t} right bold color={t.amber}>{R$(d.totalCom)}</TD>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </div>
+      )}
+
+      {/* CARDS INDIVIDUAIS — um por consultor */}
+      {dadosPeriodo.map(d=>(
+        <div key={d.id} style={{background:t.bgCard,border:`1px solid ${d.overInfo.border||t.border}`,borderRadius:14,overflow:"hidden",marginBottom:16}}>
+          {/* Header do consultor */}
+          <div style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,background:t.tableHead,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${CARGO_COLOR[d.cargo]},${t.accent})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:"#fff"}}>
+                {d.name?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <div style={{fontWeight:700,color:t.text,fontSize:14}}>{d.name}</div>
+                <div style={{fontSize:11,color:t.textMuted}}>{CARGO_LABEL[d.cargo]} · {d.nVendas} venda{d.nVendas!==1?"s":""}</div>
+              </div>
+              <span style={{background:d.overInfo.bg,color:d.overInfo.color,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${d.overInfo.border||t.border}`}}>
+                {d.overInfo.label} · {d.atingMRR.toFixed(0)}%
+              </span>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:11,color:t.textMuted}}>Total comissões</div>
+              <div style={{fontSize:22,fontWeight:900,color:t.amber,fontFamily:"'Outfit',sans-serif",letterSpacing:"-1px"}}>{R$(d.totalCom)}</div>
+            </div>
+          </div>
+
+          {/* Mini cards de resumo */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,padding:"14px 20px",borderBottom:`1px solid ${t.border}`}}>
+            <MiniCard t={t} l="MRR"       v={R$(d.totalMRR)} c={t.accent}/>
+            <MiniCard t={t} l="Meta MRR"  v={R$(d.metaMRR)}  c={t.textSub}/>
+            <MiniCard t={t} l="NR"        v={R$(d.totalNR)}  c={t.purple}/>
+            <MiniCard t={t} l="Meta NR"   v={R$(d.metaNR)}   c={t.textSub}/>
+            <MiniCard t={t} l="Com. MRR"  v={R$(d.comMRR)}   c={t.green}/>
+            <MiniCard t={t} l="Com. NR"   v={R$(d.comNR)}    c={t.green}/>
+          </div>
+
+          {/* Barra de atingimento */}
+          {d.metaMRR > 0 && (
+            <div style={{padding:"12px 20px",borderBottom:`1px solid ${t.border}`}}>
+              <OverBar t={t} ating={d.atingMRR}/>
+            </div>
+          )}
+
+          {/* Tabela de vendas */}
+          {d.vendasCalc.length > 0 ? (
+            <div className="table-scroll">
+              <table style={{width:"100%",borderCollapse:"collapse",minWidth:650}}>
+                <thead><tr>
+                  <TH t={t}>Mês</TH><TH t={t}>Produto</TH><TH t={t}>Cliente</TH>
+                  <TH t={t} right>MRR</TH><TH t={t} right>NR</TH>
+                  <TH t={t}>Faixa</TH>
+                  <TH t={t} right>Com. Total</TH>
+                  <TH t={t} right>1ª Parcela</TH><TH t={t} right>2ª Parcela</TH>
+                </tr></thead>
+                <tbody>
+                  {d.vendasCalc.map((v,i)=>{
+                    const prod = produtos.find(p=>p.id===v.produtoId);
+                    return (
+                      <tr key={v.id||i} style={{borderBottom:i<d.vendasCalc.length-1?`1px solid ${t.border}22`:"none"}}>
+                        <TD t={t} color={t.textMuted}>{ML(v.mes)}</TD>
+                        <TD t={t} bold color={t.text}>{prod?.nome}</TD>
+                        <TD t={t} color={t.textSub}>{v.cliente}</TD>
+                        <TD t={t} right bold color={t.accent}>{v.soImpl?"—":R$(v.mrr)}</TD>
+                        <TD t={t} right color={t.purple}>{R$(v.nr)}</TD>
+                        <TD t={t}><FaixaBadge t={t} faixa={v.faixa}/></TD>
+                        <TD t={t} right bold color={t.amber}>{R$(v.total)}</TD>
+                        <TD t={t} right color={t.accent}>
+                          {R$(v.parcela)}
+                          <div style={{fontSize:9,color:t.textMuted}}>{ML(v.mesParcela1)}</div>
+                        </TD>
+                        <TD t={t} right color={t.purple}>
+                          {R$(v.parcela)}
+                          <div style={{fontSize:9,color:t.textMuted}}>{ML(v.mesParcela2)}</div>
+                        </TD>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty t={t} msg="Nenhuma venda neste período."/>
+          )}
         </div>
       ))}
+
+      {dadosPeriodo.length === 0 && (
+        <Empty t={t} msg="Nenhum dado encontrado para o período selecionado."/>
+      )}
     </div>
   );
 }
