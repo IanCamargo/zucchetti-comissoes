@@ -971,24 +971,6 @@ function Login({notify, toast, t, themeName, setThemeName}) {
 // ══════════════════════════════════════════════════════════════════
 
 // Barra de overperformance reutilizável
-function OverBar({ating, height=8}) {
-  const pct   = Math.min(ating, 220);
-  const color = ating>=200?"#f59e0b":ating>=150?"#34d399":"#38bdf8";
-  return (
-    <div>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:"#1e4060",marginBottom:3}}>
-        <span>0%</span><span style={{color:"#38bdf8"}}>150%</span><span style={{color:"#34d399"}}>200%</span>
-      </div>
-      <div style={{position:"relative",height,background:"#0c1f35",borderRadius:99,overflow:"hidden"}}>
-        <div style={{position:"absolute",left:"68.2%",top:0,bottom:0,width:1,background:"#38bdf855"}}/>
-        <div style={{position:"absolute",left:"90.9%",top:0,bottom:0,width:1,background:"#34d39955"}}/>
-        <div style={{width:`${pct/220*100}%`,height:"100%",background:color,borderRadius:99,transition:"width .6s"}}/>
-      </div>
-      <div style={{fontSize:11,color,fontWeight:700,marginTop:3}}>{ating.toFixed(1)}% da meta</div>
-    </div>
-  );
-}
-
 // Gráfico de barras simples (evolução mensal do MRR no trimestre)
 function GraficoEvolucao({evolucao, overInfo, t}) {
   const maxVal = Math.max(...evolucao.map(e => Math.max(e.mrr, e.metaMRR)), 1);
