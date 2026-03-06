@@ -323,8 +323,8 @@ const GlobalCSS = ({t}) => (
     @keyframes slideIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
     @keyframes glow { 0%,100% { box-shadow:0 0 8px ${t.accent}44; } 50% { box-shadow:0 0 20px ${t.accent}88; } }
     *, *::before, *::after { box-sizing:border-box; }
-    html { -webkit-text-size-adjust:100%; touch-action:manipulation; }
-    body { margin:0; background:${t.bg}; font-family:'Outfit',sans-serif; color:${t.text}; overflow-x:hidden; }
+    html { -webkit-text-size-adjust:100%; touch-action:manipulation; overflow-x:hidden; max-width:100vw; }
+    body { margin:0; background:${t.bg}; font-family:'Outfit',sans-serif; color:${t.text}; overflow-x:hidden; max-width:100vw; }
     ::-webkit-scrollbar { width:4px; height:4px; }
     ::-webkit-scrollbar-track { background:${t.bgCard}; }
     ::-webkit-scrollbar-thumb { background:${t.border}; border-radius:99px; }
@@ -354,8 +354,8 @@ const GlobalCSS = ({t}) => (
       transition:transform .28s cubic-bezier(.4,0,.2,1);
       overflow-y:auto;
     }
-    .main-wrap { margin-left:220px; min-height:100vh; display:flex; flex-direction:column; }
-    .page-content { padding:28px 32px 60px; flex:1; }
+    .main-wrap { margin-left:220px; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; }
+    .page-content { padding:28px 32px 60px; flex:1; width:100%; min-width:0; overflow-x:hidden; }
     .topbar-mobile-row { display:none; }
     .sidebar-close-btn { display:none !important; }
     .drawer-overlay { display:none; position:fixed; inset:0; background:#00000088; z-index:39; backdrop-filter:blur(2px); }
@@ -394,16 +394,37 @@ const GlobalCSS = ({t}) => (
       .sidebar-wrap.open { transform:translateX(0); box-shadow:6px 0 40px rgba(0,0,0,.55); }
       .drawer-overlay.open { display:block; }
       .sidebar-close-btn { display:flex !important; }
-      .main-wrap { margin-left:0 !important; }
+      .main-wrap { margin-left:0 !important; width:100vw; max-width:100vw; overflow-x:hidden; }
       .topbar-mobile-row { display:flex; }
-      .page-content { padding:14px 12px 88px; }
+      .page-content { padding:14px 12px 88px; width:100%; max-width:100vw; overflow-x:hidden; }
       .stat-grid   { grid-template-columns:repeat(2,1fr); gap:10px; }
       .stat-grid-5 { grid-template-columns:repeat(2,1fr); gap:10px; }
       .mini-grid   { grid-template-columns:repeat(2,1fr); }
       .form-grid   { grid-template-columns:1fr; }
       .period-bar-wrap { padding:6px 10px; flex-wrap:wrap; gap:4px; min-height:auto; }
 
-      /* ── Dashboard mobile ── */
+      /* ── Contenção de overflow: Dashboard, Vendas, Histórico ── */
+      .main-wrap > main { width:100%; max-width:100vw; overflow-x:hidden; }
+      .page-content > div { max-width:100%; }
+      .table-scroll { max-width:calc(100vw - 24px); }
+
+      /* ── Dash card containers ── */
+      .dash-header-card > div:first-child { max-width:100%; overflow:hidden; }
+      .dash-header-card .cargo-badges { flex-wrap:wrap; }
+
+      /* ── Vendas: preview da comissão ── */
+      .preview-comissao { max-width:100%; }
+
+      /* ── Histórico: header mês ── */
+      .hist-header { min-width:0; }
+
+      /* ── Legenda overperformance ── */
+      .over-legend { max-width:100%; overflow:hidden; }
+
+      /* Impede qualquer elemento filho de alargar além da viewport */
+      .page-content * { max-width:100%; }
+      .page-content input,
+      .page-content select { max-width:100% !important; }
       .dash-card-body  { grid-template-columns:1fr; gap:10px; padding:12px 14px; }
       .dash-trim-body  { grid-template-columns:1fr; gap:10px; }
       .dash-header-card { flex-direction:column !important; align-items:flex-start !important; gap:8px !important; }
@@ -965,7 +986,7 @@ export default function App() {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'Outfit',sans-serif",display:"flex"}}>
+    <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'Outfit',sans-serif",display:"flex",width:"100%",maxWidth:"100vw",overflowX:"hidden"}}>
       <FontLink/>
       <GlobalCSS t={t}/>
 
@@ -988,7 +1009,7 @@ export default function App() {
       </aside>
 
       {/* MAIN */}
-      <main className="main-wrap">
+      <main className="main-wrap" style={{minWidth:0,overflow:"hidden"}}>
 
         {/* TOPBAR */}
         <div style={{background:t.topbarBg,borderBottom:`1px solid ${t.sidebarBorder}`,position:"sticky",top:0,zIndex:10}}>
@@ -1011,7 +1032,7 @@ export default function App() {
         </div>
 
         {/* PAGE CONTENT */}
-        <div className="page-content fade-in">
+        <div className="page-content fade-in" style={{minWidth:0}}>
           {page==="dash"      && <DashPage      me={me} users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
           {page==="vendas"    && <VendasPage    me={me} users={db.users} vendas={db.vendas} addVenda={db.addVenda} updateVenda={db.updateVenda} deleteVenda={db.deleteVenda} produtos={db.produtos} mes={mes} notify={notify} metas={db.metas} t={t}/>}
           {page==="equipe"    && <EquipePage    users={db.users} vendas={db.vendas} produtos={db.produtos} mes={mes} metas={db.metas} t={t}/>}
@@ -1197,7 +1218,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
   const totAcerto    = porConsultor.reduce((s,c)=>s+c.trim.valorAcerto,0);
 
   return (
-    <div>
+    <div style={{width:"100%",minWidth:0,overflowX:"hidden"}}>
       {/* HEADER */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <STitle t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
@@ -1238,7 +1259,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
       )}
 
       {/* CARDS POR CONSULTOR */}
-      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+      <div style={{display:"flex",flexDirection:"column",gap:16,width:"100%",minWidth:0}}>
         {porConsultor.length===0&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t} msg="Sem vendas neste mês."/></div>}
         {porConsultor.map(c=>{
           const t = c.trim;
@@ -1246,7 +1267,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
             ? (c.atingMRR>=200?"#f59e0b44":c.atingMRR>=150?"#34d39944":"#243448")
             : (t.atingMRRTrim>=200?"#f59e0b44":t.atingMRRTrim>=150?"#34d39944":"#243448");
           return (
-          <div key={c.id} style={{background:t.bgCard,border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden"}}>
+          <div key={c.id} style={{background:t.bgCard,border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden",minWidth:0,width:"100%"}}>
 
             {/* ── HEADER CARD ── */}
             <div className="dash-header-card" style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:t.tableHead}}>
@@ -1438,7 +1459,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
   const vendasMes=vendas.filter(v=>role==="consultor"?(v.consultorId||v.consultor_id)===me.id&&v.mes===mes:v.mes===mes);
 
   return (
-    <div>
+    <div style={{width:"100%",minWidth:0,overflowX:"hidden"}}>
       <STitle t={t}>Lançar Venda — {ML(mes)}</STitle>
       <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:22,marginBottom:20}}>
         <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:16}}>{editId?"✏ Editando":"➕ Nova venda"}</div>
@@ -1692,14 +1713,14 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
   }).filter(m=>m.rows.length>0);
 
   return (
-    <div>
+    <div style={{width:"100%",minWidth:0,overflowX:"hidden"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
         <STitle t={t}>Histórico</STitle>
         {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:160,maxWidth:"100%"}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
       </div>
-      {porMes.length===0&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t}/></div>}
+      {porMes.length===0&&<div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12}}><Empty t={t}/></div>}
       {porMes.map(({mes,rows,total})=>(
-        <div key={mes} style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
+        <div key={mes} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,overflow:"hidden",marginBottom:14,width:"100%",minWidth:0}}>
           <div className="hist-header" style={{padding:"12px 20px",borderBottom:`1px solid ${t.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",background:t.tableHead}}>
             <span style={{fontFamily:"'Outfit',sans-serif",fontWeight:700,color:t.text,fontSize:14}}>{ML(mes)}</span>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
