@@ -367,6 +367,16 @@ const GlobalCSS = ({t}) => (
     .mini-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
     .form-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
 
+    /* ── CARDS DE CONSULTOR NO DASHBOARD ── */
+    .dash-card-body    { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:14px 20px; }
+    .dash-trim-body    { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .params-grid       { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .metas-grid        { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .equipe-grid       { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+    .cal-grid          { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+    .preview-parcelas  { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .usuarios-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; align-items:end; }
+
     /* ── BOTTOM NAV ── */
     .mobile-bottom-nav { display:none; }
 
@@ -374,6 +384,8 @@ const GlobalCSS = ({t}) => (
     @media (max-width:1024px) {
       .stat-grid   { grid-template-columns:repeat(2,1fr); }
       .stat-grid-5 { grid-template-columns:repeat(3,1fr); }
+      .params-grid { grid-template-columns:1fr; }
+      .metas-grid  { grid-template-columns:repeat(3,1fr); }
     }
 
     /* ══ MOBILE ≤ 768px ══ */
@@ -390,6 +402,38 @@ const GlobalCSS = ({t}) => (
       .mini-grid   { grid-template-columns:repeat(2,1fr); }
       .form-grid   { grid-template-columns:1fr; }
       .period-bar-wrap { padding:6px 10px; flex-wrap:wrap; gap:4px; min-height:auto; }
+
+      /* ── Dashboard mobile ── */
+      .dash-card-body  { grid-template-columns:1fr; gap:10px; padding:12px 14px; }
+      .dash-trim-body  { grid-template-columns:1fr; gap:10px; }
+      .dash-header-card { flex-direction:column !important; align-items:flex-start !important; gap:8px !important; }
+      .dash-header-value { text-align:left !important; }
+
+      /* ── Parâmetros mobile ── */
+      .params-grid   { grid-template-columns:1fr; gap:12px; }
+      .metas-grid    { grid-template-columns:1fr; gap:10px; }
+      .regras-grid   { grid-template-columns:1fr !important; }
+
+      /* ── Equipe mobile ── */
+      .equipe-grid   { grid-template-columns:1fr; }
+
+      /* ── Calendário mobile ── */
+      .cal-grid      { grid-template-columns:1fr 1fr; gap:8px; }
+
+      /* ── Relatório mobile ── */
+      .rel-filtros   { flex-direction:column !important; align-items:stretch !important; gap:8px !important; }
+      .rel-tipo-btns { flex-wrap:wrap; gap:4px; }
+
+      /* ── Preview parcelas mobile ── */
+      .preview-parcelas { flex-direction:column; align-items:stretch; }
+      .preview-parcelas > div { text-align:left !important; }
+
+      /* ── Usuários mobile ── */
+      .usuarios-form-grid { grid-template-columns:1fr; }
+
+      /* ── Histórico cabeçalho mobile ── */
+      .hist-header  { flex-direction:column !important; align-items:flex-start !important; gap:6px !important; }
+
       .mobile-bottom-nav {
         display:flex !important;
         position:fixed; bottom:0; left:0; right:0;
@@ -409,13 +453,25 @@ const GlobalCSS = ({t}) => (
       }
       .mobile-bottom-nav button.active { color:${t.accent}; }
       .mobile-bottom-nav button.active svg { filter:drop-shadow(0 0 4px ${t.accent}88); }
+
+      /* ── Títulos menores ── */
+      h1 { font-size:20px !important; margin-bottom:14px !important; }
+      .stat-card-val { font-size:18px !important; }
+
+      /* ── Legenda overperformance ── */
+      .over-legend { flex-direction:column !important; align-items:flex-start !important; gap:6px !important; }
+      .over-legend span { font-size:10px !important; }
     }
 
-    /* ══ SMALL ≤ 420px ══ */
-    @media (max-width:420px) {
+    /* ══ SMALL ≤ 480px ══ */
+    @media (max-width:480px) {
       .stat-grid   { grid-template-columns:1fr 1fr; gap:8px; }
       .stat-grid-5 { grid-template-columns:1fr 1fr; gap:8px; }
-      .page-content { padding:10px 10px 88px; }
+      .page-content { padding:10px 8px 88px; }
+      .cal-grid    { grid-template-columns:1fr; }
+      .meses-meta-btns { display:grid !important; grid-template-columns:repeat(4,1fr); gap:4px; }
+      .produtos-tabs { display:grid !important; grid-template-columns:repeat(3,1fr); gap:4px; }
+      .rel-stat-grid { grid-template-columns:1fr 1fr !important; }
     }
   `}</style>
 );
@@ -968,23 +1024,8 @@ export default function App() {
         </div>
       </main>
 
-      {/* MOBILE BOTTOM NAV — 5 itens mais usados */}
-      <nav className="mobile-bottom-nav" style={{display:"none"}}>
-        {nav.slice(0,5).map(n=>(
-          <button key={n.id} onClick={()=>setPage(n.id)} className={page===n.id?"active":""}>
-            <Ic n={n.icon} s={20}/>
-            {n.label}
-          </button>
-        ))}
-        {nav.length > 5 && (
-          <button onClick={()=>setSidebarOpen(true)}>
-            <Ic n="menu" s={20}/>
-            Mais
-          </button>
-        )}
-      </nav>
       {/* MOBILE BOTTOM NAV */}
-      <nav className="mobile-bottom-nav" style={{display:"none"}}>
+      <nav className="mobile-bottom-nav">
         {nav.slice(0,5).map(n=>(
           <button key={n.id} onClick={()=>setPage(n.id)} className={page===n.id?"active":""}>
             <Ic n={n.icon} s={20}/>
@@ -1026,7 +1067,7 @@ function Login({notify, toast, t, themeName, setThemeName}) {
 
       {toast&&<div className="fade-in" style={{position:"fixed",top:20,right:20,zIndex:999,background:t.green,color:"#fff",padding:"11px 18px",borderRadius:10,fontSize:13,fontWeight:600}}>{toast.msg}</div>}
 
-      <div className="fade-in" style={{width:"100%",maxWidth:420,padding:"44px 40px",background:t.bgCard,borderRadius:24,border:`1px solid ${t.border}`,boxShadow:`0 32px 80px rgba(0,0,0,.3),0 0 0 1px ${t.border}`}}>
+      <div className="fade-in" style={{width:"100%",maxWidth:420,padding:"36px 28px",background:t.bgCard,borderRadius:24,border:`1px solid ${t.border}`,boxShadow:`0 32px 80px rgba(0,0,0,.3),0 0 0 1px ${t.border}`}}>
         {/* Header */}
         <div style={{textAlign:"center",marginBottom:36}}>
           <div style={{fontFamily:"'Outfit',sans-serif",fontSize:40,fontWeight:900,letterSpacing:"-2px",lineHeight:1,marginBottom:6}}>
@@ -1161,21 +1202,21 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <STitle t={t} style={{margin:0}}>{role==="consultor"?`Olá, ${me.name?.split(" ")[0]}! 👋`:`Dashboard — ${ML(mes)}`}</STitle>
         {/* Toggle mensal / trimestral */}
-        <div style={{display:"flex",background:t.tableHead,border:"1px solid #0c1f35",borderRadius:10,padding:4,gap:4}}>
-          {[["mensal","📅 Mensal"],["trimestral","📊 Trimestral"]].map(([v,l])=>(
-            <button key={v} onClick={()=>setViewMode(v)} style={{padding:"6px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:viewMode===v?"#1a2d4a":"transparent",color:viewMode===v?"#38bdf8":"#546e8a",transition:"all .15s"}}>{l}</button>
+        <div style={{display:"flex",background:t.tableHead,border:`1px solid ${t.border}`,borderRadius:10,padding:4,gap:4}}>
+          {[["mensal","📅 Mensal"],["trimestral","📊 Trim."]].map(([v,l])=>(
+            <button key={v} onClick={()=>setViewMode(v)} style={{padding:"6px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:viewMode===v?t.bgHover:"transparent",color:viewMode===v?t.accent:t.textMuted,transition:"all .15s"}}>{l}</button>
           ))}
         </div>
       </div>
 
       {/* LEGENDA OVER */}
-      <div style={{background:t.tableHead,border:"1px solid #0c2a42",borderRadius:10,padding:"10px 16px",marginBottom:18,display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
-        <span style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Over MRR {viewMode==="trimestral"?"trimestral":"mensal"}:</span>
+      <div className="over-legend" style={{background:t.tableHead,border:`1px solid ${t.borderAccent}`,borderRadius:10,padding:"10px 16px",marginBottom:18,display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
+        <span style={{fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.5}}>Over MRR {viewMode==="trimestral"?"trim.":"mensal"}:</span>
         <span style={{background:"#38bdf822",color:"#38bdf8",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>70% · até 149%</span>
         <span style={{background:"#34d39922",color:"#34d399",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>⚡ 100% · 150–199%</span>
         <span style={{background:"#f59e0b22",color:"#f59e0b",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700}}>🚀 200% · ≥200%</span>
-        {viewMode==="trimestral"&&<span style={{fontSize:10,color:"#546e8a",marginLeft:"auto"}}>Acerto pago em {porConsultor[0]?`${ML(porConsultor[0].trim.trim.parc1)} e ${ML(porConsultor[0].trim.trim.parc2)}`:"+5 e +6 meses"}</span>}
-        {viewMode==="mensal"&&<span style={{fontSize:10,color:"#546e8a",marginLeft:"auto"}}>Pagamento: +2 e +3 meses</span>}
+        {viewMode==="trimestral"&&<span style={{fontSize:10,color:t.textMuted,marginLeft:"auto"}}>Acerto: {porConsultor[0]?`${ML(porConsultor[0].trim.trim.parc1)} e ${ML(porConsultor[0].trim.trim.parc2)}`:"+5 e +6 meses"}</span>}
+        {viewMode==="mensal"&&<span style={{fontSize:10,color:t.textMuted,marginLeft:"auto"}}>Pgto: +2 e +3 meses</span>}
       </div>
 
       {/* STAT CARDS — gestor/params */}
@@ -1208,7 +1249,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
           <div key={c.id} style={{background:t.bgCard,border:`1px solid ${borderColor}`,borderRadius:12,overflow:"hidden"}}>
 
             {/* ── HEADER CARD ── */}
-            <div style={{padding:"14px 20px",borderBottom:"1px solid #080f1a",display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:t.tableHead}}>
+            <div className="dash-header-card" style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,display:"flex",gap:16,flexWrap:"wrap",justifyContent:"space-between",alignItems:"flex-start",background:t.tableHead}}>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:CARGO_COLOR[c.cargo]||"#38bdf8"}}/>
                 <span style={{fontWeight:700,color:t.text,fontSize:15}}>{c.name}</span>
@@ -1217,7 +1258,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
                 {viewMode==="trimestral"&&<span style={{background:t.overInfoTrim.bg,color:t.overInfoTrim.color,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:800,border:`1px solid ${t.overInfoTrim.border}`}}>{t.overInfoTrim.label} trim. · {t.trim.label}</span>}
               </div>
               {/* Valor destaque */}
-              <div style={{textAlign:"right"}}>
+              <div className="dash-header-value" style={{textAlign:"right"}}>
                 {viewMode==="mensal"&&<>
                   <div style={{fontSize:10,color:"#546e8a",marginBottom:2}}>Comissão do mês</div>
                   <div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(c.totalCom)}</div>
@@ -1236,13 +1277,13 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
 
             {/* ── CORPO MENSAL ── */}
             {viewMode==="mensal"&&(
-              <div style={{padding:"14px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+              <div className="dash-card-body">
                 <div>
-                  <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
+                  <div style={{fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta MRR — {R$(c.metaMRR)}/mês · Vendido: {R$(c.totalMRR)}</div>
                   <OverBar t={t} ating={c.atingMRR}/>
                 </div>
                 <div>
-                  <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
+                  <div style={{fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Meta NR — {R$(c.metaNR)}/mês · Realizado: {R$(c.totalNR)}</div>
                   <div style={{height:8,background:t.border,borderRadius:99,overflow:"hidden",marginBottom:3,marginTop:16}}>
                     <div style={{width:`${Math.min(c.atingNR,100)}%`,height:"100%",background:c.atingNR>=100?"#a78bfa":"#4a0080",borderRadius:99,transition:"width .4s"}}/>
                   </div>
@@ -1254,7 +1295,7 @@ function DashPage({me,users,vendas,produtos,mes,metas,t}) {
             {/* ── CORPO TRIMESTRAL ── */}
             {viewMode==="trimestral"&&(
               <div style={{padding:"14px 20px"}}>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
+                <div className="dash-trim-body" style={{marginBottom:16}}>
                   {/* Barra trimestral MRR */}
                   <div>
                     <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
@@ -1451,7 +1492,7 @@ function VendasPage({me,users,vendas,addVenda,updateVenda,deleteVenda,produtos,m
               {prev.licenca>0&&<div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>Licença</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.licenca)}</div><div style={{fontSize:11,color:"#a78bfa",marginTop:2}}>com.: {R$(prev.comLic)}</div></div>}
               <div style={{background:t.bgCard,borderRadius:8,padding:"10px 12px"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:4}}>NR Total</div><div style={{fontSize:13,color:t.text,fontWeight:600}}>{R$(prev.nr)}</div></div>
             </div>
-            <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+            <div className="preview-parcelas" style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
               <div style={{background:"#1a2d4a",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>1ª Parcela — {ML(prev.mesParcela1)}</div><div style={{fontSize:18,fontWeight:800,color:"#38bdf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
               <div style={{background:"#1a1640",borderRadius:8,padding:"10px 16px",textAlign:"center"}}><div style={{fontSize:10,color:"#546e8a",marginBottom:3,textTransform:"uppercase",letterSpacing:.5}}>2ª Parcela — {ML(prev.mesParcela2)}</div><div style={{fontSize:18,fontWeight:800,color:"#818cf8",fontFamily:"'Syne',sans-serif"}}>{R$(prev.parcela)}</div></div>
               <div style={{borderLeft:"1px solid #0c2a42",paddingLeft:16}}><div style={{fontSize:11,color:"#546e8a"}}>TOTAL COMISSÃO</div><div style={{fontSize:22,fontWeight:800,color:"#34d399",fontFamily:"'Syne',sans-serif"}}>{R$(prev.total)}</div></div>
@@ -1531,7 +1572,7 @@ function EquipePage({users,vendas,produtos,mes,metas,t}) {
         <StatCard t={t} l="Em Overperformance" v={rows.filter(r=>r.atingMRR>=150).length} c="#f59e0b"/>
         <StatCard t={t} l="🚀 200%+"           v={rows.filter(r=>r.atingMRR>=200).length} c="#f59e0b"/>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
+      <div className="equipe-grid">
         {rows.map((r,idx)=>(
           <div key={r.id} style={{background:t.bgCard,border:`1px solid ${r.atingMRR>=200?"#f59e0b44":r.atingMRR>=150?"#34d39944":"#243448"}`,borderRadius:12,padding:20,position:"relative"}}>
             {idx===0&&r.totalCom>0&&<span style={{position:"absolute",top:14,right:14}}>🏆</span>}
@@ -1594,7 +1635,7 @@ function CalPage({me,users,vendas,produtos,t}) {
           </div>
         </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+      <div className="cal-grid">
         {mesesDoAno.map(m=>{
           const parcelas=(cal[m]||[]);
           const total=parcelas.reduce((s,p)=>s+p.valor,0);
@@ -1652,18 +1693,18 @@ function HistPage({me,users,vendas,produtos,metas,t}) {
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
         <STitle t={t}>Histórico</STitle>
-        {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:200}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
+        {me.role!=="consultor"&&<select value={filtro} onChange={e=>setFiltro(e.target.value)} style={{...selS(t),width:"auto",minWidth:160,maxWidth:"100%"}}><option value="todos">Toda a equipe</option>{consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}
       </div>
       {porMes.length===0&&<div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12}}><Empty t={t}/></div>}
       {porMes.map(({mes,rows,total})=>(
         <div key={mes} style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,overflow:"hidden",marginBottom:14}}>
-          <div style={{padding:"12px 20px",borderBottom:"1px solid #080f1a",display:"flex",justifyContent:"space-between",alignItems:"center",background:t.tableHead}}>
-            <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,color:t.text,fontSize:14}}>{ML(mes)}</span>
-            <div style={{display:"flex",gap:16,alignItems:"center"}}>
-              <span style={{fontSize:11,color:"#546e8a"}}>Parcelas: {ML(addMonths(mes,2))} + {ML(addMonths(mes,3))}</span>
-              <span style={{color:"#34d399",fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{R$(total)}</span>
+          <div className="hist-header" style={{padding:"12px 20px",borderBottom:`1px solid ${t.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",background:t.tableHead}}>
+            <span style={{fontFamily:"'Outfit',sans-serif",fontWeight:700,color:t.text,fontSize:14}}>{ML(mes)}</span>
+            <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{fontSize:11,color:t.textMuted}}>Parc: {ML(addMonths(mes,2))} + {ML(addMonths(mes,3))}</span>
+              <span style={{color:"#34d399",fontWeight:800,fontFamily:"'Outfit',sans-serif"}}>{R$(total)}</span>
             </div>
           </div>
           <div className="table-scroll">
@@ -1763,10 +1804,12 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
       {tab==="metas"&&(
         <div>
           <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
-            <span style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Mês:</span>
+            <span style={{fontSize:10,color:t.textMuted,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Mês:</span>
+            <div className="meses-meta-btns" style={{display:"flex",flexWrap:"wrap",gap:4}}>
             {MESES_LIST.slice(0,12).slice().reverse().map(m=>(
-              <button key={m} onClick={()=>setMesMeta(m)} style={{padding:"5px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:mesMeta===m?"#1a2d4a":"transparent",color:mesMeta===m?"#38bdf8":"#546e8a"}}>{ML(m)}</button>
+              <button key={m} onClick={()=>setMesMeta(m)} style={{padding:"5px 10px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:mesMeta===m?t.bgHover:"transparent",color:mesMeta===m?t.accent:t.textMuted}}>{ML(m)}</button>
             ))}
+            </div>
           </div>
           <div style={{background:t.tableHead,border:"1px solid #0c2a42",borderRadius:10,padding:"12px 18px",marginBottom:20,fontSize:12}}>
             <div style={{fontSize:10,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Regras de Overperformance MRR</div>
@@ -1776,7 +1819,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
               <span style={{background:"#f59e0b22",color:"#f59e0b",padding:"4px 12px",borderRadius:99,fontWeight:700}}>🚀 200%+ → 200% do MRR</span>
             </div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+          <div className="metas-grid">
             {["junior","pleno","senior"].map(cargo=>{
               const m=metaDraft[cargo]||{mrr:0,nr:0};
               const color=CARGO_COLOR[cargo];
@@ -1805,10 +1848,10 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
 
       {tab==="produtos"&&(
         <div>
-          <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+          <div className="produtos-tabs" style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
             {produtos.map(p=><button key={p.id} onClick={()=>{setSelId(p.id);sync(p);}} style={{padding:"7px 16px",borderRadius:8,border:`1px solid ${selId===p.id?"#546e8a":"#243448"}`,cursor:"pointer",fontSize:13,fontWeight:700,background:selId===p.id?"#1a2d4a":"#0d1117",color:selId===p.id?"#38bdf8":"#2a5a80"}}>{p.nome}</button>)}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
+          <div className="params-grid">
             <div style={{background:t.bgCard,border:"1px solid #0c1f35",borderRadius:12,padding:20}}>
               <div style={{fontSize:11,color:"#546e8a",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:16}}>Configurações</div>
               <div style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:12,border:"1px solid #0c2a42"}}>
@@ -1824,7 +1867,7 @@ function ParamsPage({produtos,setProdutos,me,notify,metas,saveMetas,t}) {
               {draft.regras.map((r,i)=>(
                 <div key={r.id} style={{background:t.tableHead,borderRadius:10,padding:"14px 16px",marginBottom:10,border:`1px solid ${i===0?"#ca8a0433":"#243448"}`}}>
                   <div style={{fontSize:12,fontWeight:700,color:i===0?"#ca8a04":"#64748b",marginBottom:10}}>{i===0?"⭐":""} {r.label}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+                  <div className="regras-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
                     <div><Label t={t}>Mín. Horas</Label><input type="number" value={r.minHoras} onChange={e=>updRegra(i,"minHoras",e.target.value)} style={inp(t)}/></div>
                     <div><Label t={t}>Mín. R$/h</Label><input type="number" value={r.minValorH} onChange={e=>updRegra(i,"minValorH",e.target.value)} style={inp(t)}/></div>
                     <div><Label t={t}>% NR</Label><input type="number" value={r.pctImpl} onChange={e=>updRegra(i,"pctImpl",e.target.value)} style={{...inp(t),color:"#a78bfa",fontWeight:800,fontSize:16}}/></div>
@@ -2133,14 +2176,16 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
       </div>
 
       {/* SELETORES — tipo + período */}
-      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",marginBottom:16}}>
+      <div className="rel-filtros" style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",marginBottom:16}}>
         {/* Tipo */}
+        <div className="rel-tipo-btns">
         <SelGroup>
           <TipoBtn v="mensal"      l="📅 Mensal"/>
-          <TipoBtn v="trimestral"  l="📊 Trimestral"/>
-          <TipoBtn v="semestral"   l="📈 Semestral"/>
+          <TipoBtn v="trimestral"  l="📊 Trim."/>
+          <TipoBtn v="semestral"   l="📈 Sem."/>
           <TipoBtn v="anual"       l="🗓 Anual"/>
         </SelGroup>
+        </div>
 
         {/* Ano */}
         {tipo!=="mensal" && (
@@ -2173,7 +2218,7 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
         {/* Filtro consultor — só para gestor/parametros */}
         {!isConsultor && (
           <select value={filtroConsultor} onChange={e=>setFiltroConsultor(e.target.value)}
-            style={{...selS(t),width:"auto",minWidth:190,marginLeft:"auto"}}>
+            style={{...selS(t),width:"auto",minWidth:160,maxWidth:"100%"}}>
             <option value="todos">Toda a equipe</option>
             {consultores.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -2238,9 +2283,9 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
       {dadosPeriodo.map(d=>(
         <div key={d.id} style={{background:t.bgCard,border:`1px solid ${d.overInfo.border||t.border}`,borderRadius:14,overflow:"hidden",marginBottom:16}}>
           {/* Header do consultor */}
-          <div style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,background:t.tableHead,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${CARGO_COLOR[d.cargo]},${t.accent})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:"#fff"}}>
+          <div style={{padding:"14px 20px",borderBottom:`1px solid ${t.border}`,background:t.tableHead,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+              <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(135deg,${CARGO_COLOR[d.cargo]},${t.accent})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:"#fff",flexShrink:0}}>
                 {d.name?.[0]?.toUpperCase()}
               </div>
               <div>
@@ -2251,7 +2296,7 @@ function RelatorioPage({me,users,vendas,produtos,metas,t}) {
                 {d.overInfo.label} · {d.atingMRR.toFixed(0)}%
               </span>
             </div>
-            <div style={{textAlign:"right"}}>
+            <div>
               <div style={{fontSize:11,color:t.textMuted}}>Total comissões</div>
               <div style={{fontSize:22,fontWeight:900,color:t.amber,fontFamily:"'Outfit',sans-serif",letterSpacing:"-1px"}}>{R$(d.totalCom)}</div>
             </div>
@@ -2357,7 +2402,7 @@ function UsersPage({users,createUserProfile,updateProfile,notify,me,t}) {
         <div style={{background:t.tableHead,borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#546e8a",border:"1px solid #0c2a42"}}>
           <Ic n="db" s={12}/> Usuários são criados via <b style={{color:"#38bdf8"}}>Supabase Auth</b>. Um e-mail de confirmação será enviado automaticamente.
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,alignItems:"end"}}>
+        <div className="usuarios-form-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,alignItems:"end"}}>
           <div><Label t={t}>Nome</Label><input value={form.name} onChange={e=>F("name",e.target.value)} placeholder="Nome completo" style={inp(t)}/></div>
           {!editId&&<div><Label t={t}>E-mail</Label><input value={form.email} onChange={e=>F("email",e.target.value)} placeholder="email@empresa.com" style={inp(t)}/></div>}
           {!editId&&<div><Label t={t}>Senha inicial</Label><input type="password" value={form.password} onChange={e=>F("password",e.target.value)} placeholder="mín. 6 caracteres" style={inp(t)}/></div>}
